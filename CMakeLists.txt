@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.1)
 
 project(MyProject
     VERSION 1.0
-    DESCRIPTION "My new project."
+    DESCRIPTION "Just Another Chip-8 Emulator."
     LANGUAGES C)
 
-set(TARGET_NAME "myproj")
+set(TARGET_NAME "jace")
 
 add_executable(${TARGET_NAME}
     src/main.c)
