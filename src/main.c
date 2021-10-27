@@ -251,6 +251,86 @@ int main()
             V[X] += NN;
         }
 
+        else if (C == 0x08)
+        {
+            switch (N)
+            {
+            // LD VX, VY:
+            case 0x00:
+                V[X] = V[Y];
+                break;
+
+            // OR VX, VY
+            case 0x01:
+                V[X] |= V[Y];
+                break;
+
+            // AND VX, VY
+            case 0x02:
+                V[X] &= V[Y];
+                break;
+
+            // XOR VX, VY
+            case 0x03:
+                V[X] ^= V[Y];
+                break;
+
+            // ADD VX, VY
+            case 0x04:
+                if ((int)(V[X]) + (int)(V[Y]) > 0xFF)
+                {
+                    V[0xF] = 1;
+                }
+                else
+                {
+                    V[0xF] = 0;
+                }
+
+                V[X] += V[Y];
+                break;
+
+            // SUB VX, VY
+            case 0x05:
+                if (V[X] > V[Y])
+                {
+                    V[0xF] = 1;
+                }
+                else
+                {
+                    V[0xF] = 0;
+                }
+
+                V[X] -= V[Y];
+                break;
+
+            // SHR VX {, VY}
+            case 0x06:
+                V[0xF] = V[X] & 0x01;
+                V[X] /= 2;
+                break;
+
+            // SUBN VX, VY
+            case 0x07:
+                if (V[Y] > V[X])
+                {
+                    V[0xF] = 1;
+                }
+                else
+                {
+                    V[0xF] = 0;
+                }
+
+                V[X] = V[Y] - V[X];
+                break;
+
+            // SHL VX {, VY}
+            case 0x0E:
+                V[0xF] = V[X] & 0x80;
+                V[X] *= 2;
+                break;
+            }
+        }
+
         PC += 2;
     }
 
