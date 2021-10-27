@@ -106,8 +106,18 @@ void load_font(unsigned char memory[])
 
 int main()
 {
-    // The CHIP-8 has 4096 bytes (4KB) of addressable RAM.
-    unsigned char memory[0xFFF];
+    // Represents 4096 bytes (4KB) of addressable memory.
+    unsigned char memory[0x1000];
+
+    // Represents 16 general-purpose 8-bit registers (V0-VF).
+    unsigned char V[0x10];
+
+    // Represents the delay timer, sound timer and
+    // stack pointer 8-bit registers.
+    unsigned char DT, ST, SP;
+
+    // Represents the program counter and index 16-bit registers.
+    unsigned int PC, I;
 
     load_font(memory);
 
