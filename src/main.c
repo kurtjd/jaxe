@@ -221,6 +221,15 @@ int main()
             }
         }
 
+        // SNE VX, NN:
+        else if (C == 0x04)
+        {
+            if (V[X] != NN)
+            {
+                PC += 2;
+            }
+        }
+
         PC += 2;
     }
 
