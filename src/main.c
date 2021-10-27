@@ -327,6 +327,15 @@ int main()
                 V[X] *= 2;
                 break;
             }
+
+        // SNE VX, VY:
+        case 0x09:
+            if (V[X] != V[Y])
+            {
+                PC += 2;
+            }
+
+            break;
         }
 
         PC += 2;
