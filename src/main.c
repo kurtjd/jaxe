@@ -125,31 +125,50 @@ void load_font(unsigned char memory[])
 int main()
 {
     // Represents 4096 bytes (4KB) of addressable memory.
-    unsigned char memory[4096];
+    unsigned char memory[4096] = {0x00};
 
     // Represents 16 general-purpose 8-bit registers (V0-VF).
     unsigned char V[16];
 
     /* Represents the delay timer, sound timer and
     stack pointer 8-bit registers. */
-    unsigned char DT, ST, SP;
+    unsigned char DT = 0, ST = 0, SP = 0;
 
     // Represents the program counter and index 16-bit registers.
-    unsigned int PC, I;
+    unsigned int PC = 0x200, I = 0x00;
 
     // Represents the call stack. CHIP-8 allows a max of 16 nested calls.
     unsigned int stack[16];
 
-    // Represents a monochrome display of 64x32 pixels.
-    bool display[32][64] = {0};
+    /* Represents a monochrome display of 64x32 pixels.
+    A pixel can be either only on or off, no color. */
+    bool display[32][64] = {false};
 
     load_font(memory);
 
-    // Load ROM into memory (for now filename hardcoded)
-    if (!load_rom("../roms/c8_test.c8", memory))
+    // Load ROM into memory (for now filename hardcoded).
+    if (!load_rom("../roms/my_test.c8", memory))
     {
         fprintf(stderr, "Unable to open ROM file.\n");
         return 1;
+    }
+
+    // Execute instructions until none (0x0000) is found.
+    while (!(memory[PC] == 0x00 && memory[PC + 1] == 0x00))
+    {
+        // CLS:
+        if (memory[PC] == 0x00 && memory[PC + 1] == 0xE0)
+        {
+            for (int row = 0; row < 32; row++)
+            {
+                for (int col = 0; col < 64; col++)
+                {
+                    display[row][col] = false;
+                }
+            }
+        }
+
+        PC += 2;
     }
 
     return 0;
