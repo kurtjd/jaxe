@@ -34,7 +34,7 @@ bool load_rom(char *filename, unsigned char RAM[])
 
 void load_font(unsigned char RAM[])
 {
-    /* Load hexadecimal font into addresses 0x000-0x04F.
+    /* Load hexadecimal font into memory.
     Each hex character is represented by 5 bytes in memory
     with each bit representing a pixel. */
 
@@ -289,29 +289,13 @@ int main()
 
             // ADD VX, VY
             case 0x04:
-                if ((int)(V[X]) + (int)(V[Y]) > 0xFF)
-                {
-                    V[0xF] = 1;
-                }
-                else
-                {
-                    V[0xF] = 0;
-                }
-
+                V[0x0F] = ((int)(V[X]) + (int)(V[Y]) > 0xFF) ? 1 : 0;
                 V[X] += V[Y];
                 break;
 
             // SUB VX, VY
             case 0x05:
-                if (V[X] > V[Y])
-                {
-                    V[0xF] = 1;
-                }
-                else
-                {
-                    V[0xF] = 0;
-                }
-
+                V[0x0F] = (V[X] > V[Y]) ? 1 : 0;
                 V[X] -= V[Y];
                 break;
 
@@ -323,15 +307,7 @@ int main()
 
             // SUBN VX, VY
             case 0x07:
-                if (V[Y] > V[X])
-                {
-                    V[0xF] = 1;
-                }
-                else
-                {
-                    V[0xF] = 0;
-                }
-
+                V[0x0F] = (V[Y] > V[X]) ? 1 : 0;
                 V[X] = V[Y] - V[X];
                 break;
 
@@ -392,8 +368,8 @@ int main()
                     bool pixel_on = display[disp_y][disp_x];
                     bool bit = (RAM[I + j] >> (7 - j)) & 0x01;
 
-                    /* XOR the sprite onto screen and if a pixel is erased,
-                    set the VF register to 1. */
+                    /* XOR the sprite onto display. 
+                    If a pixel is erased, set the VF register to 1. */
                     display[disp_y][disp_x] = (pixel_on != bit);
                     V[0x0F] = (pixel_on && bit) ? 1 : 0;
                 }
