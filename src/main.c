@@ -10,6 +10,8 @@ bool load_rom(char *filename, unsigned char memory[])
     if (rom)
     {
         fread(memory + 0x200, 4096 - 0x200, 1, rom);
+        fclose(rom);
+
         return true;
     }
     else
@@ -130,17 +132,16 @@ int main()
     // Represents 16 general-purpose 8-bit registers (V0-VF).
     unsigned char V[16];
 
-    /* Represents the delay timer, sound timer and
-    stack pointer 8-bit registers. */
+    // Delay timer, sound timer and stack pointer 8-bit registers.
     unsigned char DT = 0, ST = 0, SP = 0;
 
-    // Represents the program counter and index 16-bit registers.
+    // Program counter and index 16-bit registers.
     unsigned int PC = 0x200, I = 0x00;
 
-    // Represents the call stack. CHIP-8 allows a max of 16 nested calls.
+    // The call stack. CHIP-8 allows a max of 16 nested calls.
     unsigned int stack[16];
 
-    /* Represents a monochrome display of 64x32 pixels.
+    /* A monochrome display of 64x32 pixels.
     A pixel can be either only on or off, no color. */
     bool display[32][64] = {false};
 
@@ -156,8 +157,26 @@ int main()
     // Execute instructions until none (0x0000) is found.
     while (!(memory[PC] == 0x00 && memory[PC + 1] == 0x00))
     {
-        // Represents the first and second byte of instruction respectively.
+        // The first and second byte of instruction respectively.
         unsigned char b1 = memory[PC], b2 = memory[PC + 1];
+
+        // The code (first 4 bits) of instruction.
+        unsigned char C = b1 >> 4;
+
+        // The last 4 bits of first byte of instruction.
+        unsigned char X = b1 & 0xF;
+
+        // The first 4 bits of second byte of instruction.
+        unsigned char Y = b2 >> 4;
+
+        // The last 12 bits of instruction (usually an address).
+        unsigned int NNN = ((b1 & 0xF) << 8) | (int)b2;
+
+        // The last 8 bits of instruction (usually an address).
+        unsigned char NN = b2;
+
+        // The last 4 bits of instruction.
+        unsigned char N = b2 & 0xF;
 
         // CLS:
         if (b1 == 0x00 && b2 == 0xE0)
@@ -176,6 +195,13 @@ int main()
         {
             PC = stack[SP];
             SP--;
+        }
+
+        // JMP:
+        else if (C == 0x01)
+        {
+            PC = NNN;
+            continue;
         }
 
         PC += 2;
