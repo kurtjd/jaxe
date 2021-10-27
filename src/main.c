@@ -1,6 +1,23 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+bool load_rom(char *filename, unsigned char memory[])
+{
+    /* Loads a given ROM into memory starting at address 0x200.
+    0x200 is where user data is stored, eeverything before that is system. */
+
+    FILE *rom = fopen(filename, "rb");
+    if (rom)
+    {
+        fread(memory + 0x200, 4096 - 0x200, 1, rom);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void load_font(unsigned char memory[])
 {
     /* Load hexadecimal font into addresses 0x000-0x04F.
@@ -127,6 +144,13 @@ int main()
     bool display[32][64] = {0};
 
     load_font(memory);
+
+    // Load ROM into memory (for now filename hardcoded)
+    if (!load_rom("../roms/c8_test.c8", memory))
+    {
+        fprintf(stderr, "Unable to open ROM file.\n");
+        return 1;
+    }
 
     return 0;
 }
