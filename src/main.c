@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 
 bool load_rom(char *filename, unsigned char memory[])
 {
@@ -126,6 +128,8 @@ void load_font(unsigned char memory[])
 
 int main()
 {
+    srand(time(NULL));
+
     // Represents 4096 bytes (4KB) of addressable memory.
     unsigned char memory[4096] = {0x00};
 
@@ -340,12 +344,16 @@ int main()
         // LD I, NNN:
         case 0x0A:
             I = NNN;
-
             break;
 
         // JMP V0, NNN:
         case 0x0B:
             PC = V[0] + NNN;
+            break;
+
+        // RND VX, NN:
+        case 0x0C:
+            V[X] = (rand() % 256) & NN;
             break;
         }
 
