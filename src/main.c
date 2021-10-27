@@ -156,8 +156,11 @@ int main()
     // Execute instructions until none (0x0000) is found.
     while (!(memory[PC] == 0x00 && memory[PC + 1] == 0x00))
     {
+        // Represents the first and second byte of instruction respectively.
+        unsigned char b1 = memory[PC], b2 = memory[PC + 1];
+
         // CLS:
-        if (memory[PC] == 0x00 && memory[PC + 1] == 0xE0)
+        if (b1 == 0x00 && b2 == 0xE0)
         {
             for (int row = 0; row < 32; row++)
             {
@@ -166,6 +169,13 @@ int main()
                     display[row][col] = false;
                 }
             }
+        }
+
+        // RET:
+        else if (b1 == 0x00 && b2 == 0xEE)
+        {
+            PC = stack[SP];
+            SP--;
         }
 
         PC += 2;
