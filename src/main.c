@@ -204,6 +204,14 @@ int main()
             continue;
         }
 
+        // CALL:
+        else if (C == 0x02)
+        {
+            SP++;
+            stack[SP] = PC;
+            PC = NNN;
+        }
+
         PC += 2;
     }
 
