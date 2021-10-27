@@ -239,6 +239,12 @@ int main()
             }
         }
 
+        // LD VX, NN:
+        else if (C == 0x06)
+        {
+            V[X] = NN;
+        }
+
         PC += 2;
     }
 
