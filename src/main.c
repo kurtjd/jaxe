@@ -336,6 +336,12 @@ int main()
             }
 
             break;
+
+        // LD I, NNN:
+        case 0x0A:
+            I = NNN;
+
+            break;
         }
 
         PC += 2;
