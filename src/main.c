@@ -197,62 +197,60 @@ int main()
             SP--;
         }
 
-        // JMP:
-        else if (C == 0x01)
+        switch (C)
         {
+        // JMP:
+        case 0x01:
             PC = NNN;
             continue;
-        }
+            break;
 
         // CALL:
-        else if (C == 0x02)
-        {
+        case 0x02:
             SP++;
             stack[SP] = PC;
             PC = NNN;
-        }
+            break;
 
         // SE VX, NN:
-        else if (C == 0x03)
-        {
+        case 0x03:
             if (V[X] == NN)
             {
                 PC += 2;
             }
-        }
+
+            break;
 
         // SNE VX, NN:
-        else if (C == 0x04)
-        {
+        case 0x04:
             if (V[X] != NN)
             {
                 PC += 2;
             }
-        }
+
+            break;
 
         // SE VX, VY:
-        else if (C == 0x05)
-        {
+        case 0x05:
             if (V[X] == V[Y])
             {
                 PC += 2;
             }
-        }
+
+            break;
 
         // LD VX, NN:
-        else if (C == 0x06)
-        {
+        case 0x06:
             V[X] = NN;
-        }
+            break;
 
         // ADD VX, NN:
-        else if (C == 0x07)
-        {
+        case 0x07:
             V[X] += NN;
-        }
+            break;
 
-        else if (C == 0x08)
-        {
+        // Bitwise family
+        case 0x08:
             switch (N)
             {
             // LD VX, VY:
