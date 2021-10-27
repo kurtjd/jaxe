@@ -1,3 +1,3 @@
-Just Another Chip-8 Emulator
+Just Another CHIP-8 Emulator
 ============================
-A basic Chip-8 emulator written in C and SDL to practice developing emulators.
+A basic CHIP-8 emulator written in C and SDL to practice developing emulators.
