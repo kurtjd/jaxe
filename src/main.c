@@ -113,12 +113,15 @@ int main()
     // Represents 16 general-purpose 8-bit registers (V0-VF).
     unsigned char V[0x10];
 
-    // Represents the delay timer, sound timer and
-    // stack pointer 8-bit registers.
+    /* Represents the delay timer, sound timer and
+    stack pointer 8-bit registers. */
     unsigned char DT, ST, SP;
 
     // Represents the program counter and index 16-bit registers.
     unsigned int PC, I;
+
+    // Represents the call stack. CHIP-8 allows a max of 16 nested calls.
+    unsigned int stack[16];
 
     // Represents a monochrome display of 64x32 pixels.
     bool display[32][64] = {0};
