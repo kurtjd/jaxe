@@ -212,6 +212,15 @@ int main()
             PC = NNN;
         }
 
+        // SE VX, NN:
+        else if (C == 0x03)
+        {
+            if (V[X] == NN)
+            {
+                PC += 2;
+            }
+        }
+
         PC += 2;
     }
 
