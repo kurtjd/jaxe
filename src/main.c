@@ -108,10 +108,10 @@ void load_font(unsigned char memory[])
 int main()
 {
     // Represents 4096 bytes (4KB) of addressable memory.
-    unsigned char memory[0x1000];
+    unsigned char memory[4096];
 
     // Represents 16 general-purpose 8-bit registers (V0-VF).
-    unsigned char V[0x10];
+    unsigned char V[16];
 
     /* Represents the delay timer, sound timer and
     stack pointer 8-bit registers. */
