@@ -245,6 +245,12 @@ int main()
             V[X] = NN;
         }
 
+        // ADD VX, NN:
+        else if (C == 0x07)
+        {
+            V[X] += NN;
+        }
+
         PC += 2;
     }
 
