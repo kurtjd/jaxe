@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 void load_font(unsigned char memory[])
 {
@@ -118,6 +119,9 @@ int main()
 
     // Represents the program counter and index 16-bit registers.
     unsigned int PC, I;
+
+    // Represents a monochrome display of 64x32 pixels.
+    bool display[32][64] = {0};
 
     load_font(memory);
 
