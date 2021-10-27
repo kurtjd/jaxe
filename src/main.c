@@ -230,6 +230,15 @@ int main()
             }
         }
 
+        // SE VX, VY:
+        else if (C == 0x05)
+        {
+            if (V[X] == V[Y])
+            {
+                PC += 2;
+            }
+        }
+
         PC += 2;
     }
 
