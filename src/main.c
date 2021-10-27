@@ -342,6 +342,11 @@ int main()
             I = NNN;
 
             break;
+
+        // JMP V0, NNN:
+        case 0x0B:
+            PC = V[0] + NNN;
+            break;
         }
 
         PC += 2;
