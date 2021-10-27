@@ -3,6 +3,16 @@
 #include <stdbool.h>
 #include <time.h>
 
+#define MAX_WIDTH 64
+#define MAX_HEIGHT 32
+#define MAX_RAM 4096
+#define MAX_REGISTERS 16
+#define MAX_STACK_LEVELS 16
+
+#define FONT_START_ADDR 0x0
+#define PC_START_ADDR 0x200
+#define NOOP 0x00
+
 bool load_rom(char *filename, unsigned char RAM[])
 {
     /* Loads a given ROM into memory starting at address 0x200.
@@ -11,7 +21,7 @@ bool load_rom(char *filename, unsigned char RAM[])
     FILE *rom = fopen(filename, "rb");
     if (rom)
     {
-        fread(RAM + 0x200, 4096 - 0x200, 1, rom);
+        fread(RAM + PC_START_ADDR, MAX_RAM - PC_START_ADDR, 1, rom);
         fclose(rom);
 
         return true;
@@ -29,101 +39,101 @@ void load_font(unsigned char RAM[])
     with each bit representing a pixel. */
 
     // 0:
-    RAM[0x0] = 0xF0;
-    RAM[0x1] = 0x90;
-    RAM[0x2] = 0x90;
-    RAM[0x3] = 0x90;
-    RAM[0x4] = 0xF0;
+    RAM[FONT_START_ADDR + 0x0] = 0xF0;
+    RAM[FONT_START_ADDR + 0x1] = 0x90;
+    RAM[FONT_START_ADDR + 0x2] = 0x90;
+    RAM[FONT_START_ADDR + 0x3] = 0x90;
+    RAM[FONT_START_ADDR + 0x4] = 0xF0;
     // 1:
-    RAM[0x5] = 0x20;
-    RAM[0x6] = 0x60;
-    RAM[0x7] = 0x20;
-    RAM[0x8] = 0x20;
-    RAM[0x9] = 0x70;
+    RAM[FONT_START_ADDR + 0x5] = 0x20;
+    RAM[FONT_START_ADDR + 0x6] = 0x60;
+    RAM[FONT_START_ADDR + 0x7] = 0x20;
+    RAM[FONT_START_ADDR + 0x8] = 0x20;
+    RAM[FONT_START_ADDR + 0x9] = 0x70;
     // 2:
-    RAM[0xA] = 0xF0;
-    RAM[0xB] = 0x10;
-    RAM[0xC] = 0xF0;
-    RAM[0xD] = 0x80;
-    RAM[0xE] = 0xF0;
+    RAM[FONT_START_ADDR + 0xA] = 0xF0;
+    RAM[FONT_START_ADDR + 0xB] = 0x10;
+    RAM[FONT_START_ADDR + 0xC] = 0xF0;
+    RAM[FONT_START_ADDR + 0xD] = 0x80;
+    RAM[FONT_START_ADDR + 0xE] = 0xF0;
     // 3:
-    RAM[0xF] = 0xF0;
-    RAM[0x10] = 0x10;
-    RAM[0x11] = 0xF0;
-    RAM[0x12] = 0x10;
-    RAM[0x13] = 0xF0;
+    RAM[FONT_START_ADDR + 0xF] = 0xF0;
+    RAM[FONT_START_ADDR + 0x10] = 0x10;
+    RAM[FONT_START_ADDR + 0x11] = 0xF0;
+    RAM[FONT_START_ADDR + 0x12] = 0x10;
+    RAM[FONT_START_ADDR + 0x13] = 0xF0;
     // 4:
-    RAM[0x14] = 0x90;
-    RAM[0x15] = 0x90;
-    RAM[0x16] = 0xF0;
-    RAM[0x17] = 0x10;
-    RAM[0x18] = 0x10;
+    RAM[FONT_START_ADDR + 0x14] = 0x90;
+    RAM[FONT_START_ADDR + 0x15] = 0x90;
+    RAM[FONT_START_ADDR + 0x16] = 0xF0;
+    RAM[FONT_START_ADDR + 0x17] = 0x10;
+    RAM[FONT_START_ADDR + 0x18] = 0x10;
     // 5:
-    RAM[0x19] = 0xF0;
-    RAM[0x1A] = 0x80;
-    RAM[0x1B] = 0xF0;
-    RAM[0x1C] = 0x10;
-    RAM[0x1D] = 0xF0;
+    RAM[FONT_START_ADDR + 0x19] = 0xF0;
+    RAM[FONT_START_ADDR + 0x1A] = 0x80;
+    RAM[FONT_START_ADDR + 0x1B] = 0xF0;
+    RAM[FONT_START_ADDR + 0x1C] = 0x10;
+    RAM[FONT_START_ADDR + 0x1D] = 0xF0;
     // 6:
-    RAM[0x1E] = 0xF0;
-    RAM[0x1F] = 0x80;
-    RAM[0x20] = 0xF0;
-    RAM[0x21] = 0x90;
-    RAM[0x22] = 0xF0;
+    RAM[FONT_START_ADDR + 0x1E] = 0xF0;
+    RAM[FONT_START_ADDR + 0x1F] = 0x80;
+    RAM[FONT_START_ADDR + 0x20] = 0xF0;
+    RAM[FONT_START_ADDR + 0x21] = 0x90;
+    RAM[FONT_START_ADDR + 0x22] = 0xF0;
     // 7:
-    RAM[0x23] = 0xF0;
-    RAM[0x24] = 0x10;
-    RAM[0x25] = 0x20;
-    RAM[0x26] = 0x40;
-    RAM[0x27] = 0x40;
+    RAM[FONT_START_ADDR + 0x23] = 0xF0;
+    RAM[FONT_START_ADDR + 0x24] = 0x10;
+    RAM[FONT_START_ADDR + 0x25] = 0x20;
+    RAM[FONT_START_ADDR + 0x26] = 0x40;
+    RAM[FONT_START_ADDR + 0x27] = 0x40;
     // 8:
-    RAM[0x28] = 0xF0;
-    RAM[0x29] = 0x90;
-    RAM[0x2A] = 0xF0;
-    RAM[0x2B] = 0x90;
-    RAM[0x2C] = 0xF0;
+    RAM[FONT_START_ADDR + 0x28] = 0xF0;
+    RAM[FONT_START_ADDR + 0x29] = 0x90;
+    RAM[FONT_START_ADDR + 0x2A] = 0xF0;
+    RAM[FONT_START_ADDR + 0x2B] = 0x90;
+    RAM[FONT_START_ADDR + 0x2C] = 0xF0;
     // 9:
-    RAM[0x2D] = 0xF0;
-    RAM[0x2E] = 0x90;
-    RAM[0x2F] = 0xF0;
-    RAM[0x30] = 0x10;
-    RAM[0x31] = 0xF0;
+    RAM[FONT_START_ADDR + 0x2D] = 0xF0;
+    RAM[FONT_START_ADDR + 0x2E] = 0x90;
+    RAM[FONT_START_ADDR + 0x2F] = 0xF0;
+    RAM[FONT_START_ADDR + 0x30] = 0x10;
+    RAM[FONT_START_ADDR + 0x31] = 0xF0;
     // A:
-    RAM[0x32] = 0xF0;
-    RAM[0x33] = 0x90;
-    RAM[0x34] = 0xF0;
-    RAM[0x35] = 0x90;
-    RAM[0x36] = 0x90;
+    RAM[FONT_START_ADDR + 0x32] = 0xF0;
+    RAM[FONT_START_ADDR + 0x33] = 0x90;
+    RAM[FONT_START_ADDR + 0x34] = 0xF0;
+    RAM[FONT_START_ADDR + 0x35] = 0x90;
+    RAM[FONT_START_ADDR + 0x36] = 0x90;
     // B:
-    RAM[0x37] = 0xE0;
-    RAM[0x38] = 0x90;
-    RAM[0x39] = 0xE0;
-    RAM[0x3A] = 0x90;
-    RAM[0x3B] = 0xE0;
+    RAM[FONT_START_ADDR + 0x37] = 0xE0;
+    RAM[FONT_START_ADDR + 0x38] = 0x90;
+    RAM[FONT_START_ADDR + 0x39] = 0xE0;
+    RAM[FONT_START_ADDR + 0x3A] = 0x90;
+    RAM[FONT_START_ADDR + 0x3B] = 0xE0;
     // C:
-    RAM[0x3C] = 0xF0;
-    RAM[0x3D] = 0x80;
-    RAM[0x3E] = 0x80;
-    RAM[0x3F] = 0x80;
-    RAM[0x40] = 0xF0;
+    RAM[FONT_START_ADDR + 0x3C] = 0xF0;
+    RAM[FONT_START_ADDR + 0x3D] = 0x80;
+    RAM[FONT_START_ADDR + 0x3E] = 0x80;
+    RAM[FONT_START_ADDR + 0x3F] = 0x80;
+    RAM[FONT_START_ADDR + 0x40] = 0xF0;
     // D:
-    RAM[0x41] = 0xE0;
-    RAM[0x42] = 0x90;
-    RAM[0x43] = 0x90;
-    RAM[0x44] = 0x90;
-    RAM[0x45] = 0xE0;
+    RAM[FONT_START_ADDR + 0x41] = 0xE0;
+    RAM[FONT_START_ADDR + 0x42] = 0x90;
+    RAM[FONT_START_ADDR + 0x43] = 0x90;
+    RAM[FONT_START_ADDR + 0x44] = 0x90;
+    RAM[FONT_START_ADDR + 0x45] = 0xE0;
     // E:
-    RAM[0x46] = 0xF0;
-    RAM[0x47] = 0x80;
-    RAM[0x48] = 0xF0;
-    RAM[0x49] = 0x80;
-    RAM[0x4A] = 0xF0;
+    RAM[FONT_START_ADDR + 0x46] = 0xF0;
+    RAM[FONT_START_ADDR + 0x47] = 0x80;
+    RAM[FONT_START_ADDR + 0x48] = 0xF0;
+    RAM[FONT_START_ADDR + 0x49] = 0x80;
+    RAM[FONT_START_ADDR + 0x4A] = 0xF0;
     // F:
-    RAM[0x4B] = 0xF0;
-    RAM[0x4C] = 0x80;
-    RAM[0x4D] = 0xF0;
-    RAM[0x4E] = 0x80;
-    RAM[0x4F] = 0x80;
+    RAM[FONT_START_ADDR + 0x4B] = 0xF0;
+    RAM[FONT_START_ADDR + 0x4C] = 0x80;
+    RAM[FONT_START_ADDR + 0x4D] = 0xF0;
+    RAM[FONT_START_ADDR + 0x4E] = 0x80;
+    RAM[FONT_START_ADDR + 0x4F] = 0x80;
 }
 
 int main()
@@ -131,23 +141,23 @@ int main()
     srand(time(NULL));
 
     // Represents 4096 bytes (4KB) of addressable memory.
-    unsigned char RAM[4096] = {0x00};
+    unsigned char RAM[MAX_RAM] = {0x00};
 
     // Represents 16 general-purpose 8-bit registers (V0-VF).
-    unsigned char V[16];
+    unsigned char V[MAX_REGISTERS];
 
     // Delay timer, sound timer and stack pointer 8-bit registers.
     unsigned char DT = 0, ST = 0, SP = 0;
 
     // Program counter and index 16-bit registers.
-    unsigned int PC = 0x200, I = 0x00;
+    unsigned int PC = PC_START_ADDR, I = 0x00;
 
     // The call stack. CHIP-8 allows a max of 16 nested calls.
-    unsigned int stack[16];
+    unsigned int stack[MAX_STACK_LEVELS];
 
     /* A monochrome display of 64x32 pixels.
     A pixel can be either only on or off, no color. */
-    bool display[32][64] = {false};
+    bool display[MAX_HEIGHT][MAX_WIDTH] = {false};
 
     load_font(RAM);
 
@@ -159,7 +169,7 @@ int main()
     }
 
     // Read and execute instructions from memory until none (0x0000) is found.
-    while (!(RAM[PC] == 0x00 && RAM[PC + 1] == 0x00))
+    while (!(RAM[PC] == NOOP && RAM[PC + 1] == NOOP))
     {
         // The first and second byte of instruction respectively.
         unsigned char b1 = RAM[PC], b2 = RAM[PC + 1];
@@ -185,9 +195,9 @@ int main()
         // CLS:
         if (b1 == 0x00 && b2 == 0xE0)
         {
-            for (int row = 0; row < 32; row++)
+            for (int row = 0; row < MAX_HEIGHT; row++)
             {
-                for (int col = 0; col < 64; col++)
+                for (int col = 0; col < MAX_WIDTH; col++)
                 {
                     display[row][col] = false;
                 }
@@ -361,7 +371,34 @@ int main()
 
         // DRW VX, VY, N:
         case 0x0D:
-            // Do draw stuff
+            for (int i = 0; i <= N; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    int disp_x = X + j;
+                    int disp_y = Y + i;
+
+                    // Allow out-of-bound sprite to wrap-around.
+                    if (disp_x >= MAX_WIDTH)
+                    {
+                        disp_x -= MAX_WIDTH;
+                    }
+                    if (disp_y >= MAX_HEIGHT)
+                    {
+                        disp_y -= MAX_HEIGHT;
+                    }
+
+                    // Get the pixel the loop is on and the corresponding bit.
+                    bool pixel_on = display[disp_y][disp_x];
+                    bool bit = (RAM[I + j] >> (7 - j)) & 0x01;
+
+                    /* XOR the sprite onto screen and if a pixel is erased,
+                    set the VF register to 1. */
+                    display[disp_y][disp_x] = (pixel_on != bit);
+                    V[0x0F] = (pixel_on && bit) ? 1 : 0;
+                }
+            }
+
             break;
 
         // Key skip family
