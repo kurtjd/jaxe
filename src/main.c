@@ -14,6 +14,13 @@
 #define PC_START_ADDR 0x200
 #define NOOP 0x00
 #define DISPLAY_SCALE 10
+#define DISPLAY_COLOR 0xFFFFFF
+
+void set_pixel(SDL_Surface *surface, int x, int y, bool on)
+{
+    Uint32 *pixels = (Uint32 *)surface->pixels;
+    pixels[(y * surface->w) + x] = on ? DISPLAY_COLOR : 0x000000;
+}
 
 unsigned char SDLK_to_hex(SDL_KeyCode key)
 {
@@ -231,7 +238,7 @@ int main(int argc, char *argv[])
     load_font(RAM);
 
     // Load ROM into memory (for now filename hardcoded).
-    if (!load_rom("../roms/my_test.c8", RAM))
+    if (!load_rom("../roms/c8_test.c8", RAM))
     {
         fprintf(stderr, "Unable to open ROM file.\n");
         return 1;
@@ -305,8 +312,23 @@ int main(int argc, char *argv[])
             }
         }
 
+        for (int y = 0; y < MAX_HEIGHT; y++)
+        {
+            for (int x = 0; x < MAX_WIDTH; x++)
+            {
+                for (int i = 0; i < DISPLAY_SCALE; i++)
+                {
+                    for (int j = 0; j < DISPLAY_SCALE; j++)
+                    {
+                        set_pixel(surface, x + j, y + i, display[y][x]);
+                    }
+                }
+            }
+        }
+        SDL_UpdateWindowSurface(window);
+
         // Decrement timers at a frequency of 60Hz and play sound if needed.
-        if ((clock() % (CLOCKS_PER_SEC / 60)))
+        if (clock() % (CLOCKS_PER_SEC / 60))
         {
             if (DT > 0)
             {
@@ -429,7 +451,7 @@ int main(int argc, char *argv[])
             // SHR VX {, VY}
             case 0x06:
                 V[0xF] = V[X] & 0x01;
-                V[X] = V[X] >> 1;
+                V[X] >>= 1;
                 break;
 
             // SUBN VX, VY
@@ -441,7 +463,7 @@ int main(int argc, char *argv[])
             // SHL VX {, VY}
             case 0x0E:
                 V[0xF] = V[X] & 0x80;
-                V[X] = V[X] << 1;
+                V[X] <<= 1;
                 break;
 
             default:
