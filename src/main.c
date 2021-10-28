@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
     load_font(RAM);
 
     // Load ROM into memory (for now filename hardcoded).
-    if (!load_rom("../roms/c8_test.c8", RAM))
+    if (!load_rom("../roms/test_opcode.ch8", RAM))
     {
         fprintf(stderr, "Unable to open ROM file.\n");
         return 1;
@@ -320,7 +320,7 @@ int main(int argc, char *argv[])
                 {
                     for (int j = 0; j < DISPLAY_SCALE; j++)
                     {
-                        set_pixel(surface, x + j, y + i, display[y][x]);
+                        set_pixel(surface, (x * DISPLAY_SCALE) + j, (y * DISPLAY_SCALE) + i, display[y][x]);
                     }
                 }
             }
@@ -498,12 +498,12 @@ int main(int argc, char *argv[])
 
         // DRW VX, VY, N:
         case 0x0D:
-            for (int i = 0; i <= N; i++)
+            for (int i = 0; i < N; i++)
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    int disp_x = X + j;
-                    int disp_y = Y + i;
+                    int disp_x = V[X] + j;
+                    int disp_y = V[Y] + i;
 
                     // Allow out-of-bound sprite to wrap-around.
                     if (disp_x >= MAX_WIDTH)
@@ -517,7 +517,7 @@ int main(int argc, char *argv[])
 
                     // Get the pixel the loop is on and the corresponding bit.
                     bool pixel_on = display[disp_y][disp_x];
-                    bool bit = (RAM[I + j] >> (7 - j)) & 0x01;
+                    bool bit = (RAM[I + i] >> (7 - j)) & 0x01;
 
                     /* XOR the sprite onto display. 
                     If a pixel is erased, set the VF register to 1. */
