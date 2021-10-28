@@ -10,7 +10,6 @@
 #define MAX_RAM 4096
 #define MAX_REGISTERS 16
 #define MAX_STACK_LEVELS 16
-
 #define FONT_START_ADDR 0x0
 #define PC_START_ADDR 0x200
 #define NOOP 0x00
@@ -541,11 +540,12 @@ int main(int argc, char *argv[])
             {
             // LD VX, DT
             case 0x07:
-                V[X] = input();
+                V[X] = DT;
                 break;
 
             // LD VX, K
             case 0x0A:
+            {
                 bool key_pressed = false;
 
                 for (int i = 0; i < MAX_KEYS; i++)
@@ -564,6 +564,7 @@ int main(int argc, char *argv[])
                 }
 
                 break;
+            }
 
             // LD DT, VX
             case 0x15:
