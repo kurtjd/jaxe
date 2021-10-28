@@ -5,6 +5,7 @@
 
 #define MAX_WIDTH 64
 #define MAX_HEIGHT 32
+#define MAX_KEYS 16
 #define MAX_RAM 4096
 #define MAX_REGISTERS 16
 #define MAX_STACK_LEVELS 16
@@ -12,6 +13,11 @@
 #define FONT_START_ADDR 0x0
 #define PC_START_ADDR 0x200
 #define NOOP 0x00
+
+unsigned char input()
+{
+    return 0;
+}
 
 bool load_rom(char *filename, unsigned char RAM[])
 {
@@ -158,6 +164,9 @@ int main()
     /* A monochrome display of 64x32 pixels.
     A pixel can be either only on or off, no color. */
     bool display[MAX_HEIGHT][MAX_WIDTH] = {false};
+
+    // Represents keys 0-F and if they are pressed or not.
+    bool keypad[MAX_KEYS] = {false};
 
     load_font(RAM);
 
@@ -383,12 +392,20 @@ int main()
             {
             // SKP VX
             case 0x9E:
-                // Do key stuff
+                if (keypad[V[X]])
+                {
+                    PC += 2;
+                }
+
                 break;
 
             // SKNP VX
             case 0xA1:
-                // Do key stuff
+                if (!keypad[V[X]])
+                {
+                    PC += 2;
+                }
+
                 break;
 
             default:
@@ -403,7 +420,7 @@ int main()
             {
             // LD VX, DT
             case 0x07:
-                V[X] = DT;
+                V[X] = input();
                 break;
 
             // LD VX, K
