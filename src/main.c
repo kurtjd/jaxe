@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
-#include <unistd.h>
+#include <SDL2/SDL.h>
 
 #define MAX_WIDTH 64
 #define MAX_HEIGHT 32
@@ -14,6 +14,7 @@
 #define FONT_START_ADDR 0x0
 #define PC_START_ADDR 0x200
 #define NOOP 0x00
+#define DISPLAY_SCALE 10
 
 unsigned char input()
 {
@@ -148,7 +149,7 @@ void load_font(unsigned char RAM[])
     RAM[FONT_START_ADDR + 0x4F] = 0x80;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     srand(time(NULL));
 
@@ -183,8 +184,28 @@ int main()
         return 1;
     }
 
+    SDL_Window *window = NULL;
+    SDL_Surface *surface = NULL;
+    SDL_Event e;
+    bool quit = false;
+
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        fprintf(stderr, "Could not initialize SDL.\n");
+        return 1;
+    }
+
+    window = SDL_CreateWindow("JACE", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MAX_WIDTH * DISPLAY_SCALE, MAX_HEIGHT * DISPLAY_SCALE, SDL_WINDOW_SHOWN);
+    if (window == NULL)
+    {
+        fprintf(stderr, "Could not create SDL window.\n");
+        return 1;
+    }
+
+    surface = SDL_GetWindowSurface(window);
+
     // Read and execute instructions from memory until none (0x0000) is found.
-    while (!(RAM[PC] == NOOP && RAM[PC + 1] == NOOP))
+    while (!quit && !(RAM[PC] == NOOP && RAM[PC + 1] == NOOP))
     {
         // The first and second byte of instruction respectively.
         unsigned char b1 = RAM[PC], b2 = RAM[PC + 1];
@@ -206,6 +227,14 @@ int main()
 
         // The last 4 bits of instruction.
         unsigned char N = b2 & 0xF;
+
+        while (SDL_PollEvent(&e))
+        {
+            if (e.type == SDL_QUIT)
+            {
+                quit = true;
+            }
+        }
 
         // Decrement timers at a frequency of 60Hz and play sound if needed.
         if ((clock() % (CLOCKS_PER_SEC / 60)))
@@ -331,7 +360,7 @@ int main()
             // SHR VX {, VY}
             case 0x06:
                 V[0xF] = V[X] & 0x01;
-                V[X] >> 1;
+                V[X] = V[X] >> 1;
                 break;
 
             // SUBN VX, VY
@@ -343,12 +372,14 @@ int main()
             // SHL VX {, VY}
             case 0x0E:
                 V[0xF] = V[X] & 0x80;
-                V[X] << 1;
+                V[X] = V[X] << 1;
                 break;
 
             default:
                 break;
             }
+
+            break;
 
         // SNE VX, VY:
         case 0x09:
@@ -505,6 +536,9 @@ int main()
 
         PC += 2;
     }
+
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 
     return 0;
 }

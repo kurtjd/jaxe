@@ -11,5 +11,5 @@ add_executable(${TARGET_NAME}
     src/main.c)
 
 target_include_directories(${TARGET_NAME} PUBLIC include)
-target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -Werror -Wpedantic)
-
+target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(${TARGET_NAME} -lSDL2)
