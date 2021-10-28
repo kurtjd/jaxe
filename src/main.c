@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+#include <unistd.h>
 
 #define MAX_WIDTH 64
 #define MAX_HEIGHT 32
@@ -17,6 +18,11 @@
 unsigned char input()
 {
     return 0;
+}
+
+void beep()
+{
+    return;
 }
 
 bool load_rom(char *filename, unsigned char RAM[])
@@ -200,6 +206,20 @@ int main()
 
         // The last 4 bits of instruction.
         unsigned char N = b2 & 0xF;
+
+        // Decrement timers at a frequency of 60Hz and play sound if needed.
+        if ((clock() % (CLOCKS_PER_SEC / 60)))
+        {
+            if (DT > 0)
+            {
+                DT--;
+            }
+            if (ST > 0)
+            {
+                ST--;
+                beep();
+            }
+        }
 
         // CLS:
         if (b1 == 0x00 && b2 == 0xE0)
