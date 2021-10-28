@@ -16,9 +16,63 @@
 #define NOOP 0x00
 #define DISPLAY_SCALE 10
 
-unsigned char input()
+unsigned char SDLK_to_hex(SDL_KeyCode key)
 {
-    return 0;
+    // Maps a key press to the corresponding key on hex pad.
+    switch (key)
+    {
+    case SDLK_1:
+        return 0x1;
+        break;
+    case SDLK_2:
+        return 0x2;
+        break;
+    case SDLK_3:
+        return 0x3;
+        break;
+    case SDLK_4:
+        return 0xC;
+        break;
+    case SDLK_q:
+        return 0x4;
+        break;
+    case SDLK_w:
+        return 0x5;
+        break;
+    case SDLK_e:
+        return 0x6;
+        break;
+    case SDLK_r:
+        return 0xD;
+        break;
+    case SDLK_a:
+        return 0x7;
+        break;
+    case SDLK_s:
+        return 0x8;
+        break;
+    case SDLK_d:
+        return 0x9;
+        break;
+    case SDLK_f:
+        return 0xE;
+        break;
+    case SDLK_z:
+        return 0xA;
+        break;
+    case SDLK_x:
+        return 0x0;
+        break;
+    case SDLK_c:
+        return 0xC;
+        break;
+    case SDLK_v:
+        return 0xF;
+        break;
+    default:
+        return 42;
+        break;
+    }
 }
 
 void beep()
@@ -233,6 +287,22 @@ int main(int argc, char *argv[])
             if (e.type == SDL_QUIT)
             {
                 quit = true;
+            }
+            else if (e.type == SDL_KEYDOWN)
+            {
+                unsigned char hexkey = SDLK_to_hex(e.key.keysym.sym);
+                if (hexkey != 42)
+                {
+                    keypad[SDLK_to_hex(e.key.keysym.sym)] = true;
+                }
+            }
+            else if (e.type == SDL_KEYUP)
+            {
+                unsigned char hexkey = SDLK_to_hex(e.key.keysym.sym);
+                if (hexkey != 42)
+                {
+                    keypad[SDLK_to_hex(e.key.keysym.sym)] = false;
+                }
             }
         }
 
@@ -476,7 +546,23 @@ int main(int argc, char *argv[])
 
             // LD VX, K
             case 0x0A:
-                // Do key stuff
+                bool key_pressed = false;
+
+                for (int i = 0; i < MAX_KEYS; i++)
+                {
+                    if (keypad[i])
+                    {
+                        V[X] = i;
+                        key_pressed = true;
+                        break;
+                    }
+                }
+
+                if (!key_pressed)
+                {
+                    continue;
+                }
+
                 break;
 
             // LD DT, VX
