@@ -5,19 +5,39 @@
 
 void test_00E0(CHIP8 *chip8)
 {
-    chip8->RAM[PC_START_ADDR] = 0x00;
-    chip8->RAM[PC_START_ADDR + 1] = 0xE0;
+    chip8_load_instr(chip8, 0x00E0);
+
     chip8->display[0][0] = true;
+    chip8->display[MAX_HEIGHT / 2][MAX_WIDTH / 2] = true;
+    chip8->display[MAX_HEIGHT - 1][0] = true;
+    chip8->display[0][MAX_WIDTH - 1] = true;
+    chip8->display[MAX_HEIGHT - 1][MAX_WIDTH - 1] = true;
+
     chip8_execute(chip8);
-    assert(chip8->display[0][0] == false);
+
+    for (int i = 0; i < MAX_HEIGHT; i++)
+    {
+        for (int j = 0; j < MAX_WIDTH; j++)
+        {
+            assert(chip8->display[i][j] == false);
+        }
+    }
+
     chip8_init(chip8);
 }
 
 int main()
 {
+    // The test machine.
     CHIP8 chip8;
     chip8_init(&chip8);
 
+    /* All tests follow similar pattern:
+            * Load instruction into RAM
+            * Modify some data to be tested on
+            * Execute instruction
+            * Check result
+            * Reset the machine */
     test_00E0(&chip8);
 
     printf("All tests pass!\n");

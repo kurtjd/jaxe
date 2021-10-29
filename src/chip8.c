@@ -512,3 +512,12 @@ void chip8_reset_display(CHIP8 *chip8)
         }
     }
 }
+
+void chip8_load_instr(CHIP8 *chip8, unsigned int instr)
+{
+    unsigned char b1 = instr >> 8;
+    unsigned char b2 = instr & 0xFF;
+
+    chip8->RAM[PC_START_ADDR] = b1;
+    chip8->RAM[PC_START_ADDR + 1] = b2;
+}
