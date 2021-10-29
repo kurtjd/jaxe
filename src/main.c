@@ -215,7 +215,7 @@ void machine_execute(Machine *machine)
     // The last 4 bits of instruction.
     unsigned char N = b2 & 0xF;
 
-    // CLS:
+    // CLS (00E0):
     if (b1 == 0x00 && b2 == 0xE0)
     {
         for (int row = 0; row < MAX_HEIGHT; row++)
@@ -227,7 +227,7 @@ void machine_execute(Machine *machine)
         }
     }
 
-    // RET:
+    // RET (00EE):
     else if (b1 == 0x00 && b2 == 0xEE)
     {
         machine->PC = machine->stack[machine->SP];
@@ -236,20 +236,20 @@ void machine_execute(Machine *machine)
 
     switch (C)
     {
-    // JMP:
+    // JMP NNN (1NNN):
     case 0x01:
         machine->PC = NNN;
         return;
         break;
 
-    // CALL:
+    // CALL NNN (2NNN):
     case 0x02:
         machine->SP++;
         machine->stack[machine->SP] = machine->PC;
         machine->PC = NNN;
         break;
 
-    // SE VX, NN:
+    // SE VX, NN (3XNN):
     case 0x03:
         if (machine->V[X] == NN)
         {
@@ -258,7 +258,7 @@ void machine_execute(Machine *machine)
 
         break;
 
-    // SNE VX, NN:
+    // SNE VX, NN (4XNN):
     case 0x04:
         if (machine->V[X] != NN)
         {
@@ -267,7 +267,7 @@ void machine_execute(Machine *machine)
 
         break;
 
-    // SE VX, VY:
+    // SE VX, VY (5XY0):
     case 0x05:
         if (machine->V[X] == machine->V[Y])
         {
@@ -276,12 +276,12 @@ void machine_execute(Machine *machine)
 
         break;
 
-    // LD VX, NN:
+    // LD VX, NN (6XNN):
     case 0x06:
         machine->V[X] = NN;
         break;
 
-    // ADD VX, NN:
+    // ADD VX, NN (7XNN):
     case 0x07:
         machine->V[X] += NN;
         break;
@@ -290,52 +290,52 @@ void machine_execute(Machine *machine)
     case 0x08:
         switch (N)
         {
-        // LD VX, VY:
+        // LD VX, VY (8XY0):
         case 0x00:
             machine->V[X] = machine->V[Y];
             break;
 
-        // OR VX, VY
+        // OR VX, VY (8XY1):
         case 0x01:
             machine->V[X] |= machine->V[Y];
             break;
 
-        // AND VX, VY
+        // AND VX, VY (8XY2):
         case 0x02:
             machine->V[X] &= machine->V[Y];
             break;
 
-        // XOR VX, VY
+        // XOR VX, VY (8XY3):
         case 0x03:
             machine->V[X] ^= machine->V[Y];
             break;
 
-        // ADD VX, VY
+        // ADD VX, VY (8XY4):
         case 0x04:
             machine->V[0x0F] = ((int)(machine->V[X]) + (int)(machine->V[Y]) > 0xFF) ? 1 : 0;
             machine->V[X] += machine->V[Y];
             break;
 
-        // SUB VX, VY
+        // SUB VX, VY (8XY5):
         case 0x05:
             machine->V[0x0F] = (machine->V[X] > machine->V[Y]) ? 1 : 0;
             machine->V[X] -= machine->V[Y];
             break;
 
-        // SHR VX {, VY}
+        // SHR VX {, VY} (8XY6):
         case 0x06:
             machine->V[X] = machine->V[Y];
             machine->V[0x0F] = machine->V[X] & 0x01;
             machine->V[X] >>= 1;
             break;
 
-        // SUBN VX, VY
+        // SUBN VX, VY (8XY7):
         case 0x07:
             machine->V[0x0F] = (machine->V[Y] > machine->V[X]) ? 1 : 0;
             machine->V[X] = machine->V[Y] - machine->V[X];
             break;
 
-        // SHL VX {, VY}
+        // SHL VX {, VY} (8XYE):
         case 0x0E:
             machine->V[X] = machine->V[Y];
             machine->V[0x0F] = machine->V[X] & 0x80;
@@ -348,7 +348,7 @@ void machine_execute(Machine *machine)
 
         break;
 
-    // SNE VX, VY:
+    // SNE VX, VY (9XY0):
     case 0x09:
         if (machine->V[X] != machine->V[Y])
         {
@@ -357,22 +357,22 @@ void machine_execute(Machine *machine)
 
         break;
 
-    // LD I, NNN:
+    // LD I, NNN (ANNN):
     case 0x0A:
         machine->I = NNN;
         break;
 
-    // JMP V0, NNN:
+    // JMP V0, NNN (BNNN):
     case 0x0B:
         machine->PC = machine->V[0] + NNN;
         break;
 
-    // RND VX, NN:
+    // RND VX, NN (CXNN):
     case 0x0C:
         machine->V[X] = (rand() % 256) & NN;
         break;
 
-    // DRW VX, VY, N:
+    // DRW VX, VY, N (DXYN):
     case 0x0D:
         for (int i = 0; i < N; i++)
         {
@@ -408,7 +408,7 @@ void machine_execute(Machine *machine)
     case 0x0E:
         switch (b2)
         {
-        // SKP VX
+        // SKP VX (EX9E):
         case 0x9E:
             if (machine->keypad[machine->V[X]])
             {
@@ -417,7 +417,7 @@ void machine_execute(Machine *machine)
 
             break;
 
-        // SKNP VX
+        // SKNP VX (EXA1):
         case 0xA1:
             if (!machine->keypad[machine->V[X]])
             {
@@ -436,12 +436,12 @@ void machine_execute(Machine *machine)
     case 0x0F:
         switch (b2)
         {
-        // LD VX, DT
+        // LD VX, DT (FX07):
         case 0x07:
             machine->V[X] = machine->DT;
             break;
 
-        // LD VX, K
+        // LD VX, K (FX0A):
         case 0x0A:
         {
             bool key_pressed = false;
@@ -464,34 +464,34 @@ void machine_execute(Machine *machine)
             break;
         }
 
-        // LD DT, VX
+        // LD DT, VX (FX15):
         case 0x15:
             machine->DT = machine->V[X];
             break;
 
-        // LD ST, VX
+        // LD ST, VX (FX18):
         case 0x18:
             machine->ST = machine->V[X];
             break;
 
-        // ADD I, VX
+        // ADD I, VX (FX1E):
         case 0x1E:
             machine->I += machine->V[X];
             break;
 
-        // LD F, VX
+        // LD F, VX (FX29):
         case 0x29:
             machine->I = machine->V[X] * 0x05;
             break;
 
-        // LD B, VX
+        // LD B, VX (FX33):
         case 0x33:
             machine->RAM[machine->I] = (machine->V[X] / 100) % 10;
             machine->RAM[machine->I + 1] = (machine->V[X] / 10) % 10;
             machine->RAM[machine->I + 2] = machine->V[X] % 10;
             break;
 
-        // LD [I], VX
+        // LD [I], VX (FX55):
         case 0x55:
             for (int r = 0; r <= X; r++)
             {
@@ -500,7 +500,7 @@ void machine_execute(Machine *machine)
 
             break;
 
-        // LD VX, [I]
+        // LD VX, [I] (FX65):
         case 0x65:
             for (int r = 0; r <= X; r++)
             {
