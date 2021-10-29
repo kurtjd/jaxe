@@ -3,8 +3,10 @@
 #include <time.h>
 #include <unistd.h>
 #include <SDL2/SDL.h>
-#include "constants.h"
 #include "chip8.h"
+
+#define DISPLAY_SCALE 10
+#define DISPLAY_COLOR 0xFFFFFF
 
 void set_pixel(SDL_Surface *surface, int x, int y, bool on)
 {

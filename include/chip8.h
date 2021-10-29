@@ -1,7 +1,15 @@
 #ifndef CHIP8_H
 #define CHIP8_H
 
-#include "constants.h"
+#define MAX_WIDTH 64
+#define MAX_HEIGHT 32
+#define MAX_KEYS 16
+#define MAX_RAM 4096
+#define MAX_REGISTERS 16
+#define MAX_STACK_LEVELS 16
+#define FONT_START_ADDR 0x0
+#define PC_START_ADDR 0x200
+#define NOOP 0x00
 
 typedef struct Machine
 {
