@@ -120,8 +120,6 @@ void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
 
 int main(int argc, char *argv[])
 {
-    printf("argc: %d\n", argc);
-
     srand(time(NULL));
 
     CHIP8 chip8;
@@ -159,11 +157,9 @@ int main(int argc, char *argv[])
     while (!quit && !(chip8.RAM[chip8.PC] == NOOP && chip8.RAM[chip8.PC + 1] == NOOP))
     {
         handle_input(&e, &quit, &chip8);
-        draw_display(window, surface, &chip8);
-
-        chip8_handle_timers(&chip8);
         chip8_execute(&chip8);
-
+        chip8_handle_timers(&chip8);
+        draw_display(window, surface, &chip8);
         usleep(1000 / 700);
     }
 

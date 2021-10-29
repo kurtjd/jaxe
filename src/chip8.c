@@ -6,29 +6,15 @@
 
 void chip8_init(CHIP8 *chip8)
 {
-    for (int addr = 0; addr < MAX_RAM; addr++)
-    {
-        chip8->RAM[addr] = 0x00;
-    }
-
-    for (int k = 0; k < MAX_KEYS; k++)
-    {
-        chip8->keypad[k] = false;
-    }
-
-    for (int y = 0; y < MAX_HEIGHT; y++)
-    {
-        for (int x = 0; x < MAX_WIDTH; x++)
-        {
-            chip8->display[y][x] = false;
-        }
-    }
+    chip8_reset_RAM(chip8);
+    chip8_reset_keypad(chip8);
+    chip8_reset_display(chip8);
 
     chip8->DT = 0;
     chip8->ST = 0;
     chip8->SP = 0;
     chip8->PC = PC_START_ADDR;
-    chip8->I = 0x00;
+    chip8->I = NOOP;
 }
 
 void chip8_load_font(CHIP8 *chip8)
@@ -180,13 +166,7 @@ void chip8_execute(CHIP8 *chip8)
     // CLS (00E0):
     if (b1 == 0x00 && b2 == 0xE0)
     {
-        for (int row = 0; row < MAX_HEIGHT; row++)
-        {
-            for (int col = 0; col < MAX_WIDTH; col++)
-            {
-                chip8->display[row][col] = false;
-            }
-        }
+        chip8_reset_display(chip8);
     }
 
     // RET (00EE):
@@ -484,11 +464,6 @@ void chip8_execute(CHIP8 *chip8)
     chip8->PC += 2;
 }
 
-void chip8_beep()
-{
-    return;
-}
-
 void chip8_handle_timers(CHIP8 *chip8)
 {
     // Decrement timers at a frequency of 60Hz and play sound if needed.
@@ -501,7 +476,39 @@ void chip8_handle_timers(CHIP8 *chip8)
         if (chip8->ST > 0)
         {
             chip8->ST--;
-            chip8_beep();
+            chip8_beep(chip8);
+        }
+    }
+}
+
+void chip8_beep(CHIP8 *chip8)
+{
+    return;
+}
+
+void chip8_reset_RAM(CHIP8 *chip8)
+{
+    for (int addr = 0; addr < MAX_RAM; addr++)
+    {
+        chip8->RAM[addr] = NOOP;
+    }
+}
+
+void chip8_reset_keypad(CHIP8 *chip8)
+{
+    for (int k = 0; k < MAX_KEYS; k++)
+    {
+        chip8->keypad[k] = false;
+    }
+}
+
+void chip8_reset_display(CHIP8 *chip8)
+{
+    for (int y = 0; y < MAX_HEIGHT; y++)
+    {
+        for (int x = 0; x < MAX_WIDTH; x++)
+        {
+            chip8->display[y][x] = false;
         }
     }
 }
