@@ -237,8 +237,8 @@ int main(int argc, char *argv[])
 
     load_font(RAM);
 
-    // Load ROM into memory (for now filename hardcoded).
-    if (!load_rom("../roms/test_opcode.ch8", RAM))
+    // Load ROM into memory.
+    if (!load_rom(argv[1], RAM))
     {
         fprintf(stderr, "Unable to open ROM file.\n");
         return 1;
@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
         unsigned char Y = b2 >> 4;
 
         // The last 12 bits of instruction (usually an address).
-        unsigned int NNN = ((b1 & 0xF) << 8) | (int)b2;
+        unsigned int NNN = ((b1 & 0xF) << 8) | b2;
 
         // The last 8 bits of instruction.
         unsigned char NN = b2;
@@ -450,7 +450,8 @@ int main(int argc, char *argv[])
 
             // SHR VX {, VY}
             case 0x06:
-                V[0xF] = V[X] & 0x01;
+                V[X] = V[Y];
+                V[0x0F] = V[X] & 0x01;
                 V[X] >>= 1;
                 break;
 
@@ -462,7 +463,8 @@ int main(int argc, char *argv[])
 
             // SHL VX {, VY}
             case 0x0E:
-                V[0xF] = V[X] & 0x80;
+                V[X] = V[Y];
+                V[0x0F] = V[X] & 0x80;
                 V[X] <<= 1;
                 break;
 
