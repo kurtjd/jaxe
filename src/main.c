@@ -14,6 +14,24 @@ void set_pixel(SDL_Surface *surface, int x, int y, bool on)
     pixels[(y * surface->w) + x] = on ? DISPLAY_COLOR : 0x000000;
 }
 
+void draw_display(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
+{
+    for (int y = 0; y < MAX_HEIGHT; y++)
+    {
+        for (int x = 0; x < MAX_WIDTH; x++)
+        {
+            for (int i = 0; i < DISPLAY_SCALE; i++)
+            {
+                for (int j = 0; j < DISPLAY_SCALE; j++)
+                {
+                    set_pixel(surface, (x * DISPLAY_SCALE) + j, (y * DISPLAY_SCALE) + i, chip8->display[y][x]);
+                }
+            }
+        }
+    }
+    SDL_UpdateWindowSurface(window);
+}
+
 unsigned char SDLK_to_hex(SDL_KeyCode key)
 {
     // Maps a key press to the corresponding key on hex pad.
@@ -73,6 +91,33 @@ unsigned char SDLK_to_hex(SDL_KeyCode key)
     }
 }
 
+void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
+{
+    while (SDL_PollEvent(e))
+    {
+        if (e->type == SDL_QUIT)
+        {
+            *quit = true;
+        }
+        else if (e->type == SDL_KEYDOWN)
+        {
+            unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
+            if (hexkey != 42)
+            {
+                chip8->keypad[SDLK_to_hex(e->key.keysym.sym)] = true;
+            }
+        }
+        else if (e->type == SDL_KEYUP)
+        {
+            unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
+            if (hexkey != 42)
+            {
+                chip8->keypad[SDLK_to_hex(e->key.keysym.sym)] = false;
+            }
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
     printf("argc: %d\n", argc);
@@ -113,44 +158,8 @@ int main(int argc, char *argv[])
     // Read and execute instructions from memory until none (0x0000) is found.
     while (!quit && !(chip8.RAM[chip8.PC] == NOOP && chip8.RAM[chip8.PC + 1] == NOOP))
     {
-        while (SDL_PollEvent(&e))
-        {
-            if (e.type == SDL_QUIT)
-            {
-                quit = true;
-            }
-            else if (e.type == SDL_KEYDOWN)
-            {
-                unsigned char hexkey = SDLK_to_hex(e.key.keysym.sym);
-                if (hexkey != 42)
-                {
-                    chip8.keypad[SDLK_to_hex(e.key.keysym.sym)] = true;
-                }
-            }
-            else if (e.type == SDL_KEYUP)
-            {
-                unsigned char hexkey = SDLK_to_hex(e.key.keysym.sym);
-                if (hexkey != 42)
-                {
-                    chip8.keypad[SDLK_to_hex(e.key.keysym.sym)] = false;
-                }
-            }
-        }
-
-        for (int y = 0; y < MAX_HEIGHT; y++)
-        {
-            for (int x = 0; x < MAX_WIDTH; x++)
-            {
-                for (int i = 0; i < DISPLAY_SCALE; i++)
-                {
-                    for (int j = 0; j < DISPLAY_SCALE; j++)
-                    {
-                        set_pixel(surface, (x * DISPLAY_SCALE) + j, (y * DISPLAY_SCALE) + i, chip8.display[y][x]);
-                    }
-                }
-            }
-        }
-        SDL_UpdateWindowSurface(window);
+        handle_input(&e, &quit, &chip8);
+        draw_display(window, surface, &chip8);
 
         chip8_handle_timers(&chip8);
         chip8_execute(&chip8);
