@@ -129,7 +129,11 @@ bool chip8_load_rom(CHIP8 *chip8, char *filename)
     FILE *rom = fopen(filename, "rb");
     if (rom)
     {
-        fread(chip8->RAM + PC_START_ADDR, MAX_RAM - PC_START_ADDR, 1, rom);
+        if (fread(chip8->RAM + PC_START_ADDR, MAX_RAM - PC_START_ADDR, 1, rom) != 0)
+        {
+            printf("Really just here to get GCC to shut up about unused return values.\n");
+        }
+
         fclose(rom);
 
         return true;
