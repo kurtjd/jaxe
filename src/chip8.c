@@ -267,7 +267,7 @@ void chip8_execute(CHIP8 *chip8)
 
         // SHR VX {, VY} (8XY6):
         case 0x06:
-            chip8->V[X] = chip8->V[Y];
+            //chip8->V[X] = chip8->V[Y];
             chip8->V[0x0F] = chip8->V[X] & 0x01;
             chip8->V[X] >>= 1;
             break;
@@ -280,8 +280,8 @@ void chip8_execute(CHIP8 *chip8)
 
         // SHL VX {, VY} (8XYE):
         case 0x0E:
-            chip8->V[X] = chip8->V[Y];
-            chip8->V[0x0F] = chip8->V[X] & 0x80;
+            //chip8->V[X] = chip8->V[Y];
+            chip8->V[0x0F] = (chip8->V[X] & 0x80) >> 7;
             chip8->V[X] <<= 1;
             break;
 

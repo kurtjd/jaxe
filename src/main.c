@@ -80,7 +80,7 @@ unsigned char SDLK_to_hex(SDL_KeyCode key)
         return 0x0;
         break;
     case SDLK_c:
-        return 0xC;
+        return 0xB;
         break;
     case SDLK_v:
         return 0xF;
