@@ -1,6 +1,8 @@
 #ifndef CHIP8_H
 #define CHIP8_H
 
+#include <stdbool.h>
+
 #define MAX_WIDTH 64
 #define MAX_HEIGHT 32
 #define MAX_KEYS 16
