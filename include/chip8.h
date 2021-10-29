@@ -11,7 +11,7 @@
 #define PC_START_ADDR 0x200
 #define NOOP 0x00
 
-typedef struct Machine
+typedef struct CHIP8
 {
     // Represents 4096 bytes (4KB) of addressable memory.
     unsigned char RAM[MAX_RAM];
@@ -34,13 +34,13 @@ typedef struct Machine
 
     // Represents keys 0-F and if they are pressed or not.
     bool keypad[MAX_KEYS];
-} Machine;
+} CHIP8;
 
-void machine_init(Machine *machine);
-void machine_load_font(Machine *machine);
-bool machine_load_rom(Machine *machine, char *filename);
-void machine_execute(Machine *machine);
-void machine_beep();
-void machine_handle_timers(Machine *machine);
+void chip8_init(CHIP8 *chip8);
+void chip8_load_font(CHIP8 *chip8);
+bool chip8_load_rom(CHIP8 *chip8, char *filename);
+void chip8_execute(CHIP8 *chip8);
+void chip8_beep();
+void chip8_handle_timers(CHIP8 *chip8);
 
 #endif

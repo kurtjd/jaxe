@@ -79,12 +79,12 @@ int main(int argc, char *argv[])
 
     srand(time(NULL));
 
-    Machine machine;
-    machine_init(&machine);
-    machine_load_font(&machine);
+    CHIP8 chip8;
+    chip8_init(&chip8);
+    chip8_load_font(&chip8);
 
     // Load ROM into memory.
-    if (!machine_load_rom(&machine, argv[1]))
+    if (!chip8_load_rom(&chip8, argv[1]))
     {
         fprintf(stderr, "Unable to open ROM file.\n");
         return 1;
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     surface = SDL_GetWindowSurface(window);
 
     // Read and execute instructions from memory until none (0x0000) is found.
-    while (!quit && !(machine.RAM[machine.PC] == NOOP && machine.RAM[machine.PC + 1] == NOOP))
+    while (!quit && !(chip8.RAM[chip8.PC] == NOOP && chip8.RAM[chip8.PC + 1] == NOOP))
     {
         while (SDL_PollEvent(&e))
         {
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
                 unsigned char hexkey = SDLK_to_hex(e.key.keysym.sym);
                 if (hexkey != 42)
                 {
-                    machine.keypad[SDLK_to_hex(e.key.keysym.sym)] = true;
+                    chip8.keypad[SDLK_to_hex(e.key.keysym.sym)] = true;
                 }
             }
             else if (e.type == SDL_KEYUP)
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
                 unsigned char hexkey = SDLK_to_hex(e.key.keysym.sym);
                 if (hexkey != 42)
                 {
-                    machine.keypad[SDLK_to_hex(e.key.keysym.sym)] = false;
+                    chip8.keypad[SDLK_to_hex(e.key.keysym.sym)] = false;
                 }
             }
         }
@@ -145,15 +145,15 @@ int main(int argc, char *argv[])
                 {
                     for (int j = 0; j < DISPLAY_SCALE; j++)
                     {
-                        set_pixel(surface, (x * DISPLAY_SCALE) + j, (y * DISPLAY_SCALE) + i, machine.display[y][x]);
+                        set_pixel(surface, (x * DISPLAY_SCALE) + j, (y * DISPLAY_SCALE) + i, chip8.display[y][x]);
                     }
                 }
             }
         }
         SDL_UpdateWindowSurface(window);
 
-        machine_handle_timers(&machine);
-        machine_execute(&machine);
+        chip8_handle_timers(&chip8);
+        chip8_execute(&chip8);
 
         usleep(1000 / 700);
     }

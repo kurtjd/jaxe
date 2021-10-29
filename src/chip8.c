@@ -4,138 +4,138 @@
 #include <time.h>
 #include "chip8.h"
 
-void machine_init(Machine *machine)
+void chip8_init(CHIP8 *chip8)
 {
     for (int addr = 0; addr < MAX_RAM; addr++)
     {
-        machine->RAM[addr] = 0x00;
+        chip8->RAM[addr] = 0x00;
     }
 
     for (int k = 0; k < MAX_KEYS; k++)
     {
-        machine->keypad[k] = false;
+        chip8->keypad[k] = false;
     }
 
     for (int y = 0; y < MAX_HEIGHT; y++)
     {
         for (int x = 0; x < MAX_WIDTH; x++)
         {
-            machine->display[y][x] = false;
+            chip8->display[y][x] = false;
         }
     }
 
-    machine->DT = 0;
-    machine->ST = 0;
-    machine->SP = 0;
-    machine->PC = PC_START_ADDR;
-    machine->I = 0x00;
+    chip8->DT = 0;
+    chip8->ST = 0;
+    chip8->SP = 0;
+    chip8->PC = PC_START_ADDR;
+    chip8->I = 0x00;
 }
 
-void machine_load_font(Machine *machine)
+void chip8_load_font(CHIP8 *chip8)
 {
     /* Load hexadecimal font into memory.
     Each hex character is represented by 5 bytes in memory
     with each bit representing a pixel. */
 
     // 0:
-    machine->RAM[FONT_START_ADDR + 0x0] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x1] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x2] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x3] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x4] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x0] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x1] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x2] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x3] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x4] = 0xF0;
     // 1:
-    machine->RAM[FONT_START_ADDR + 0x5] = 0x20;
-    machine->RAM[FONT_START_ADDR + 0x6] = 0x60;
-    machine->RAM[FONT_START_ADDR + 0x7] = 0x20;
-    machine->RAM[FONT_START_ADDR + 0x8] = 0x20;
-    machine->RAM[FONT_START_ADDR + 0x9] = 0x70;
+    chip8->RAM[FONT_START_ADDR + 0x5] = 0x20;
+    chip8->RAM[FONT_START_ADDR + 0x6] = 0x60;
+    chip8->RAM[FONT_START_ADDR + 0x7] = 0x20;
+    chip8->RAM[FONT_START_ADDR + 0x8] = 0x20;
+    chip8->RAM[FONT_START_ADDR + 0x9] = 0x70;
     // 2:
-    machine->RAM[FONT_START_ADDR + 0xA] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0xB] = 0x10;
-    machine->RAM[FONT_START_ADDR + 0xC] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0xD] = 0x80;
-    machine->RAM[FONT_START_ADDR + 0xE] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0xA] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0xB] = 0x10;
+    chip8->RAM[FONT_START_ADDR + 0xC] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0xD] = 0x80;
+    chip8->RAM[FONT_START_ADDR + 0xE] = 0xF0;
     // 3:
-    machine->RAM[FONT_START_ADDR + 0xF] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x10] = 0x10;
-    machine->RAM[FONT_START_ADDR + 0x11] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x12] = 0x10;
-    machine->RAM[FONT_START_ADDR + 0x13] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0xF] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x10] = 0x10;
+    chip8->RAM[FONT_START_ADDR + 0x11] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x12] = 0x10;
+    chip8->RAM[FONT_START_ADDR + 0x13] = 0xF0;
     // 4:
-    machine->RAM[FONT_START_ADDR + 0x14] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x15] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x16] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x17] = 0x10;
-    machine->RAM[FONT_START_ADDR + 0x18] = 0x10;
+    chip8->RAM[FONT_START_ADDR + 0x14] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x15] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x16] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x17] = 0x10;
+    chip8->RAM[FONT_START_ADDR + 0x18] = 0x10;
     // 5:
-    machine->RAM[FONT_START_ADDR + 0x19] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x1A] = 0x80;
-    machine->RAM[FONT_START_ADDR + 0x1B] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x1C] = 0x10;
-    machine->RAM[FONT_START_ADDR + 0x1D] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x19] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x1A] = 0x80;
+    chip8->RAM[FONT_START_ADDR + 0x1B] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x1C] = 0x10;
+    chip8->RAM[FONT_START_ADDR + 0x1D] = 0xF0;
     // 6:
-    machine->RAM[FONT_START_ADDR + 0x1E] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x1F] = 0x80;
-    machine->RAM[FONT_START_ADDR + 0x20] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x21] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x22] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x1E] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x1F] = 0x80;
+    chip8->RAM[FONT_START_ADDR + 0x20] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x21] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x22] = 0xF0;
     // 7:
-    machine->RAM[FONT_START_ADDR + 0x23] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x24] = 0x10;
-    machine->RAM[FONT_START_ADDR + 0x25] = 0x20;
-    machine->RAM[FONT_START_ADDR + 0x26] = 0x40;
-    machine->RAM[FONT_START_ADDR + 0x27] = 0x40;
+    chip8->RAM[FONT_START_ADDR + 0x23] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x24] = 0x10;
+    chip8->RAM[FONT_START_ADDR + 0x25] = 0x20;
+    chip8->RAM[FONT_START_ADDR + 0x26] = 0x40;
+    chip8->RAM[FONT_START_ADDR + 0x27] = 0x40;
     // 8:
-    machine->RAM[FONT_START_ADDR + 0x28] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x29] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x2A] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x2B] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x2C] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x28] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x29] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x2A] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x2B] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x2C] = 0xF0;
     // 9:
-    machine->RAM[FONT_START_ADDR + 0x2D] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x2E] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x2F] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x30] = 0x10;
-    machine->RAM[FONT_START_ADDR + 0x31] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x2D] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x2E] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x2F] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x30] = 0x10;
+    chip8->RAM[FONT_START_ADDR + 0x31] = 0xF0;
     // A:
-    machine->RAM[FONT_START_ADDR + 0x32] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x33] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x34] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x35] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x36] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x32] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x33] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x34] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x35] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x36] = 0x90;
     // B:
-    machine->RAM[FONT_START_ADDR + 0x37] = 0xE0;
-    machine->RAM[FONT_START_ADDR + 0x38] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x39] = 0xE0;
-    machine->RAM[FONT_START_ADDR + 0x3A] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x3B] = 0xE0;
+    chip8->RAM[FONT_START_ADDR + 0x37] = 0xE0;
+    chip8->RAM[FONT_START_ADDR + 0x38] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x39] = 0xE0;
+    chip8->RAM[FONT_START_ADDR + 0x3A] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x3B] = 0xE0;
     // C:
-    machine->RAM[FONT_START_ADDR + 0x3C] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x3D] = 0x80;
-    machine->RAM[FONT_START_ADDR + 0x3E] = 0x80;
-    machine->RAM[FONT_START_ADDR + 0x3F] = 0x80;
-    machine->RAM[FONT_START_ADDR + 0x40] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x3C] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x3D] = 0x80;
+    chip8->RAM[FONT_START_ADDR + 0x3E] = 0x80;
+    chip8->RAM[FONT_START_ADDR + 0x3F] = 0x80;
+    chip8->RAM[FONT_START_ADDR + 0x40] = 0xF0;
     // D:
-    machine->RAM[FONT_START_ADDR + 0x41] = 0xE0;
-    machine->RAM[FONT_START_ADDR + 0x42] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x43] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x44] = 0x90;
-    machine->RAM[FONT_START_ADDR + 0x45] = 0xE0;
+    chip8->RAM[FONT_START_ADDR + 0x41] = 0xE0;
+    chip8->RAM[FONT_START_ADDR + 0x42] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x43] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x44] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x45] = 0xE0;
     // E:
-    machine->RAM[FONT_START_ADDR + 0x46] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x47] = 0x80;
-    machine->RAM[FONT_START_ADDR + 0x48] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x49] = 0x80;
-    machine->RAM[FONT_START_ADDR + 0x4A] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x46] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x47] = 0x80;
+    chip8->RAM[FONT_START_ADDR + 0x48] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x49] = 0x80;
+    chip8->RAM[FONT_START_ADDR + 0x4A] = 0xF0;
     // F:
-    machine->RAM[FONT_START_ADDR + 0x4B] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x4C] = 0x80;
-    machine->RAM[FONT_START_ADDR + 0x4D] = 0xF0;
-    machine->RAM[FONT_START_ADDR + 0x4E] = 0x80;
-    machine->RAM[FONT_START_ADDR + 0x4F] = 0x80;
+    chip8->RAM[FONT_START_ADDR + 0x4B] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x4C] = 0x80;
+    chip8->RAM[FONT_START_ADDR + 0x4D] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x4E] = 0x80;
+    chip8->RAM[FONT_START_ADDR + 0x4F] = 0x80;
 }
 
-bool machine_load_rom(Machine *machine, char *filename)
+bool chip8_load_rom(CHIP8 *chip8, char *filename)
 {
     /* Loads a given ROM into memory starting at address 0x200.
     0x200 is where user data is stored, eeverything before that is system. */
@@ -143,7 +143,7 @@ bool machine_load_rom(Machine *machine, char *filename)
     FILE *rom = fopen(filename, "rb");
     if (rom)
     {
-        fread(machine->RAM + PC_START_ADDR, MAX_RAM - PC_START_ADDR, 1, rom);
+        fread(chip8->RAM + PC_START_ADDR, MAX_RAM - PC_START_ADDR, 1, rom);
         fclose(rom);
 
         return true;
@@ -154,10 +154,10 @@ bool machine_load_rom(Machine *machine, char *filename)
     }
 }
 
-void machine_execute(Machine *machine)
+void chip8_execute(CHIP8 *chip8)
 {
     // The first and second byte of instruction respectively.
-    unsigned char b1 = machine->RAM[machine->PC], b2 = machine->RAM[machine->PC + 1];
+    unsigned char b1 = chip8->RAM[chip8->PC], b2 = chip8->RAM[chip8->PC + 1];
 
     // The code (first 4 bits) of instruction.
     unsigned char C = b1 >> 4;
@@ -184,7 +184,7 @@ void machine_execute(Machine *machine)
         {
             for (int col = 0; col < MAX_WIDTH; col++)
             {
-                machine->display[row][col] = false;
+                chip8->display[row][col] = false;
             }
         }
     }
@@ -192,60 +192,60 @@ void machine_execute(Machine *machine)
     // RET (00EE):
     else if (b1 == 0x00 && b2 == 0xEE)
     {
-        machine->PC = machine->stack[machine->SP];
-        machine->SP--;
+        chip8->PC = chip8->stack[chip8->SP];
+        chip8->SP--;
     }
 
     switch (C)
     {
     // JMP NNN (1NNN):
     case 0x01:
-        machine->PC = NNN;
+        chip8->PC = NNN;
         return;
         break;
 
     // CALL NNN (2NNN):
     case 0x02:
-        machine->SP++;
-        machine->stack[machine->SP] = machine->PC;
-        machine->PC = NNN;
+        chip8->SP++;
+        chip8->stack[chip8->SP] = chip8->PC;
+        chip8->PC = NNN;
         break;
 
     // SE VX, NN (3XNN):
     case 0x03:
-        if (machine->V[X] == NN)
+        if (chip8->V[X] == NN)
         {
-            machine->PC += 2;
+            chip8->PC += 2;
         }
 
         break;
 
     // SNE VX, NN (4XNN):
     case 0x04:
-        if (machine->V[X] != NN)
+        if (chip8->V[X] != NN)
         {
-            machine->PC += 2;
+            chip8->PC += 2;
         }
 
         break;
 
     // SE VX, VY (5XY0):
     case 0x05:
-        if (machine->V[X] == machine->V[Y])
+        if (chip8->V[X] == chip8->V[Y])
         {
-            machine->PC += 2;
+            chip8->PC += 2;
         }
 
         break;
 
     // LD VX, NN (6XNN):
     case 0x06:
-        machine->V[X] = NN;
+        chip8->V[X] = NN;
         break;
 
     // ADD VX, NN (7XNN):
     case 0x07:
-        machine->V[X] += NN;
+        chip8->V[X] += NN;
         break;
 
     // Bitwise family
@@ -254,54 +254,54 @@ void machine_execute(Machine *machine)
         {
         // LD VX, VY (8XY0):
         case 0x00:
-            machine->V[X] = machine->V[Y];
+            chip8->V[X] = chip8->V[Y];
             break;
 
         // OR VX, VY (8XY1):
         case 0x01:
-            machine->V[X] |= machine->V[Y];
+            chip8->V[X] |= chip8->V[Y];
             break;
 
         // AND VX, VY (8XY2):
         case 0x02:
-            machine->V[X] &= machine->V[Y];
+            chip8->V[X] &= chip8->V[Y];
             break;
 
         // XOR VX, VY (8XY3):
         case 0x03:
-            machine->V[X] ^= machine->V[Y];
+            chip8->V[X] ^= chip8->V[Y];
             break;
 
         // ADD VX, VY (8XY4):
         case 0x04:
-            machine->V[0x0F] = ((int)(machine->V[X]) + (int)(machine->V[Y]) > 0xFF) ? 1 : 0;
-            machine->V[X] += machine->V[Y];
+            chip8->V[0x0F] = ((int)(chip8->V[X]) + (int)(chip8->V[Y]) > 0xFF) ? 1 : 0;
+            chip8->V[X] += chip8->V[Y];
             break;
 
         // SUB VX, VY (8XY5):
         case 0x05:
-            machine->V[0x0F] = (machine->V[X] > machine->V[Y]) ? 1 : 0;
-            machine->V[X] -= machine->V[Y];
+            chip8->V[0x0F] = (chip8->V[X] > chip8->V[Y]) ? 1 : 0;
+            chip8->V[X] -= chip8->V[Y];
             break;
 
         // SHR VX {, VY} (8XY6):
         case 0x06:
-            machine->V[X] = machine->V[Y];
-            machine->V[0x0F] = machine->V[X] & 0x01;
-            machine->V[X] >>= 1;
+            chip8->V[X] = chip8->V[Y];
+            chip8->V[0x0F] = chip8->V[X] & 0x01;
+            chip8->V[X] >>= 1;
             break;
 
         // SUBN VX, VY (8XY7):
         case 0x07:
-            machine->V[0x0F] = (machine->V[Y] > machine->V[X]) ? 1 : 0;
-            machine->V[X] = machine->V[Y] - machine->V[X];
+            chip8->V[0x0F] = (chip8->V[Y] > chip8->V[X]) ? 1 : 0;
+            chip8->V[X] = chip8->V[Y] - chip8->V[X];
             break;
 
         // SHL VX {, VY} (8XYE):
         case 0x0E:
-            machine->V[X] = machine->V[Y];
-            machine->V[0x0F] = machine->V[X] & 0x80;
-            machine->V[X] <<= 1;
+            chip8->V[X] = chip8->V[Y];
+            chip8->V[0x0F] = chip8->V[X] & 0x80;
+            chip8->V[X] <<= 1;
             break;
 
         default:
@@ -312,26 +312,26 @@ void machine_execute(Machine *machine)
 
     // SNE VX, VY (9XY0):
     case 0x09:
-        if (machine->V[X] != machine->V[Y])
+        if (chip8->V[X] != chip8->V[Y])
         {
-            machine->PC += 2;
+            chip8->PC += 2;
         }
 
         break;
 
     // LD I, NNN (ANNN):
     case 0x0A:
-        machine->I = NNN;
+        chip8->I = NNN;
         break;
 
     // JMP V0, NNN (BNNN):
     case 0x0B:
-        machine->PC = machine->V[0] + NNN;
+        chip8->PC = chip8->V[0] + NNN;
         break;
 
     // RND VX, NN (CXNN):
     case 0x0C:
-        machine->V[X] = (rand() % 256) & NN;
+        chip8->V[X] = (rand() % 256) & NN;
         break;
 
     // DRW VX, VY, N (DXYN):
@@ -340,8 +340,8 @@ void machine_execute(Machine *machine)
         {
             for (int j = 0; j < 8; j++)
             {
-                int disp_x = machine->V[X] + j;
-                int disp_y = machine->V[Y] + i;
+                int disp_x = chip8->V[X] + j;
+                int disp_y = chip8->V[Y] + i;
 
                 // Allow out-of-bound sprite to wrap-around.
                 if (disp_x >= MAX_WIDTH)
@@ -354,13 +354,13 @@ void machine_execute(Machine *machine)
                 }
 
                 // Get the pixel the loop is on and the corresponding bit.
-                bool pixel_on = machine->display[disp_y][disp_x];
-                bool bit = (machine->RAM[machine->I + i] >> (7 - j)) & 0x01;
+                bool pixel_on = chip8->display[disp_y][disp_x];
+                bool bit = (chip8->RAM[chip8->I + i] >> (7 - j)) & 0x01;
 
                 /* XOR the sprite onto display. 
                 If a pixel is erased, set the VF register to 1. */
-                machine->display[disp_y][disp_x] = (pixel_on != bit);
-                machine->V[0x0F] = (pixel_on && bit) ? 1 : 0;
+                chip8->display[disp_y][disp_x] = (pixel_on != bit);
+                chip8->V[0x0F] = (pixel_on && bit) ? 1 : 0;
             }
         }
 
@@ -372,18 +372,18 @@ void machine_execute(Machine *machine)
         {
         // SKP VX (EX9E):
         case 0x9E:
-            if (machine->keypad[machine->V[X]])
+            if (chip8->keypad[chip8->V[X]])
             {
-                machine->PC += 2;
+                chip8->PC += 2;
             }
 
             break;
 
         // SKNP VX (EXA1):
         case 0xA1:
-            if (!machine->keypad[machine->V[X]])
+            if (!chip8->keypad[chip8->V[X]])
             {
-                machine->PC += 2;
+                chip8->PC += 2;
             }
 
             break;
@@ -400,7 +400,7 @@ void machine_execute(Machine *machine)
         {
         // LD VX, DT (FX07):
         case 0x07:
-            machine->V[X] = machine->DT;
+            chip8->V[X] = chip8->DT;
             break;
 
         // LD VX, K (FX0A):
@@ -410,9 +410,9 @@ void machine_execute(Machine *machine)
 
             for (int i = 0; i < MAX_KEYS; i++)
             {
-                if (machine->keypad[i])
+                if (chip8->keypad[i])
                 {
-                    machine->V[X] = i;
+                    chip8->V[X] = i;
                     key_pressed = true;
                     break;
                 }
@@ -428,36 +428,36 @@ void machine_execute(Machine *machine)
 
         // LD DT, VX (FX15):
         case 0x15:
-            machine->DT = machine->V[X];
+            chip8->DT = chip8->V[X];
             break;
 
         // LD ST, VX (FX18):
         case 0x18:
-            machine->ST = machine->V[X];
+            chip8->ST = chip8->V[X];
             break;
 
         // ADD I, VX (FX1E):
         case 0x1E:
-            machine->I += machine->V[X];
+            chip8->I += chip8->V[X];
             break;
 
         // LD F, VX (FX29):
         case 0x29:
-            machine->I = machine->V[X] * 0x05;
+            chip8->I = chip8->V[X] * 0x05;
             break;
 
         // LD B, VX (FX33):
         case 0x33:
-            machine->RAM[machine->I] = (machine->V[X] / 100) % 10;
-            machine->RAM[machine->I + 1] = (machine->V[X] / 10) % 10;
-            machine->RAM[machine->I + 2] = machine->V[X] % 10;
+            chip8->RAM[chip8->I] = (chip8->V[X] / 100) % 10;
+            chip8->RAM[chip8->I + 1] = (chip8->V[X] / 10) % 10;
+            chip8->RAM[chip8->I + 2] = chip8->V[X] % 10;
             break;
 
         // LD [I], VX (FX55):
         case 0x55:
             for (int r = 0; r <= X; r++)
             {
-                machine->RAM[machine->I + r] = machine->V[r];
+                chip8->RAM[chip8->I + r] = chip8->V[r];
             }
 
             break;
@@ -466,7 +466,7 @@ void machine_execute(Machine *machine)
         case 0x65:
             for (int r = 0; r <= X; r++)
             {
-                machine->V[r] = machine->RAM[machine->I + r];
+                chip8->V[r] = chip8->RAM[chip8->I + r];
             }
 
             break;
@@ -481,27 +481,27 @@ void machine_execute(Machine *machine)
         break;
     }
 
-    machine->PC += 2;
+    chip8->PC += 2;
 }
 
-void machine_beep()
+void chip8_beep()
 {
     return;
 }
 
-void machine_handle_timers(Machine *machine)
+void chip8_handle_timers(CHIP8 *chip8)
 {
     // Decrement timers at a frequency of 60Hz and play sound if needed.
     if (clock() % (CLOCKS_PER_SEC / 60))
     {
-        if (machine->DT > 0)
+        if (chip8->DT > 0)
         {
-            machine->DT--;
+            chip8->DT--;
         }
-        if (machine->ST > 0)
+        if (chip8->ST > 0)
         {
-            machine->ST--;
-            machine_beep();
+            chip8->ST--;
+            chip8_beep();
         }
     }
 }
