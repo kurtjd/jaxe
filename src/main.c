@@ -527,6 +527,23 @@ void machine_beep()
     return;
 }
 
+void machine_handle_timers(Machine *machine)
+{
+    // Decrement timers at a frequency of 60Hz and play sound if needed.
+    if (clock() % (CLOCKS_PER_SEC / 60))
+    {
+        if (machine->DT > 0)
+        {
+            machine->DT--;
+        }
+        if (machine->ST > 0)
+        {
+            machine->ST--;
+            machine_beep();
+        }
+    }
+}
+
 void set_pixel(SDL_Surface *surface, int x, int y, bool on)
 {
     Uint32 *pixels = (Uint32 *)surface->pixels;
@@ -671,20 +688,7 @@ int main(int argc, char *argv[])
         }
         SDL_UpdateWindowSurface(window);
 
-        // Decrement timers at a frequency of 60Hz and play sound if needed.
-        if (clock() % (CLOCKS_PER_SEC / 60))
-        {
-            if (machine.DT > 0)
-            {
-                machine.DT--;
-            }
-            if (machine.ST > 0)
-            {
-                machine.ST--;
-                machine_beep();
-            }
-        }
-
+        machine_handle_timers(&machine);
         machine_execute(&machine);
 
         usleep(1000 / 700);
