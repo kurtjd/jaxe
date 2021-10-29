@@ -8,7 +8,8 @@ project(MyProject
 set(TARGET_NAME "jace")
 
 add_executable(${TARGET_NAME}
-    src/main.c)
+    src/main.c
+    src/chip8.c)
 
 target_include_directories(${TARGET_NAME} PUBLIC include)
 target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -Wpedantic)
