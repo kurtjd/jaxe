@@ -107,14 +107,14 @@ void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
                 chip8->keypad[SDLK_to_hex(e->key.keysym.sym)] = true;
             }
         }
-        else if (e->type == SDL_KEYUP)
+        /*else if (e->type == SDL_KEYUP)
         {
             unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
             if (hexkey != 42)
             {
                 chip8->keypad[SDLK_to_hex(e->key.keysym.sym)] = false;
             }
-        }
+        }*/
     }
 }
 
@@ -160,6 +160,7 @@ int main(int argc, char *argv[])
         chip8_execute(&chip8);
         chip8_handle_timers(&chip8);
         draw_display(window, surface, &chip8);
+        chip8_reset_keypad(&chip8);
         usleep(1000 / 700);
     }
 
