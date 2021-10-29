@@ -163,6 +163,8 @@ void chip8_execute(CHIP8 *chip8)
     // The last 4 bits of instruction.
     unsigned char N = b2 & 0xF;
 
+    chip8->PC += 2;
+
     // CLS (00E0):
     if (b1 == 0x00 && b2 == 0xE0)
     {
@@ -181,7 +183,6 @@ void chip8_execute(CHIP8 *chip8)
     // JMP NNN (1NNN):
     case 0x01:
         chip8->PC = NNN;
-        return;
         break;
 
     // CALL NNN (2NNN):
@@ -400,7 +401,7 @@ void chip8_execute(CHIP8 *chip8)
 
             if (!key_pressed)
             {
-                return;
+                chip8->PC -= 2;
             }
 
             break;
@@ -460,8 +461,6 @@ void chip8_execute(CHIP8 *chip8)
     default:
         break;
     }
-
-    chip8->PC += 2;
 }
 
 void chip8_handle_timers(CHIP8 *chip8)
@@ -483,6 +482,7 @@ void chip8_handle_timers(CHIP8 *chip8)
 
 void chip8_beep(CHIP8 *chip8)
 {
+    (void)chip8; // For now to quit compiler complaining about unused param
     return;
 }
 

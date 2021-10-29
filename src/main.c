@@ -120,6 +120,7 @@ void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
 
 int main(int argc, char *argv[])
 {
+    (void)argc; // For now to quit compiler complaining about unused param
     srand(time(NULL));
 
     CHIP8 chip8;

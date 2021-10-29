@@ -26,6 +26,21 @@ void test_00E0(CHIP8 *chip8)
     chip8_init(chip8);
 }
 
+void test_00EE(CHIP8 *chip8)
+{
+    chip8_load_instr(chip8, 0x00EE);
+
+    chip8->SP = 5;
+    chip8->stack[chip8->SP] = 0xDAD;
+
+    chip8_execute(chip8);
+
+    assert(chip8->SP == 4);
+    assert(chip8->PC == 0xDAD);
+
+    chip8_init(chip8);
+}
+
 int main()
 {
     // The test machine.
@@ -39,6 +54,7 @@ int main()
             * Check result
             * Reset the machine */
     test_00E0(&chip8);
+    test_00EE(&chip8);
 
     printf("All tests pass!\n");
 
