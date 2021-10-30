@@ -487,7 +487,7 @@ void chip8_handle_timers(CHIP8 *chip8)
     // Decrement timers at a frequency of 60Hz and play sound if needed.
     long freq = CLOCKS_PER_SEC / 60;
     int cycle = clock() % freq;
-    if (cycle)
+    if (cycle >= 0 && cycle <= 1000)
     {
         if (chip8->DT > 0)
         {
