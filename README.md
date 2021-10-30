@@ -12,7 +12,7 @@ A basic CHIP-8 emulator written in C and SDL to practice emulator dev.
 TODO
 =====
 * Fix timers
-* Add sound
+* Generate sound programatically
 * Add misc features
 * Allow user to change flags
 * Add more tests
@@ -20,7 +20,8 @@ TODO
 
 Requirements
 ============
-* SDL
+* SDL2
+* SDL2_Mixer (for sound)
 
 Build
 =====

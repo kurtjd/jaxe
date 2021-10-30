@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 #include "chip8.h"
 
 #define DISPLAY_SCALE 10
@@ -9,9 +10,9 @@
 #define OFF_COLOR 0x000000
 #define BAD_KEY 0x42
 
-void beep()
+void beep(Mix_Chunk *snd)
 {
-    return;
+    Mix_PlayChannel(-1, snd, 0);
 }
 
 void set_pixel(SDL_Surface *surface, int x, int y, bool on)
@@ -156,8 +157,18 @@ int main(int argc, char *argv[])
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
     {
-        fprintf(stderr, "Could not initialize SDL video.\n");
+        fprintf(stderr, "Could not initialize SDL.\n");
         return 1;
+    }
+
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+    {
+        fprintf(stderr, "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+    }
+    Mix_Chunk *beep_snd = Mix_LoadWAV("../beep.wav");
+    if (beep_snd == NULL)
+    {
+        fprintf(stderr, "Could not load beep.\n");
     }
 
     window = SDL_CreateWindow("JACE", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MAX_WIDTH * DISPLAY_SCALE, MAX_HEIGHT * DISPLAY_SCALE, SDL_WINDOW_SHOWN);
@@ -183,12 +194,12 @@ int main(int argc, char *argv[])
 
         if (chip8.beep)
         {
-            beep();
+            beep(beep_snd);
         }
     }
 
     SDL_DestroyWindow(window);
-    SDL_CloseAudio();
+    Mix_FreeChunk(beep_snd);
     SDL_Quit();
 
     return 0;
