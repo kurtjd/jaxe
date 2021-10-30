@@ -93,26 +93,26 @@ unsigned char SDLK_to_hex(SDL_KeyCode key)
 
 void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
 {
+    for (int k = 0; k < MAX_KEYS; k++)
+    {
+        if (chip8->keypad[k] == 2)
+        {
+            chip8->keypad[k] = 0;
+        }
+    }
+
     while (SDL_PollEvent(e))
     {
         if (e->type == SDL_QUIT)
         {
             *quit = true;
         }
-        /*else if (e->type == SDL_KEYDOWN)
-        {
-            unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
-            if (hexkey != 42)
-            {
-                chip8->keypad[SDLK_to_hex(e->key.keysym.sym)] = true;
-            }
-        }*/
         else if (e->type == SDL_KEYUP)
         {
             unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
             if (hexkey != 42)
             {
-                chip8->keypad[SDLK_to_hex(e->key.keysym.sym)] = 2;
+                chip8->keypad[hexkey] = 2;
             }
         }
         else if (e->type == SDL_KEYDOWN)
@@ -120,7 +120,7 @@ void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
             unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
             if (hexkey != 42)
             {
-                chip8->keypad[SDLK_to_hex(e->key.keysym.sym)] = 1;
+                chip8->keypad[hexkey] = 1;
             }
         }
     }
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
         chip8_execute(&chip8);
         chip8_handle_timers(&chip8);
         draw_display(window, surface, &chip8);
-        chip8_reset_keypad(&chip8);
+        //chip8_reset_keypad(&chip8);
     }
 
     SDL_DestroyWindow(window);
