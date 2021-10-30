@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+#include <unistd.h>
 #include "chip8.h"
 
 void chip8_init(CHIP8 *chip8)
@@ -465,12 +466,16 @@ void chip8_execute(CHIP8 *chip8)
     default:
         break;
     }
+
+    usleep(1000000 / SPEED);
 }
 
 void chip8_handle_timers(CHIP8 *chip8)
 {
     // Decrement timers at a frequency of 60Hz and play sound if needed.
-    if (clock() % (CLOCKS_PER_SEC / 60))
+    long freq = CLOCKS_PER_SEC / 60;
+    int cycle = clock() % freq;
+    if (cycle)
     {
         if (chip8->DT > 0)
         {

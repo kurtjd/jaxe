@@ -1,17 +1,17 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <time.h>
-#include <unistd.h>
 #include <SDL2/SDL.h>
 #include "chip8.h"
 
 #define DISPLAY_SCALE 10
-#define DISPLAY_COLOR 0xFFFFFF
+#define ON_COLOR 0xFFFFFF
+#define OFF_COLOR 0x000000
 
 void set_pixel(SDL_Surface *surface, int x, int y, bool on)
 {
     Uint32 *pixels = (Uint32 *)surface->pixels;
-    pixels[(y * surface->w) + x] = on ? DISPLAY_COLOR : 0x000000;
+    pixels[(y * surface->w) + x] = on ? ON_COLOR : OFF_COLOR;
 }
 
 void draw_display(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
@@ -170,7 +170,6 @@ int main(int argc, char *argv[])
         chip8_handle_timers(&chip8);
         draw_display(window, surface, &chip8);
         chip8_reset_keypad(&chip8);
-        usleep(1000 / 700);
     }
 
     SDL_DestroyWindow(window);
