@@ -478,7 +478,7 @@ void chip8_execute(CHIP8 *chip8)
         break;
     }
 
-    usleep(1000000 / SPEED);
+    usleep(1000000 / CLOCK_SPEED);
 }
 
 void chip8_handle_timers(CHIP8 *chip8)
