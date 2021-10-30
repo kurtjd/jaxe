@@ -99,7 +99,7 @@ void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
         {
             *quit = true;
         }
-        else if (e->type == SDL_KEYDOWN)
+        /*else if (e->type == SDL_KEYDOWN)
         {
             unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
             if (hexkey != 42)
@@ -113,6 +113,14 @@ void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
             if (hexkey != 42)
             {
                 chip8->keypad[SDLK_to_hex(e->key.keysym.sym)] = false;
+            }
+        }*/
+        else if (e->type == SDL_KEYUP)
+        {
+            unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
+            if (hexkey != 42)
+            {
+                chip8->keypad[SDLK_to_hex(e->key.keysym.sym)] = true;
             }
         }
     }
@@ -157,11 +165,11 @@ int main(int argc, char *argv[])
     // Read and execute instructions from memory until none (0x0000) is found.
     while (!quit && !(chip8.RAM[chip8.PC] == NOOP && chip8.RAM[chip8.PC + 1] == NOOP))
     {
-        chip8_execute(&chip8);
         handle_input(&e, &quit, &chip8);
+        chip8_execute(&chip8);
         chip8_handle_timers(&chip8);
         draw_display(window, surface, &chip8);
-        //chip8_reset_keypad(&chip8);
+        chip8_reset_keypad(&chip8);
         usleep(1000 / 700);
     }
 
