@@ -9,11 +9,17 @@ A basic CHIP-8 emulator written in C and SDL to practice emulator dev.
 
 * Currently supports all basic instructions, display, and keyboard input.
 * ToDo:
+* 
 -Fix timers
+
 -Add sound
+
 -Add misc features
+
 -Allow user to change flags
+
 -Add more tests
+
 -Add debug mode
 
 Requirements
@@ -23,7 +29,9 @@ Requirements
 Build
 =====
 `mkdir build && cd build`
+
 `cmake -B. --config Release ..`
+
 `make jace`
 
 Run
