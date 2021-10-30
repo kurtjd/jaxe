@@ -30,12 +30,13 @@ void test_00EE(CHIP8 *chip8)
 {
     chip8_load_instr(chip8, 0x00EE);
 
-    chip8->SP = 5;
-    chip8->stack[chip8->SP] = 0xDAD;
+    chip8->SP = SP_START_ADDR + 5;
+    chip8->RAM[chip8->SP] = 0x0D;
+    chip8->RAM[chip8->SP + 1] = 0xAD;
 
     chip8_execute(chip8);
 
-    assert(chip8->SP == 4);
+    assert(chip8->SP == (SP_START_ADDR + 3));
     assert(chip8->PC == 0xDAD);
 
     chip8_init(chip8);
