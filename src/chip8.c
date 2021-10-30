@@ -357,7 +357,7 @@ void chip8_execute(CHIP8 *chip8)
         {
         // SKP VX (EX9E):
         case 0x9E:
-            if (chip8->keypad[chip8->V[X]])
+            if (chip8->keypad[chip8->V[X]] == 1)
             {
                 chip8->PC += 2;
             }
@@ -366,7 +366,7 @@ void chip8_execute(CHIP8 *chip8)
 
         // SKNP VX (EXA1):
         case 0xA1:
-            if (!chip8->keypad[chip8->V[X]])
+            if (chip8->keypad[chip8->V[X]] == 0)
             {
                 chip8->PC += 2;
             }
@@ -391,19 +391,19 @@ void chip8_execute(CHIP8 *chip8)
         // LD VX, K (FX0A):
         case 0x0A:
         {
-            bool key_pressed = false;
+            bool key_released = false;
 
             for (int i = 0; i < MAX_KEYS; i++)
             {
-                if (chip8->keypad[i])
+                if (chip8->keypad[i] == 2)
                 {
                     chip8->V[X] = i;
-                    key_pressed = true;
+                    key_released = true;
                     break;
                 }
             }
 
-            if (!key_pressed)
+            if (!key_released)
             {
                 chip8->PC -= 2;
             }
@@ -502,7 +502,7 @@ void chip8_reset_keypad(CHIP8 *chip8)
 {
     for (int k = 0; k < MAX_KEYS; k++)
     {
-        chip8->keypad[k] = false;
+        chip8->keypad[k] = 0;
     }
 }
 

@@ -106,21 +106,21 @@ void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
             {
                 chip8->keypad[SDLK_to_hex(e->key.keysym.sym)] = true;
             }
-        }
-        else if (e->type == SDL_KEYUP)
-        {
-            unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
-            if (hexkey != 42)
-            {
-                chip8->keypad[SDLK_to_hex(e->key.keysym.sym)] = false;
-            }
         }*/
         else if (e->type == SDL_KEYUP)
         {
             unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
             if (hexkey != 42)
             {
-                chip8->keypad[SDLK_to_hex(e->key.keysym.sym)] = true;
+                chip8->keypad[SDLK_to_hex(e->key.keysym.sym)] = 2;
+            }
+        }
+        else if (e->type == SDL_KEYDOWN)
+        {
+            unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
+            if (hexkey != 42)
+            {
+                chip8->keypad[SDLK_to_hex(e->key.keysym.sym)] = 1;
             }
         }
     }
