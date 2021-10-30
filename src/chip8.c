@@ -1,8 +1,12 @@
+#ifdef WIN32
+#include <windows.h>
+#elif _POSIX_C_SOURCE < 199309L
+#include <unistd.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
-#include <unistd.h>
 #include "chip8.h"
 
 void chip8_init(CHIP8 *chip8)
@@ -488,7 +492,7 @@ void chip8_execute(CHIP8 *chip8)
         }
     }
 
-    usleep(1000000 / CLOCK_SPEED);
+    chip8_sleep();
 }
 
 void chip8_handle_timers(CHIP8 *chip8)
@@ -548,4 +552,18 @@ void chip8_load_instr(CHIP8 *chip8, unsigned int instr)
 
     chip8->RAM[PC_START_ADDR] = b1;
     chip8->RAM[PC_START_ADDR + 1] = b2;
+}
+
+void chip8_sleep()
+{
+#ifdef WIN32
+    Sleep(1000 / CLOCK_SPEED);
+#elif _POSIX_C_SOURCE >= 199309L
+    struct timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = 1000000000 / CLOCK_SPEED;
+    nanosleep(&ts, NULL);
+#else
+    usleep(1000000 / CLOCK_SPEED);
+#endif
 }

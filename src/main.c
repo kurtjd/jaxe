@@ -6,7 +6,7 @@
 #include "chip8.h"
 
 #define DISPLAY_SCALE 10
-#define ON_COLOR 0x00FF00
+#define ON_COLOR 0xFFFFFF
 #define OFF_COLOR 0x000000
 #define BAD_KEY 0x42
 

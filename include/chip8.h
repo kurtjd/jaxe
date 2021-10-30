@@ -47,5 +47,6 @@ void chip8_reset_RAM(CHIP8 *chip8);
 void chip8_reset_keypad(CHIP8 *chip8);
 void chip8_reset_display(CHIP8 *chip8);
 void chip8_load_instr(CHIP8 *chip8, unsigned int instr);
+void chip8_sleep();
 
 #endif
