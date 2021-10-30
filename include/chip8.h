@@ -11,7 +11,6 @@
 #define FONT_START_ADDR 0x0
 #define SP_START_ADDR 0x50
 #define PC_START_ADDR 0x200
-#define NOOP 0x00
 #define CLOCK_SPEED 500
 
 typedef struct CHIP8

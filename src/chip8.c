@@ -13,7 +13,7 @@ void chip8_init(CHIP8 *chip8)
 
     chip8->PC = PC_START_ADDR;
     chip8->SP = SP_START_ADDR;
-    chip8->I = NOOP;
+    chip8->I = 0x00;
     chip8->DT = 0;
     chip8->ST = 0;
 
@@ -509,7 +509,7 @@ void chip8_reset_RAM(CHIP8 *chip8)
 {
     for (int addr = 0; addr < MAX_RAM; addr++)
     {
-        chip8->RAM[addr] = NOOP;
+        chip8->RAM[addr] = 0x00;
     }
 }
 

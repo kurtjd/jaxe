@@ -11,9 +11,7 @@
 
 void beep()
 {
-    SDL_PauseAudio(0); // start playing sound
-    SDL_Delay(1000);   // wait while sound is playing
-    SDL_PauseAudio(1); // stop playing sound
+    return;
 }
 
 void set_pixel(SDL_Surface *surface, int x, int y, bool on)
@@ -171,8 +169,8 @@ int main(int argc, char *argv[])
 
     surface = SDL_GetWindowSurface(window);
 
-    // Read and execute instructions from memory until none (0x0000) is found.
-    while (!quit && !(chip8.RAM[chip8.PC] == NOOP && chip8.RAM[chip8.PC + 1] == NOOP))
+    // Main loop
+    while (!quit)
     {
         handle_input(&e, &quit, &chip8);
         chip8_execute(&chip8);
