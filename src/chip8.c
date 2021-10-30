@@ -479,6 +479,15 @@ void chip8_execute(CHIP8 *chip8)
         break;
     }
 
+    // Any key that was released previous frame gets turned off.
+    for (int k = 0; k < MAX_KEYS; k++)
+    {
+        if (chip8->keypad[k] == 2)
+        {
+            chip8->keypad[k] = 0;
+        }
+    }
+
     usleep(1000000 / CLOCK_SPEED);
 }
 

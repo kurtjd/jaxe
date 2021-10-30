@@ -100,15 +100,6 @@ unsigned char SDLK_to_hex(SDL_KeyCode key)
 
 void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
 {
-    // Any key that was released previous frame gets turned off.
-    for (int k = 0; k < MAX_KEYS; k++)
-    {
-        if (chip8->keypad[k] == 2)
-        {
-            chip8->keypad[k] = 0;
-        }
-    }
-
     while (SDL_PollEvent(e))
     {
         if (e->type == SDL_QUIT)
