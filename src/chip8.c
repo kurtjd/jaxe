@@ -18,6 +18,7 @@ void chip8_init(CHIP8 *chip8)
     chip8->ST = 0;
 
     chip8->display_updated = false;
+    chip8->beep = false;
 }
 
 void chip8_load_font(CHIP8 *chip8)
@@ -495,15 +496,13 @@ void chip8_handle_timers(CHIP8 *chip8)
         if (chip8->ST > 0)
         {
             chip8->ST--;
-            chip8_beep(chip8);
+            chip8->beep = true;
+        }
+        else
+        {
+            chip8->beep = false;
         }
     }
-}
-
-void chip8_beep(CHIP8 *chip8)
-{
-    (void)chip8; // For now to quit compiler complaining about unused param
-    return;
 }
 
 void chip8_reset_RAM(CHIP8 *chip8)

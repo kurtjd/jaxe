@@ -9,6 +9,13 @@
 #define OFF_COLOR 0x000000
 #define BAD_KEY 0x42
 
+void beep()
+{
+    SDL_PauseAudio(0); // start playing sound
+    SDL_Delay(1000);   // wait while sound is playing
+    SDL_PauseAudio(1); // stop playing sound
+}
+
 void set_pixel(SDL_Surface *surface, int x, int y, bool on)
 {
     Uint32 *pixels = (Uint32 *)surface->pixels;
@@ -149,9 +156,9 @@ int main(int argc, char *argv[])
     SDL_Event e;
     bool quit = false;
 
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
     {
-        fprintf(stderr, "Could not initialize SDL.\n");
+        fprintf(stderr, "Could not initialize SDL video.\n");
         return 1;
     }
 
@@ -175,9 +182,15 @@ int main(int argc, char *argv[])
         {
             draw_display(window, surface, &chip8);
         }
+
+        if (chip8.beep)
+        {
+            beep();
+        }
     }
 
     SDL_DestroyWindow(window);
+    SDL_CloseAudio();
     SDL_Quit();
 
     return 0;

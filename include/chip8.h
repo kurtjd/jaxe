@@ -36,6 +36,7 @@ typedef struct CHIP8
     int keypad[MAX_KEYS];
 
     bool display_updated;
+    bool beep;
 } CHIP8;
 
 void chip8_init(CHIP8 *chip8);
@@ -43,7 +44,6 @@ void chip8_load_font(CHIP8 *chip8);
 bool chip8_load_rom(CHIP8 *chip8, char *filename);
 void chip8_execute(CHIP8 *chip8);
 void chip8_handle_timers(CHIP8 *chip8);
-void chip8_beep(CHIP8 *chip8);
 void chip8_reset_RAM(CHIP8 *chip8);
 void chip8_reset_keypad(CHIP8 *chip8);
 void chip8_reset_display(CHIP8 *chip8);
