@@ -322,6 +322,8 @@ void chip8_execute(CHIP8 *chip8)
 
     // DRW VX, VY, N (DXYN):
     case 0x0D:
+        chip8->V[0x0F] = 0;
+
         for (int i = 0; i < N; i++)
         {
             for (int j = 0; j < 8; j++)
@@ -346,7 +348,10 @@ void chip8_execute(CHIP8 *chip8)
                 /* XOR the sprite onto display. 
                 If a pixel is erased, set the VF register to 1. */
                 chip8->display[disp_y][disp_x] = (pixel_on != bit);
-                chip8->V[0x0F] = (pixel_on && bit) ? 1 : 0;
+                if (pixel_on && bit)
+                {
+                    chip8->V[0x0F] = 1;
+                }
             }
         }
 

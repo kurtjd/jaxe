@@ -7,6 +7,7 @@
 #define DISPLAY_SCALE 10
 #define ON_COLOR 0xFFFFFF
 #define OFF_COLOR 0x000000
+#define BAD_KEY 0x42
 
 void set_pixel(SDL_Surface *surface, int x, int y, bool on)
 {
@@ -86,13 +87,14 @@ unsigned char SDLK_to_hex(SDL_KeyCode key)
         return 0xF;
         break;
     default:
-        return 42;
+        return BAD_KEY;
         break;
     }
 }
 
 void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
 {
+    // Any key that was released previous frame gets turned off.
     for (int k = 0; k < MAX_KEYS; k++)
     {
         if (chip8->keypad[k] == 2)
@@ -110,7 +112,7 @@ void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
         else if (e->type == SDL_KEYUP)
         {
             unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
-            if (hexkey != 42)
+            if (hexkey != BAD_KEY)
             {
                 chip8->keypad[hexkey] = 2;
             }
@@ -118,7 +120,7 @@ void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
         else if (e->type == SDL_KEYDOWN)
         {
             unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
-            if (hexkey != 42)
+            if (hexkey != BAD_KEY)
             {
                 chip8->keypad[hexkey] = 1;
             }
