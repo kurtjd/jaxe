@@ -8,9 +8,9 @@
 #define MAX_KEYS 16
 #define MAX_RAM 4096
 #define MAX_REGISTERS 16
-#define MAX_STACK_LEVELS 16
 #define FONT_START_ADDR 0x0
 #define PC_START_ADDR 0x200
+#define SP_START_ADDR 0x52
 #define NOOP 0x00
 #define SPEED 500
 
@@ -22,14 +22,11 @@ typedef struct CHIP8
     // Represents 16 general-purpose 8-bit registers (V0-VF).
     unsigned char V[MAX_REGISTERS];
 
-    // Delay timer, sound timer and stack pointer 8-bit registers.
-    unsigned char DT, ST, SP;
+    // Program counter, stack pointer, and index 16-bit registers.
+    unsigned int PC, SP, I;
 
-    // Program counter and index 16-bit registers.
-    unsigned int PC, I;
-
-    // The call stack. CHIP-8 allows a max of 16 nested calls.
-    unsigned int stack[MAX_STACK_LEVELS];
+    // Delay timer and sound timer 8-bit registers.
+    unsigned char DT, ST;
 
     /* A monochrome display of 64x32 pixels.
     A pixel can be either only on or off, no color. */

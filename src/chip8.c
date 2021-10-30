@@ -11,11 +11,11 @@ void chip8_init(CHIP8 *chip8)
     chip8_reset_keypad(chip8);
     chip8_reset_display(chip8);
 
+    chip8->PC = PC_START_ADDR;
+    chip8->SP = SP_START_ADDR;
+    chip8->I = NOOP;
     chip8->DT = 0;
     chip8->ST = 0;
-    chip8->SP = 0;
-    chip8->PC = PC_START_ADDR;
-    chip8->I = NOOP;
 }
 
 void chip8_load_font(CHIP8 *chip8)
@@ -179,8 +179,8 @@ void chip8_execute(CHIP8 *chip8)
     // RET (00EE):
     else if (b1 == 0x00 && b2 == 0xEE)
     {
-        chip8->PC = chip8->stack[chip8->SP];
-        chip8->SP--;
+        chip8->PC = (chip8->RAM[chip8->SP] << 8) | chip8->RAM[chip8->SP + 1];
+        chip8->SP -= 2;
     }
 
     switch (C)
@@ -192,8 +192,9 @@ void chip8_execute(CHIP8 *chip8)
 
     // CALL NNN (2NNN):
     case 0x02:
-        chip8->SP++;
-        chip8->stack[chip8->SP] = chip8->PC;
+        chip8->SP += 2;
+        chip8->RAM[chip8->SP] = chip8->PC >> 8;
+        chip8->RAM[chip8->SP + 1] = chip8->PC & 0x00FF;
         chip8->PC = NNN;
         break;
 
