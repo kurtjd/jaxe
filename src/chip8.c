@@ -16,6 +16,8 @@ void chip8_init(CHIP8 *chip8)
     chip8->I = NOOP;
     chip8->DT = 0;
     chip8->ST = 0;
+
+    chip8->display_updated = false;
 }
 
 void chip8_load_font(CHIP8 *chip8)
@@ -169,6 +171,8 @@ void chip8_execute(CHIP8 *chip8)
     unsigned char N = b2 & 0xF;
 
     chip8->PC += 2;
+
+    chip8->display_updated = false;
 
     // CLS (00E0):
     if (b1 == 0x00 && b2 == 0xE0)
@@ -355,6 +359,7 @@ void chip8_execute(CHIP8 *chip8)
                 }
             }
         }
+        chip8->display_updated = true;
 
         break;
 

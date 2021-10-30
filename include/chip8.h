@@ -9,8 +9,8 @@
 #define MAX_RAM 4096
 #define MAX_REGISTERS 16
 #define FONT_START_ADDR 0x0
+#define SP_START_ADDR 0x50
 #define PC_START_ADDR 0x200
-#define SP_START_ADDR 0x52
 #define NOOP 0x00
 #define SPEED 500
 
@@ -34,6 +34,8 @@ typedef struct CHIP8
 
     // Represents keys 0-F and if key is not pressed (0), pressed (1), or released (2)
     int keypad[MAX_KEYS];
+
+    bool display_updated;
 } CHIP8;
 
 void chip8_init(CHIP8 *chip8);

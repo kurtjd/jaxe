@@ -170,8 +170,11 @@ int main(int argc, char *argv[])
         handle_input(&e, &quit, &chip8);
         chip8_execute(&chip8);
         chip8_handle_timers(&chip8);
-        draw_display(window, surface, &chip8);
-        //chip8_reset_keypad(&chip8);
+
+        if (chip8.display_updated)
+        {
+            draw_display(window, surface, &chip8);
+        }
     }
 
     SDL_DestroyWindow(window);
