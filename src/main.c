@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
         chip8_handle_timers(&chip8);
         draw_display(window, surface, &chip8);
         //chip8_reset_keypad(&chip8);
-        usleep(1000 / 2);
+        usleep(1000 / 700);
     }
 
     SDL_DestroyWindow(window);
