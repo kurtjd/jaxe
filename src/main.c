@@ -10,17 +10,20 @@
 #define OFF_COLOR 0x000000
 #define BAD_KEY 0x42
 
+// Called while the emulator is producing sound.
 void beep(Mix_Chunk *snd)
 {
     Mix_PlayChannel(-1, snd, 0);
 }
 
+// Sets a pixel of the SDL surface to match the emulator.
 void set_pixel(SDL_Surface *surface, int x, int y, bool on)
 {
     Uint32 *pixels = (Uint32 *)surface->pixels;
     pixels[(y * surface->w) + x] = on ? ON_COLOR : OFF_COLOR;
 }
 
+// Makes the physical screen match the emulator display.
 void draw_display(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
 {
     for (int y = 0; y < MAX_HEIGHT; y++)
@@ -31,14 +34,19 @@ void draw_display(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
             {
                 for (int j = 0; j < DISPLAY_SCALE; j++)
                 {
-                    set_pixel(surface, (x * DISPLAY_SCALE) + j, (y * DISPLAY_SCALE) + i, chip8->display[y][x]);
+                    set_pixel(surface,
+                              (x * DISPLAY_SCALE) + j,
+                              (y * DISPLAY_SCALE) + i,
+                              chip8->display[y][x]);
                 }
             }
         }
     }
+
     SDL_UpdateWindowSurface(window);
 }
 
+// Converts an SDL key code to the respective key on the emulator keypad.
 unsigned char SDLK_to_hex(SDL_KeyCode key)
 {
     // Maps a key press to the corresponding key on hex pad.
@@ -127,7 +135,6 @@ void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
 
 int main(int argc, char *argv[])
 {
-    (void)argc; // For now to quit compiler complaining about unused param
     srand(time(NULL));
 
     CHIP8 chip8;
@@ -154,15 +161,26 @@ int main(int argc, char *argv[])
 
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
     {
-        fprintf(stderr, "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+        fprintf(stderr,
+                "SDL_mixer could not initialize! SDL_mixer Error: %s\n",
+                Mix_GetError());
+        return 1;
     }
+
     Mix_Chunk *beep_snd = Mix_LoadWAV("../beep.wav");
     if (beep_snd == NULL)
     {
         fprintf(stderr, "Could not load beep.\n");
+        return 1;
     }
 
-    window = SDL_CreateWindow("JACE", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MAX_WIDTH * DISPLAY_SCALE, MAX_HEIGHT * DISPLAY_SCALE, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("JACE",
+                              SDL_WINDOWPOS_CENTERED,
+                              SDL_WINDOWPOS_CENTERED,
+                              MAX_WIDTH * DISPLAY_SCALE,
+                              MAX_HEIGHT * DISPLAY_SCALE,
+                              SDL_WINDOW_SHOWN);
+
     if (window == NULL)
     {
         fprintf(stderr, "Could not create SDL window.\n");

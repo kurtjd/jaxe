@@ -137,19 +137,13 @@ bool chip8_load_rom(CHIP8 *chip8, char *filename)
     FILE *rom = fopen(filename, "rb");
     if (rom)
     {
-        if (fread(chip8->RAM + PC_START_ADDR, MAX_RAM - PC_START_ADDR, 1, rom) != 0)
-        {
-            printf("Really just here to get GCC to shut up about unused return values.\n");
-        }
-
+        fread(chip8->RAM + PC_START_ADDR, MAX_RAM - PC_START_ADDR, 1, rom);
         fclose(rom);
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 void chip8_execute(CHIP8 *chip8)
@@ -270,7 +264,7 @@ void chip8_execute(CHIP8 *chip8)
 
         // ADD VX, VY (8XY4):
         case 0x04:
-            chip8->V[0x0F] = ((int)(chip8->V[X]) + (int)(chip8->V[Y]) > 0xFF) ? 1 : 0;
+            chip8->V[0x0F] = ((chip8->V[X] + chip8->V[Y]) > 0xFF) ? 1 : 0;
             chip8->V[X] += chip8->V[Y];
             break;
 

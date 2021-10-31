@@ -31,7 +31,10 @@ typedef struct CHIP8
     A pixel can be either only on or off, no color. */
     bool display[MAX_HEIGHT][MAX_WIDTH];
 
-    // Represents keys 0-F and if key is not pressed (0), pressed (1), or released (2)
+    /* Represents keys 0-F
+    Key up: 0
+    Key down: 1
+    Key released: 2 */
     int keypad[MAX_KEYS];
 
     bool display_updated;
