@@ -315,7 +315,7 @@ void chip8_execute(CHIP8 *chip8)
         /* SHR Vx {, Vy} (8xy6)
            Set Vx = Vx SHR 1. */
         case 0x06:
-            //chip8->V[x] = chip8->V[y];
+            chip8->V[x] = chip8->V[y];
             chip8->V[0x0F] = chip8->V[x] & 0x01;
             chip8->V[x] >>= 1;
             break;
@@ -330,7 +330,7 @@ void chip8_execute(CHIP8 *chip8)
         /* SHL Vx {, Vy} (8xyE)
            Set Vx = Vx SHL 1. */
         case 0x0E:
-            //chip8->V[x] = chip8->V[y];
+            chip8->V[x] = chip8->V[y];
             chip8->V[0x0F] = (chip8->V[x] & 0x80) >> 7;
             chip8->V[x] <<= 1;
             break;
@@ -499,12 +499,13 @@ void chip8_execute(CHIP8 *chip8)
             break;
 
         /* LD [I], Vx (Fx55)
-           Fx55 - LD [I], Vx */
+           Store registers V0 through Vx in memory starting at location I. */
         case 0x55:
             for (int r = 0; r <= x; r++)
             {
                 chip8->RAM[chip8->I + r] = chip8->V[r];
             }
+            chip8->I += (x + 1);
 
             break;
 
@@ -515,6 +516,7 @@ void chip8_execute(CHIP8 *chip8)
             {
                 chip8->V[r] = chip8->RAM[chip8->I + r];
             }
+            chip8->I += (x + 1);
 
             break;
         }
