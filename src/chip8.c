@@ -25,6 +25,8 @@ void chip8_init(CHIP8 *chip8)
 
     chip8->display_updated = false;
     chip8->beep = false;
+
+    chip8->super_mode = false;
 }
 
 void chip8_load_font(CHIP8 *chip8)
@@ -315,7 +317,11 @@ void chip8_execute(CHIP8 *chip8)
         /* SHR Vx {, Vy} (8xy6)
            Set Vx = Vx SHR 1. */
         case 0x06:
-            chip8->V[x] = chip8->V[y];
+            if (!chip8->super_mode)
+            {
+                chip8->V[x] = chip8->V[y];
+            }
+
             chip8->V[0x0F] = chip8->V[x] & 0x01;
             chip8->V[x] >>= 1;
             break;
@@ -330,7 +336,10 @@ void chip8_execute(CHIP8 *chip8)
         /* SHL Vx {, Vy} (8xyE)
            Set Vx = Vx SHL 1. */
         case 0x0E:
-            chip8->V[x] = chip8->V[y];
+            if (!chip8->super_mode)
+            {
+                chip8->V[x] = chip8->V[y];
+            }
             chip8->V[0x0F] = (chip8->V[x] & 0x80) >> 7;
             chip8->V[x] <<= 1;
             break;
@@ -505,7 +514,11 @@ void chip8_execute(CHIP8 *chip8)
             {
                 chip8->RAM[chip8->I + r] = chip8->V[r];
             }
-            chip8->I += (x + 1);
+
+            if (!chip8->super_mode)
+            {
+                chip8->I += (x + 1);
+            }
 
             break;
 
@@ -516,7 +529,11 @@ void chip8_execute(CHIP8 *chip8)
             {
                 chip8->V[r] = chip8->RAM[chip8->I + r];
             }
-            chip8->I += (x + 1);
+
+            if (!chip8->super_mode)
+            {
+                chip8->I += (x + 1);
+            }
 
             break;
         }

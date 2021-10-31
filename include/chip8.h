@@ -44,6 +44,8 @@ typedef struct CHIP8
 
     bool display_updated;
     bool beep;
+
+    bool super_mode;
 } CHIP8;
 
 // Set some things to useful default values.
