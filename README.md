@@ -31,6 +31,16 @@ Build
 
 `make jace`
 
+For tests: `make test`
+
 Run
 ===
 `./jace <path-to-rom>`
+
+ROMs
+====
+* [Revival Studio's Chip-8 Program Pack](https://github.com/kripod/chip8-roms)
+
+References
+==========
+* [Cowgod's Chip-8 Technical Reference v1.0](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)
