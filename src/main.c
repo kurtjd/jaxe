@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdbool.h>
-#include <time.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #include "chip8.h"
@@ -49,56 +48,55 @@ void draw_display(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
 // Converts an SDL key code to the respective key on the emulator keypad.
 unsigned char SDLK_to_hex(SDL_KeyCode key)
 {
-    // Maps a key press to the corresponding key on hex pad.
     switch (key)
     {
     case SDLK_1:
-        return 0x1;
+        return 0x01;
         break;
     case SDLK_2:
-        return 0x2;
+        return 0x02;
         break;
     case SDLK_3:
-        return 0x3;
+        return 0x03;
         break;
     case SDLK_4:
-        return 0xC;
+        return 0x0C;
         break;
     case SDLK_q:
-        return 0x4;
+        return 0x04;
         break;
     case SDLK_w:
-        return 0x5;
+        return 0x05;
         break;
     case SDLK_e:
-        return 0x6;
+        return 0x06;
         break;
     case SDLK_r:
-        return 0xD;
+        return 0x0D;
         break;
     case SDLK_a:
-        return 0x7;
+        return 0x07;
         break;
     case SDLK_s:
-        return 0x8;
+        return 0x08;
         break;
     case SDLK_d:
-        return 0x9;
+        return 0x09;
         break;
     case SDLK_f:
-        return 0xE;
+        return 0x0E;
         break;
     case SDLK_z:
-        return 0xA;
+        return 0x0A;
         break;
     case SDLK_x:
-        return 0x0;
+        return 0x00;
         break;
     case SDLK_c:
-        return 0xB;
+        return 0x0B;
         break;
     case SDLK_v:
-        return 0xF;
+        return 0x0F;
         break;
     default:
         return BAD_KEY;
@@ -106,20 +104,22 @@ unsigned char SDLK_to_hex(SDL_KeyCode key)
     }
 }
 
-void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
+// Checks for key presses/releases and a quit event.
+bool handle_input(SDL_Event *e, CHIP8 *chip8)
 {
     while (SDL_PollEvent(e))
     {
         if (e->type == SDL_QUIT)
         {
-            *quit = true;
+            return false;
         }
-        else if (e->type == SDL_KEYUP)
+
+        if (e->type == SDL_KEYUP)
         {
             unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
             if (hexkey != BAD_KEY)
             {
-                chip8->keypad[hexkey] = 2;
+                chip8->keypad[hexkey] = KEY_RELEASED;
             }
         }
         else if (e->type == SDL_KEYDOWN)
@@ -127,75 +127,78 @@ void handle_input(SDL_Event *e, bool *quit, CHIP8 *chip8)
             unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
             if (hexkey != BAD_KEY)
             {
-                chip8->keypad[hexkey] = 1;
+                chip8->keypad[hexkey] = KEY_DOWN;
             }
         }
     }
+
+    return true;
 }
 
 int main(int argc, char *argv[])
 {
-    srand(time(NULL));
+    /* Check command-line arguments. */
+    if (argc < 2)
+    {
+        printf("Usage: ./jace <path-to-ROM>\n");
+        return 1;
+    }
 
+    /* Initialize the CHIP8 emulator. */
     CHIP8 chip8;
     chip8_init(&chip8);
     chip8_load_font(&chip8);
 
-    // Load ROM into memory.
+    /* Load ROM into memory. */
     if (!chip8_load_rom(&chip8, argv[1]))
     {
         fprintf(stderr, "Unable to open ROM file.\n");
         return 1;
     }
 
-    SDL_Window *window = NULL;
-    SDL_Surface *surface = NULL;
-    SDL_Event e;
-    bool quit = false;
-
+    /* Initialize SDL */
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
     {
         fprintf(stderr, "Could not initialize SDL.\n");
         return 1;
     }
 
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
-    {
-        fprintf(stderr,
-                "SDL_mixer could not initialize! SDL_mixer Error: %s\n",
-                Mix_GetError());
-        return 1;
-    }
-
-    Mix_Chunk *beep_snd = Mix_LoadWAV("../beep.wav");
-    if (beep_snd == NULL)
-    {
-        fprintf(stderr, "Could not load beep.\n");
-        return 1;
-    }
-
-    window = SDL_CreateWindow("JACE",
-                              SDL_WINDOWPOS_CENTERED,
-                              SDL_WINDOWPOS_CENTERED,
-                              MAX_WIDTH * DISPLAY_SCALE,
-                              MAX_HEIGHT * DISPLAY_SCALE,
-                              SDL_WINDOW_SHOWN);
-
+    SDL_Window *window = SDL_CreateWindow("JACE",
+                                          SDL_WINDOWPOS_CENTERED,
+                                          SDL_WINDOWPOS_CENTERED,
+                                          MAX_WIDTH * DISPLAY_SCALE,
+                                          MAX_HEIGHT * DISPLAY_SCALE,
+                                          SDL_WINDOW_SHOWN);
     if (window == NULL)
     {
         fprintf(stderr, "Could not create SDL window.\n");
         return 1;
     }
 
-    surface = SDL_GetWindowSurface(window);
+    SDL_Surface *surface = SDL_GetWindowSurface(window);
 
-    // Main loop
-    while (!quit)
+    /***** TEMPORARY AUDIO CODE *****/
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
     {
-        handle_input(&e, &quit, &chip8);
+        fprintf(stderr,
+                "SDL_mixer could not initialize! SDL_mixer Error: %s\n",
+                Mix_GetError());
+    }
+    Mix_Chunk *beep_snd = Mix_LoadWAV("../beep.wav");
+    if (beep_snd == NULL)
+    {
+        fprintf(stderr, "Could not load beep.\n");
+    }
+    /***** END TEMPORARY AUDIO CODE *****/
+
+    /* Main Loop */
+    SDL_Event e;
+    while (handle_input(&e, &chip8))
+    {
         chip8_execute(&chip8);
         chip8_handle_timers(&chip8);
 
+        // Prevents wasting time drawing every frame when unnecessary.
         if (chip8.display_updated)
         {
             draw_display(window, surface, &chip8);
@@ -207,6 +210,7 @@ int main(int argc, char *argv[])
         }
     }
 
+    /* Free Resources */
     SDL_DestroyWindow(window);
     Mix_FreeChunk(beep_snd);
     SDL_Quit();

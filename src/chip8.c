@@ -11,7 +11,9 @@
 
 void chip8_init(CHIP8 *chip8)
 {
-    chip8_reset_RAM(chip8);
+    // Seed for the RND instruction.
+    srand(time(NULL));
+
     chip8_reset_keypad(chip8);
     chip8_reset_display(chip8);
 
@@ -27,100 +29,111 @@ void chip8_init(CHIP8 *chip8)
 
 void chip8_load_font(CHIP8 *chip8)
 {
-    /* Load hexadecimal font into memory.
-    Each hex character is represented by 5 bytes in memory
-    with each bit representing a pixel. */
-
     // 0:
-    chip8->RAM[FONT_START_ADDR + 0x0] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x1] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x2] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x3] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x4] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x00] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x01] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x02] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x03] = 0x90;
+    chip8->RAM[FONT_START_ADDR + 0x04] = 0xF0;
+
     // 1:
-    chip8->RAM[FONT_START_ADDR + 0x5] = 0x20;
-    chip8->RAM[FONT_START_ADDR + 0x6] = 0x60;
-    chip8->RAM[FONT_START_ADDR + 0x7] = 0x20;
-    chip8->RAM[FONT_START_ADDR + 0x8] = 0x20;
-    chip8->RAM[FONT_START_ADDR + 0x9] = 0x70;
+    chip8->RAM[FONT_START_ADDR + 0x05] = 0x20;
+    chip8->RAM[FONT_START_ADDR + 0x06] = 0x60;
+    chip8->RAM[FONT_START_ADDR + 0x07] = 0x20;
+    chip8->RAM[FONT_START_ADDR + 0x08] = 0x20;
+    chip8->RAM[FONT_START_ADDR + 0x09] = 0x70;
+
     // 2:
-    chip8->RAM[FONT_START_ADDR + 0xA] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0xB] = 0x10;
-    chip8->RAM[FONT_START_ADDR + 0xC] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0xD] = 0x80;
-    chip8->RAM[FONT_START_ADDR + 0xE] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x0A] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x0B] = 0x10;
+    chip8->RAM[FONT_START_ADDR + 0x0C] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x0D] = 0x80;
+    chip8->RAM[FONT_START_ADDR + 0x0E] = 0xF0;
+
     // 3:
-    chip8->RAM[FONT_START_ADDR + 0xF] = 0xF0;
+    chip8->RAM[FONT_START_ADDR + 0x0F] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x10] = 0x10;
     chip8->RAM[FONT_START_ADDR + 0x11] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x12] = 0x10;
     chip8->RAM[FONT_START_ADDR + 0x13] = 0xF0;
+
     // 4:
     chip8->RAM[FONT_START_ADDR + 0x14] = 0x90;
     chip8->RAM[FONT_START_ADDR + 0x15] = 0x90;
     chip8->RAM[FONT_START_ADDR + 0x16] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x17] = 0x10;
     chip8->RAM[FONT_START_ADDR + 0x18] = 0x10;
+
     // 5:
     chip8->RAM[FONT_START_ADDR + 0x19] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x1A] = 0x80;
     chip8->RAM[FONT_START_ADDR + 0x1B] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x1C] = 0x10;
     chip8->RAM[FONT_START_ADDR + 0x1D] = 0xF0;
+
     // 6:
     chip8->RAM[FONT_START_ADDR + 0x1E] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x1F] = 0x80;
     chip8->RAM[FONT_START_ADDR + 0x20] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x21] = 0x90;
     chip8->RAM[FONT_START_ADDR + 0x22] = 0xF0;
+
     // 7:
     chip8->RAM[FONT_START_ADDR + 0x23] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x24] = 0x10;
     chip8->RAM[FONT_START_ADDR + 0x25] = 0x20;
     chip8->RAM[FONT_START_ADDR + 0x26] = 0x40;
     chip8->RAM[FONT_START_ADDR + 0x27] = 0x40;
+
     // 8:
     chip8->RAM[FONT_START_ADDR + 0x28] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x29] = 0x90;
     chip8->RAM[FONT_START_ADDR + 0x2A] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x2B] = 0x90;
     chip8->RAM[FONT_START_ADDR + 0x2C] = 0xF0;
+
     // 9:
     chip8->RAM[FONT_START_ADDR + 0x2D] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x2E] = 0x90;
     chip8->RAM[FONT_START_ADDR + 0x2F] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x30] = 0x10;
     chip8->RAM[FONT_START_ADDR + 0x31] = 0xF0;
+
     // A:
     chip8->RAM[FONT_START_ADDR + 0x32] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x33] = 0x90;
     chip8->RAM[FONT_START_ADDR + 0x34] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x35] = 0x90;
     chip8->RAM[FONT_START_ADDR + 0x36] = 0x90;
+
     // B:
     chip8->RAM[FONT_START_ADDR + 0x37] = 0xE0;
     chip8->RAM[FONT_START_ADDR + 0x38] = 0x90;
     chip8->RAM[FONT_START_ADDR + 0x39] = 0xE0;
     chip8->RAM[FONT_START_ADDR + 0x3A] = 0x90;
     chip8->RAM[FONT_START_ADDR + 0x3B] = 0xE0;
+
     // C:
     chip8->RAM[FONT_START_ADDR + 0x3C] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x3D] = 0x80;
     chip8->RAM[FONT_START_ADDR + 0x3E] = 0x80;
     chip8->RAM[FONT_START_ADDR + 0x3F] = 0x80;
     chip8->RAM[FONT_START_ADDR + 0x40] = 0xF0;
+
     // D:
     chip8->RAM[FONT_START_ADDR + 0x41] = 0xE0;
     chip8->RAM[FONT_START_ADDR + 0x42] = 0x90;
     chip8->RAM[FONT_START_ADDR + 0x43] = 0x90;
     chip8->RAM[FONT_START_ADDR + 0x44] = 0x90;
     chip8->RAM[FONT_START_ADDR + 0x45] = 0xE0;
+
     // E:
     chip8->RAM[FONT_START_ADDR + 0x46] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x47] = 0x80;
     chip8->RAM[FONT_START_ADDR + 0x48] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x49] = 0x80;
     chip8->RAM[FONT_START_ADDR + 0x4A] = 0xF0;
+
     // F:
     chip8->RAM[FONT_START_ADDR + 0x4B] = 0xF0;
     chip8->RAM[FONT_START_ADDR + 0x4C] = 0x80;
@@ -131,13 +144,15 @@ void chip8_load_font(CHIP8 *chip8)
 
 bool chip8_load_rom(CHIP8 *chip8, char *filename)
 {
-    /* Loads a given ROM into memory starting at address 0x200.
-    0x200 is where user data is stored, eeverything before that is system. */
-
     FILE *rom = fopen(filename, "rb");
     if (rom)
     {
-        fread(chip8->RAM + PC_START_ADDR, MAX_RAM - PC_START_ADDR, 1, rom);
+        size_t fr = fread(chip8->RAM + PC_START_ADDR,
+                          MAX_RAM - PC_START_ADDR,
+                          1,
+                          rom);
+        (void)fr; // Just to suppress fread unused return value warning.
+
         fclose(rom);
 
         return true;
@@ -368,7 +383,7 @@ void chip8_execute(CHIP8 *chip8)
         {
         // SKP VX (EX9E):
         case 0x9E:
-            if (chip8->keypad[chip8->V[X]] == 1)
+            if (chip8->keypad[chip8->V[X]] == KEY_DOWN)
             {
                 chip8->PC += 2;
             }
@@ -377,7 +392,7 @@ void chip8_execute(CHIP8 *chip8)
 
         // SKNP VX (EXA1):
         case 0xA1:
-            if (chip8->keypad[chip8->V[X]] == 0)
+            if (chip8->keypad[chip8->V[X]] == KEY_UP)
             {
                 chip8->PC += 2;
             }
@@ -406,7 +421,7 @@ void chip8_execute(CHIP8 *chip8)
 
             for (int i = 0; i < MAX_KEYS; i++)
             {
-                if (chip8->keypad[i] == 2)
+                if (chip8->keypad[i] == KEY_RELEASED)
                 {
                     chip8->V[X] = i;
                     key_released = true;
@@ -480,9 +495,9 @@ void chip8_execute(CHIP8 *chip8)
     // Any key that was released previous frame gets turned off.
     for (int k = 0; k < MAX_KEYS; k++)
     {
-        if (chip8->keypad[k] == 2)
+        if (chip8->keypad[k] == KEY_RELEASED)
         {
-            chip8->keypad[k] = 0;
+            chip8->keypad[k] = KEY_UP;
         }
     }
 
@@ -491,9 +506,10 @@ void chip8_execute(CHIP8 *chip8)
 
 void chip8_handle_timers(CHIP8 *chip8)
 {
-    // Decrement timers at a frequency of 60Hz and play sound if needed.
     long freq = CLOCKS_PER_SEC / 60;
     int cycle = clock() % freq;
+
+    // This whole thing will be modified in the future...
     if (cycle >= 0 && cycle <= 1000)
     {
         if (chip8->DT > 0)
@@ -512,19 +528,11 @@ void chip8_handle_timers(CHIP8 *chip8)
     }
 }
 
-void chip8_reset_RAM(CHIP8 *chip8)
-{
-    for (int addr = 0; addr < MAX_RAM; addr++)
-    {
-        chip8->RAM[addr] = 0x00;
-    }
-}
-
 void chip8_reset_keypad(CHIP8 *chip8)
 {
     for (int k = 0; k < MAX_KEYS; k++)
     {
-        chip8->keypad[k] = 0;
+        chip8->keypad[k] = KEY_UP;
     }
 }
 
