@@ -26,7 +26,7 @@ void chip8_init(CHIP8 *chip8)
     chip8->display_updated = false;
     chip8->beep = false;
 
-    chip8->super_mode = false;
+    chip8->super_mode = true;
 }
 
 void chip8_load_font(CHIP8 *chip8)
@@ -340,6 +340,7 @@ void chip8_execute(CHIP8 *chip8)
             {
                 chip8->V[x] = chip8->V[y];
             }
+
             chip8->V[0x0F] = (chip8->V[x] & 0x80) >> 7;
             chip8->V[x] <<= 1;
             break;
@@ -363,7 +364,7 @@ void chip8_execute(CHIP8 *chip8)
         chip8->I = nnn;
         break;
 
-    /* JMP V0, addr (Bnnn)
+    /* JP V0, addr (Bnnn)
        Jump to location nnn + V0. */
     case 0x0B:
         chip8->PC = chip8->V[0] + nnn;
@@ -372,47 +373,14 @@ void chip8_execute(CHIP8 *chip8)
     /* RND Vx, byte (Cxkk)
        Set Vx = random byte AND kk. */
     case 0x0C:
-        chip8->V[x] = (rand() % 256) & kk;
+        chip8->V[x] = (rand() % 0x100) & kk;
         break;
 
     /* DRW Vx, Vy, n (Dxyn):
        Display n-byte sprite starting at memory location I at (Vx, Vy),
        set VF = collision. */
     case 0x0D:
-        chip8->V[0x0F] = 0;
-
-        for (int i = 0; i < n; i++)
-        {
-            for (int j = 0; j < 8; j++)
-            {
-                int disp_x = chip8->V[x] + j;
-                int disp_y = chip8->V[y] + i;
-
-                // Allow out-of-bound sprite to wrap-around.
-                if (disp_x >= MAX_WIDTH)
-                {
-                    disp_x -= MAX_WIDTH;
-                }
-                if (disp_y >= MAX_HEIGHT)
-                {
-                    disp_y -= MAX_HEIGHT;
-                }
-
-                // Get the pixel the loop is on and the corresponding bit.
-                bool pixel_on = chip8->display[disp_y][disp_x];
-                bool bit = (chip8->RAM[chip8->I + i] >> (7 - j)) & 0x01;
-
-                /* XOR the sprite onto display. 
-                If a pixel is erased, set the VF register to 1. */
-                chip8->display[disp_y][disp_x] = (pixel_on != bit);
-                if (pixel_on && bit)
-                {
-                    chip8->V[0x0F] = 1;
-                }
-            }
-        }
-        chip8->display_updated = true;
-
+        chip8_draw(chip8, x, y, n);
         break;
 
     case 0x0E:
@@ -454,23 +422,7 @@ void chip8_execute(CHIP8 *chip8)
            Wait for a key press, store the value of the key in Vx. */
         case 0x0A:
         {
-            bool key_released = false;
-
-            for (int i = 0; i < MAX_KEYS; i++)
-            {
-                if (chip8->keypad[i] == KEY_RELEASED)
-                {
-                    chip8->V[x] = i;
-                    key_released = true;
-                    break;
-                }
-            }
-
-            if (!key_released)
-            {
-                chip8->PC -= 2;
-            }
-
+            chip8_wait_key(chip8, x);
             break;
         }
 
@@ -495,7 +447,7 @@ void chip8_execute(CHIP8 *chip8)
         /* LD F, Vx (Fx29)
            Set I = location of sprite for digit Vx. */
         case 0x29:
-            chip8->I = chip8->V[x] * 0x05;
+            chip8->I = FONT_START_ADDR + (chip8->V[x] * 0x05);
             break;
 
         /* LD B, Vx (Fx33)
@@ -542,13 +494,7 @@ void chip8_execute(CHIP8 *chip8)
     }
 
     // Any key that was released previous frame gets turned off.
-    for (int k = 0; k < MAX_KEYS; k++)
-    {
-        if (chip8->keypad[k] == KEY_RELEASED)
-        {
-            chip8->keypad[k] = KEY_UP;
-        }
-    }
+    chip8_reset_released_keys(chip8);
 
     // Slow the processor down to match old hardware.
     chip8_sleep();
@@ -586,6 +532,17 @@ void chip8_reset_keypad(CHIP8 *chip8)
     }
 }
 
+void chip8_reset_released_keys(CHIP8 *chip8)
+{
+    for (int k = 0; k < MAX_KEYS; k++)
+    {
+        if (chip8->keypad[k] == KEY_RELEASED)
+        {
+            chip8->keypad[k] = KEY_UP;
+        }
+    }
+}
+
 void chip8_reset_display(CHIP8 *chip8)
 {
     for (int y = 0; y < MAX_HEIGHT; y++)
@@ -595,6 +552,8 @@ void chip8_reset_display(CHIP8 *chip8)
             chip8->display[y][x] = false;
         }
     }
+
+    chip8->display_updated = true;
 }
 
 void chip8_sleep()
@@ -613,9 +572,64 @@ void chip8_sleep()
 
 void chip8_load_instr(CHIP8 *chip8, unsigned int instr)
 {
-    unsigned char b1 = instr >> 8;
-    unsigned char b2 = instr & 0xFF;
+    chip8->RAM[PC_START_ADDR] = instr >> 8;
+    chip8->RAM[PC_START_ADDR + 1] = instr & 0x00FF;
+}
 
-    chip8->RAM[PC_START_ADDR] = b1;
-    chip8->RAM[PC_START_ADDR + 1] = b2;
+void chip8_draw(CHIP8 *chip8, unsigned char x, unsigned char y, unsigned char n)
+{
+    chip8->V[0x0F] = 0;
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            int disp_x = chip8->V[x] + j;
+            int disp_y = chip8->V[y] + i;
+
+            // Allow out-of-bound sprite to wrap-around.
+            if (disp_x >= MAX_WIDTH)
+            {
+                disp_x -= MAX_WIDTH;
+            }
+            if (disp_y >= MAX_HEIGHT)
+            {
+                disp_y -= MAX_HEIGHT;
+            }
+
+            // Get the pixel the loop is on and the corresponding bit.
+            bool pixel_on = chip8->display[disp_y][disp_x];
+            bool bit = (chip8->RAM[chip8->I + i] >> (7 - j)) & 0x01;
+
+            /* XOR the sprite onto display. 
+                If a pixel is erased, set the VF register to 1. */
+            chip8->display[disp_y][disp_x] = (pixel_on != bit);
+            if (pixel_on && bit)
+            {
+                chip8->V[0x0F] = 1;
+            }
+        }
+    }
+
+    chip8->display_updated = true;
+}
+
+void chip8_wait_key(CHIP8 *chip8, unsigned char x)
+{
+    bool key_released = false;
+
+    for (int i = 0; i < MAX_KEYS; i++)
+    {
+        if (chip8->keypad[i] == KEY_RELEASED)
+        {
+            chip8->V[x] = i;
+            key_released = true;
+            break;
+        }
+    }
+
+    if (!key_released)
+    {
+        chip8->PC -= 2;
+    }
 }

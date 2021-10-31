@@ -70,6 +70,9 @@ void chip8_handle_timers(CHIP8 *chip8);
 // Clears the keypad by setting all keys to up.
 void chip8_reset_keypad(CHIP8 *chip8);
 
+// Resets any key that was released to KEY_UP.
+void chip8_reset_released_keys(CHIP8 *chip8);
+
 // Clears the display by setting all pixels to off.
 void chip8_reset_display(CHIP8 *chip8);
 
@@ -78,5 +81,11 @@ void chip8_sleep();
 
 // Loads an instruction into PC_START_ADDR.
 void chip8_load_instr(CHIP8 *chip8, unsigned int instr);
+
+// Draws n bytes starting at address I onto the display at coordinates (Vx, Vy).
+void chip8_draw(CHIP8 *chip8, unsigned char x, unsigned char y, unsigned char n);
+
+// Waits for a key to be released then stores that key in Vx.
+void chip8_wait_key(CHIP8 *chip8, unsigned char x);
 
 #endif
