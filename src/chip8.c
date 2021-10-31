@@ -303,14 +303,14 @@ void chip8_execute(CHIP8 *chip8)
         /* ADD Vx, Vy (8xy4)
            Set Vx = Vx + Vy, set VF = carry. */
         case 0x04:
-            chip8->V[0x0F] = ((chip8->V[x] + chip8->V[y]) > 0xFF) ? 1 : 0;
+            chip8->V[0x0F] = ((chip8->V[x] + chip8->V[y]) > 0xFF);
             chip8->V[x] += chip8->V[y];
             break;
 
         /* SUB Vx, Vy (8xy5)
            Set Vx = Vx - Vy, set VF = NOT borrow. */
         case 0x05:
-            chip8->V[0x0F] = (chip8->V[x] > chip8->V[y]) ? 1 : 0;
+            chip8->V[0x0F] = (chip8->V[x] > chip8->V[y]);
             chip8->V[x] -= chip8->V[y];
             break;
 
@@ -329,7 +329,7 @@ void chip8_execute(CHIP8 *chip8)
         /* SUBN Vx, Vy (8xy7)
            Set Vx = Vy - Vx, set VF = NOT borrow. */
         case 0x07:
-            chip8->V[0x0F] = (chip8->V[y] > chip8->V[x]) ? 1 : 0;
+            chip8->V[0x0F] = (chip8->V[y] > chip8->V[x]);
             chip8->V[x] = chip8->V[y] - chip8->V[x];
             break;
 
@@ -550,6 +550,7 @@ void chip8_execute(CHIP8 *chip8)
         }
     }
 
+    // Slow the processor down to match old hardware.
     chip8_sleep();
 }
 
