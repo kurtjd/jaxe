@@ -31,8 +31,6 @@ Build
 
 `make jace`
 
-For tests: `make test`
-
 Run
 ===
 `./jace <path-to-rom>`
