@@ -7,12 +7,11 @@ Just Another CHIP-8 Emulator
 ============================
 A basic CHIP-8 emulator written in C and SDL to practice emulator dev.
 
-* Currently supports all basic instructions, display, and keyboard input.
+* Currently supports all basic instructions, display, sound, and keyboard input.
 
 TODO
 =====
 * Fix timers
-* Generate sound programatically
 * Add misc features
 * Allow user to change flags
 * Add debug mode
@@ -20,7 +19,6 @@ TODO
 Requirements
 ============
 * SDL2
-* SDL2_Mixer (for sound)
 
 Build
 =====

@@ -1,18 +1,30 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <math.h>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_audio.h>
 #include "chip8.h"
 
 #define DISPLAY_SCALE 10
 #define ON_COLOR 0xFFFFFF
 #define OFF_COLOR 0x000000
 #define BAD_KEY 0x42
+#define AMPLITUDE 28000
+#define SAMPLE_RATE 44100
 
-// Called while the emulator is producing sound.
-void beep(Mix_Chunk *snd)
+// Black magic SDL sound stuff.
+void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
 {
-    Mix_PlayChannel(-1, snd, 0);
+    Sint16 *buffer = (Sint16 *)raw_buffer;
+    int length = bytes / 2; // 2 bytes per sample for AUDIO_S16SYS
+    int sample_nr = (*(int *)user_data);
+
+    for (int i = 0; i < length; i++, sample_nr++)
+    {
+        double time = (double)sample_nr / (double)SAMPLE_RATE;
+        // render 441 HZ sine wave
+        buffer[i] = (Sint16)(AMPLITUDE * sin(2.0f * M_PI * 441.0f * time));
+    }
 }
 
 // Sets a pixel of the SDL surface to match the emulator.
@@ -177,19 +189,38 @@ int main(int argc, char *argv[])
 
     SDL_Surface *surface = SDL_GetWindowSurface(window);
 
-    /***** TEMPORARY AUDIO CODE *****/
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+    /******* Black Magic SDL Sound *********/
+    int sample_nr = 0;
+
+    SDL_AudioSpec want;
+    // number of samples per second
+    want.freq = SAMPLE_RATE;
+
+    // sample type (here: signed short i.e. 16 bit)
+    want.format = AUDIO_S16SYS;
+
+    // only one channel
+    want.channels = 1;
+
+    // buffer-size
+    want.samples = 2048;
+
+    // function SDL calls periodically to refill the buffer
+    want.callback = audio_callback;
+
+    // counter, keeping track of current sample number
+    want.userdata = &sample_nr;
+
+    SDL_AudioSpec have;
+    if (SDL_OpenAudio(&want, &have) != 0)
     {
-        fprintf(stderr,
-                "SDL_mixer could not initialize! SDL_mixer Error: %s\n",
-                Mix_GetError());
+        fprintf(stderr, "Could not open audio.\n");
     }
-    Mix_Chunk *beep_snd = Mix_LoadWAV("../beep.wav");
-    if (beep_snd == NULL)
+    if (want.format != have.format)
     {
-        fprintf(stderr, "Could not load beep.\n");
+        fprintf(stderr, "Could not get desired audio spec.\n");
     }
-    /***** END TEMPORARY AUDIO CODE *****/
+    /******************************/
 
     /* Main Loop */
     SDL_Event e;
@@ -206,13 +237,17 @@ int main(int argc, char *argv[])
 
         if (chip8.beep)
         {
-            beep(beep_snd);
+            SDL_PauseAudio(0);
+        }
+        else
+        {
+            SDL_PauseAudio(1);
         }
     }
 
     /* Free Resources */
     SDL_DestroyWindow(window);
-    Mix_FreeChunk(beep_snd);
+    SDL_CloseAudio();
     SDL_Quit();
 
     return 0;
