@@ -11,8 +11,6 @@
 
 #define FONT_START_ADDR 0x0
 #define SP_START_ADDR 0x50
-#define PC_START_ADDR 0x200
-#define CLOCK_SPEED 500
 
 #define KEY_UP 0
 #define KEY_DOWN 1
@@ -46,6 +44,8 @@ typedef struct CHIP8
     bool beep;
 
     bool super_mode;
+    int clock_speed;
+    unsigned int pc_start_addr;
 } CHIP8;
 
 // Set some things to useful default values.
@@ -77,7 +77,7 @@ void chip8_reset_released_keys(CHIP8 *chip8);
 void chip8_reset_display(CHIP8 *chip8);
 
 // Makes the CPU sleep after every instruction to match the given clock speed.
-void chip8_sleep();
+void chip8_sleep(CHIP8 *chip8);
 
 // Loads an instruction into PC_START_ADDR.
 void chip8_load_instr(CHIP8 *chip8, unsigned int instr);

@@ -17,9 +17,9 @@ void chip8_init(CHIP8 *chip8)
     chip8_reset_keypad(chip8);
     chip8_reset_display(chip8);
 
-    chip8->PC = PC_START_ADDR;
+    chip8->PC = chip8->pc_start_addr;
     chip8->SP = SP_START_ADDR;
-    chip8->I = PC_START_ADDR;
+    chip8->I = chip8->pc_start_addr;
     chip8->DT = 0;
     chip8->ST = 0;
 
@@ -149,8 +149,8 @@ bool chip8_load_rom(CHIP8 *chip8, char *filename)
     FILE *rom = fopen(filename, "rb");
     if (rom)
     {
-        size_t fr = fread(chip8->RAM + PC_START_ADDR,
-                          MAX_RAM - PC_START_ADDR,
+        size_t fr = fread(chip8->RAM + chip8->pc_start_addr,
+                          MAX_RAM - chip8->pc_start_addr,
                           1,
                           rom);
         (void)fr; // Just to suppress fread unused return value warning.
@@ -497,7 +497,7 @@ void chip8_execute(CHIP8 *chip8)
     chip8_reset_released_keys(chip8);
 
     // Slow the processor down to match old hardware.
-    chip8_sleep();
+    chip8_sleep(chip8);
 }
 
 void chip8_handle_timers(CHIP8 *chip8)
@@ -556,24 +556,24 @@ void chip8_reset_display(CHIP8 *chip8)
     chip8->display_updated = true;
 }
 
-void chip8_sleep()
+void chip8_sleep(CHIP8 *chip8)
 {
 #ifdef WIN32
-    Sleep(1000 / CLOCK_SPEED);
+    Sleep(1000 / chip8->clock_speed);
 #elif _POSIX_C_SOURCE >= 199309L
     struct timespec ts;
     ts.tv_sec = 0;
-    ts.tv_nsec = 1000000000 / CLOCK_SPEED;
+    ts.tv_nsec = 1000000000 / chip8->clock_speed;
     nanosleep(&ts, NULL);
 #else
-    usleep(1000000 / CLOCK_SPEED);
+    usleep(1000000 / chip8->clock_speed);
 #endif
 }
 
 void chip8_load_instr(CHIP8 *chip8, unsigned int instr)
 {
-    chip8->RAM[PC_START_ADDR] = instr >> 8;
-    chip8->RAM[PC_START_ADDR + 1] = instr & 0x00FF;
+    chip8->RAM[chip8->pc_start_addr] = instr >> 8;
+    chip8->RAM[chip8->pc_start_addr + 1] = instr & 0x00FF;
 }
 
 void chip8_draw(CHIP8 *chip8, unsigned char x, unsigned char y, unsigned char n)

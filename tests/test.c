@@ -61,7 +61,7 @@ void test_2nnn(CHIP8 *chip8)
 
     assert(chip8->SP == (SP_START_ADDR + 2));
     assert(chip8->PC == 0xFFF);
-    assert(((chip8->RAM[chip8->SP] << 8) | chip8->RAM[chip8->SP + 1]) == (PC_START_ADDR + 2));
+    assert(((chip8->RAM[chip8->SP] << 8) | chip8->RAM[chip8->SP + 1]) == (int)(chip8->pc_start_addr + 2));
 
     chip8_init(chip8);
 }
@@ -74,14 +74,14 @@ void test_3xkk(CHIP8 *chip8)
 
     chip8_execute(chip8);
 
-    assert(chip8->PC == (PC_START_ADDR + 4));
+    assert(chip8->PC == (chip8->pc_start_addr + 4));
 
-    chip8->PC = PC_START_ADDR;
+    chip8->PC = chip8->pc_start_addr;
     chip8->V[0] = 0x42;
 
     chip8_execute(chip8);
 
-    assert(chip8->PC == (PC_START_ADDR + 2));
+    assert(chip8->PC == (chip8->pc_start_addr + 2));
 
     chip8_init(chip8);
 }
@@ -94,14 +94,14 @@ void test_4xkk(CHIP8 *chip8)
 
     chip8_execute(chip8);
 
-    assert(chip8->PC == (PC_START_ADDR + 4));
+    assert(chip8->PC == (chip8->pc_start_addr + 4));
 
-    chip8->PC = PC_START_ADDR;
+    chip8->PC = chip8->pc_start_addr;
     chip8->V[0] = 0x69;
 
     chip8_execute(chip8);
 
-    assert(chip8->PC == (PC_START_ADDR + 2));
+    assert(chip8->PC == (chip8->pc_start_addr + 2));
 
     chip8_init(chip8);
 }
@@ -115,14 +115,14 @@ void test_5xy0(CHIP8 *chip8)
 
     chip8_execute(chip8);
 
-    assert(chip8->PC == (PC_START_ADDR + 4));
+    assert(chip8->PC == (chip8->pc_start_addr + 4));
 
-    chip8->PC = PC_START_ADDR;
+    chip8->PC = chip8->pc_start_addr;
     chip8->V[9] = 0x69;
 
     chip8_execute(chip8);
 
-    assert(chip8->PC == (PC_START_ADDR + 2));
+    assert(chip8->PC == (chip8->pc_start_addr + 2));
 
     chip8_init(chip8);
 }
@@ -219,7 +219,7 @@ void test_8xy4(CHIP8 *chip8)
     assert(chip8->V[6] == 0x0A);
     assert(chip8->V[0x0F] == 0x00);
 
-    chip8->PC = PC_START_ADDR;
+    chip8->PC = chip8->pc_start_addr;
     chip8->V[6] = 0xFA;
     chip8->V[9] = 0x07;
 
@@ -243,7 +243,7 @@ void test_8xy5(CHIP8 *chip8)
     assert(chip8->V[6] == 0x07);
     assert(chip8->V[0x0F] == 0x01);
 
-    chip8->PC = PC_START_ADDR;
+    chip8->PC = chip8->pc_start_addr;
     chip8->V[6] = 0x02;
     chip8->V[9] = 0x04;
 
@@ -266,7 +266,7 @@ void test_8xy6(CHIP8 *chip8)
     assert(chip8->V[6] == 0x34);
     assert(chip8->V[0x0F] == 0x01);
 
-    chip8->PC = PC_START_ADDR;
+    chip8->PC = chip8->pc_start_addr;
     chip8->V[6] = 0x42;
 
     chip8_execute(chip8);
@@ -289,7 +289,7 @@ void test_8xy7(CHIP8 *chip8)
     assert(chip8->V[6] == 0x07);
     assert(chip8->V[0x0F] == 0x01);
 
-    chip8->PC = PC_START_ADDR;
+    chip8->PC = chip8->pc_start_addr;
     chip8->V[6] = 0x04;
     chip8->V[9] = 0x03;
 
@@ -312,7 +312,7 @@ void test_8xyE(CHIP8 *chip8)
     assert(chip8->V[6] == 0xD2);
     assert(chip8->V[0x0F] == 0x00);
 
-    chip8->PC = PC_START_ADDR;
+    chip8->PC = chip8->pc_start_addr;
     chip8->V[6] = 0xF0;
 
     chip8_execute(chip8);
@@ -332,15 +332,15 @@ void test_9xy0(CHIP8 *chip8)
 
     chip8_execute(chip8);
 
-    assert(chip8->PC == (PC_START_ADDR + 4));
+    assert(chip8->PC == (chip8->pc_start_addr + 4));
 
-    chip8->PC = PC_START_ADDR;
+    chip8->PC = chip8->pc_start_addr;
     chip8->V[6] = 0x69;
     chip8->V[9] = 0x69;
 
     chip8_execute(chip8);
 
-    assert(chip8->PC == (PC_START_ADDR + 2));
+    assert(chip8->PC == (chip8->pc_start_addr + 2));
 
     chip8_init(chip8);
 }
@@ -424,14 +424,14 @@ void test_Ex9E(CHIP8 *chip8)
 
     chip8_execute(chip8);
 
-    assert(chip8->PC == (PC_START_ADDR + 4));
+    assert(chip8->PC == (chip8->pc_start_addr + 4));
 
-    chip8->PC = PC_START_ADDR;
+    chip8->PC = chip8->pc_start_addr;
     chip8->keypad[0xA] = 0;
 
     chip8_execute(chip8);
 
-    assert(chip8->PC == (PC_START_ADDR + 2));
+    assert(chip8->PC == (chip8->pc_start_addr + 2));
 
     chip8_init(chip8);
 }
@@ -445,14 +445,14 @@ void test_ExA1(CHIP8 *chip8)
 
     chip8_execute(chip8);
 
-    assert(chip8->PC == (PC_START_ADDR + 4));
+    assert(chip8->PC == (chip8->pc_start_addr + 4));
 
-    chip8->PC = PC_START_ADDR;
+    chip8->PC = chip8->pc_start_addr;
     chip8->keypad[0xA] = 1;
 
     chip8_execute(chip8);
 
-    assert(chip8->PC == (PC_START_ADDR + 2));
+    assert(chip8->PC == (chip8->pc_start_addr + 2));
 
     chip8_init(chip8);
 }
@@ -478,13 +478,13 @@ void test_Fx0A(CHIP8 *chip8)
 
     chip8_execute(chip8);
 
-    assert(chip8->PC == PC_START_ADDR);
+    assert(chip8->PC == chip8->pc_start_addr);
 
     chip8->keypad[0xA] = 2;
 
     chip8_execute(chip8);
 
-    assert(chip8->PC == PC_START_ADDR + 2 && chip8->V[0] == 0xA);
+    assert(chip8->PC == chip8->pc_start_addr + 2 && chip8->V[0] == 0xA);
 
     chip8_init(chip8);
 }
@@ -555,7 +555,7 @@ void test_Fx33(CHIP8 *chip8)
     assert(chip8->RAM[chip8->I + 1] == 6);
     assert(chip8->RAM[chip8->I + 2] == 9);
 
-    chip8->PC = PC_START_ADDR;
+    chip8->PC = chip8->pc_start_addr;
     chip8->V[0] = 69;
 
     chip8_execute(chip8);
@@ -564,7 +564,7 @@ void test_Fx33(CHIP8 *chip8)
     assert(chip8->RAM[chip8->I + 1] == 6);
     assert(chip8->RAM[chip8->I + 2] == 9);
 
-    chip8->PC = PC_START_ADDR;
+    chip8->PC = chip8->pc_start_addr;
     chip8->V[0] = 9;
 
     chip8_execute(chip8);
@@ -614,6 +614,8 @@ int main()
 {
     // The test machine.
     CHIP8 chip8;
+    chip8.pc_start_addr = 0x200;
+    chip8.clock_speed = 500;
     chip8_init(&chip8);
 
     /* All tests follow similar pattern:

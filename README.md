@@ -13,7 +13,6 @@ TODO
 =====
 * Fix timers
 * Add misc features
-* Allow user to change flags
 * Add debug mode
 
 Requirements

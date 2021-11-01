@@ -1,16 +1,22 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
+#include <string.h>
+#include <unistd.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_audio.h>
 #include "chip8.h"
 
-#define DISPLAY_SCALE 10
-#define ON_COLOR 0xFFFFFF
-#define OFF_COLOR 0x000000
 #define BAD_KEY 0x42
 #define AMPLITUDE 28000
 #define SAMPLE_RATE 44100
+
+bool SUPER_MODE = true;
+int DISPLAY_SCALE = 10;
+unsigned int PC_START_ADDR = 0x200;
+int CLOCK_SPEED = 500;
+long ON_COLOR = 0xFFFFFF;
+long OFF_COLOR = 0x000000;
 
 // Black magic SDL sound stuff.
 void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
@@ -155,14 +161,45 @@ int main(int argc, char *argv[])
         printf("Usage: ./jace <path-to-ROM>\n");
         return 1;
     }
+    else if (argc > 2)
+    {
+        int opt;
+        while ((opt = getopt(argc, argv, "sd:p:c:f:b:")) != -1)
+        {
+            switch (opt)
+            {
+            case 's':
+                SUPER_MODE = true;
+                break;
+            case 'd':
+                DISPLAY_SCALE = atoi(optarg);
+                break;
+            case 'p':
+                PC_START_ADDR = atoi(optarg);
+                break;
+            case 'c':
+                CLOCK_SPEED = atoi(optarg);
+                break;
+            case 'f':
+                ON_COLOR = strtol(optarg, NULL, 16);
+                break;
+            case 'b':
+                OFF_COLOR = strtol(optarg, NULL, 16);
+                break;
+            }
+        }
+    }
 
     /* Initialize the CHIP8 emulator. */
     CHIP8 chip8;
+    chip8.pc_start_addr = PC_START_ADDR;
+    chip8.clock_speed = CLOCK_SPEED;
+    chip8.super_mode = SUPER_MODE;
     chip8_init(&chip8);
     chip8_load_font(&chip8);
 
     /* Load ROM into memory. */
-    if (!chip8_load_rom(&chip8, argv[1]))
+    if (!chip8_load_rom(&chip8, argv[argc - 1]))
     {
         fprintf(stderr, "Unable to open ROM file.\n");
         return 1;
