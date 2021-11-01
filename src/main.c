@@ -16,11 +16,6 @@ int DISPLAY_SCALE = 10;
 long ON_COLOR = 0xFFFFFF;
 long OFF_COLOR = 0x000000;
 
-// Globals passed to emulator
-bool LEGACY_MODE = false;
-unsigned int PC_START_ADDR = PC_START_ADDR_DEFAULT;
-int CLOCK_SPEED = CLOCK_SPEED_DEFAULT;
-
 // Black magic SDL sound stuff.
 void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
 {
@@ -158,6 +153,11 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
 
 int main(int argc, char *argv[])
 {
+    // Emulator options
+    bool LEGACY_MODE = false;
+    unsigned int PC_START_ADDR = PC_START_ADDR_DEFAULT;
+    int CLOCK_SPEED = CLOCK_SPEED_DEFAULT;
+
     /* Check command-line arguments. */
     if (argc < 2)
     {
