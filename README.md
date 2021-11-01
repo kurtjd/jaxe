@@ -15,7 +15,6 @@ TODO
 * Generate sound programatically
 * Add misc features
 * Allow user to change flags
-* Add more tests
 * Add debug mode
 
 Requirements
