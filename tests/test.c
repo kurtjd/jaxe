@@ -614,7 +614,7 @@ int main()
 {
     // The test machine.
     CHIP8 chip8;
-    chip8_init(&chip8, true, CLOCK_SPEED_DEFAULT, PC_START_ADDR_DEFAULT);
+    chip8_init(&chip8, false, CLOCK_SPEED_DEFAULT, PC_START_ADDR_DEFAULT);
 
     /* All tests follow similar pattern:
             * Load instruction into RAM

@@ -9,12 +9,12 @@
 #include <time.h>
 #include "chip8.h"
 
-void chip8_init(CHIP8 *chip8, bool super_mode, int clock_speed, int pc_start_addr)
+void chip8_init(CHIP8 *chip8, bool legacy_mode, int clock_speed, int pc_start_addr)
 {
     // Seed for the RND instruction.
     srand(time(NULL));
 
-    chip8->super_mode = super_mode;
+    chip8->legacy_mode = legacy_mode;
 
     if (clock_speed <= 0)
     {
@@ -339,7 +339,7 @@ void chip8_execute(CHIP8 *chip8)
         /* SHR Vx {, Vy} (8xy6)
            Set Vx = Vx SHR 1. */
         case 0x06:
-            if (!chip8->super_mode)
+            if (chip8->legacy_mode)
             {
                 chip8->V[x] = chip8->V[y];
             }
@@ -358,7 +358,7 @@ void chip8_execute(CHIP8 *chip8)
         /* SHL Vx {, Vy} (8xyE)
            Set Vx = Vx SHL 1. */
         case 0x0E:
-            if (!chip8->super_mode)
+            if (chip8->legacy_mode)
             {
                 chip8->V[x] = chip8->V[y];
             }
@@ -489,7 +489,7 @@ void chip8_execute(CHIP8 *chip8)
                 chip8->RAM[chip8->I + r] = chip8->V[r];
             }
 
-            if (!chip8->super_mode)
+            if (chip8->legacy_mode)
             {
                 chip8->I += (x + 1);
             }
@@ -504,7 +504,7 @@ void chip8_execute(CHIP8 *chip8)
                 chip8->V[r] = chip8->RAM[chip8->I + r];
             }
 
-            if (!chip8->super_mode)
+            if (chip8->legacy_mode)
             {
                 chip8->I += (x + 1);
             }

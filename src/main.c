@@ -17,7 +17,7 @@ long ON_COLOR = 0xFFFFFF;
 long OFF_COLOR = 0x000000;
 
 // Globals passed to emulator
-bool SUPER_MODE = true; // Default to super_mode for now.
+bool LEGACY_MODE = false;
 unsigned int PC_START_ADDR = PC_START_ADDR_DEFAULT;
 int CLOCK_SPEED = CLOCK_SPEED_DEFAULT;
 
@@ -167,12 +167,12 @@ int main(int argc, char *argv[])
     else if (argc > 2)
     {
         int opt;
-        while ((opt = getopt(argc, argv, "sd:p:c:f:b:")) != -1)
+        while ((opt = getopt(argc, argv, "ld:p:c:f:b:")) != -1)
         {
             switch (opt)
             {
-            case 's':
-                SUPER_MODE = true;
+            case 'l':
+                LEGACY_MODE = true;
                 break;
             case 'd':
                 DISPLAY_SCALE = atoi(optarg);
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
 
     /* Initialize the CHIP8 emulator. */
     CHIP8 chip8;
-    chip8_init(&chip8, SUPER_MODE, CLOCK_SPEED, PC_START_ADDR);
+    chip8_init(&chip8, LEGACY_MODE, CLOCK_SPEED, PC_START_ADDR);
     chip8_load_font(&chip8);
 
     /* Load ROM into memory. */

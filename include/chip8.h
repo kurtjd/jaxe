@@ -42,7 +42,7 @@ typedef struct CHIP8
     Key released: 2 */
     int keypad[MAX_KEYS];
 
-    bool super_mode;
+    bool legacy_mode;
     int clock_speed;
     unsigned int pc_start_addr;
 
@@ -51,7 +51,7 @@ typedef struct CHIP8
 } CHIP8;
 
 // Set some things to useful default values.
-void chip8_init(CHIP8 *chip8, bool super_mode, int clock_speed, int pc_start_addr);
+void chip8_init(CHIP8 *chip8, bool legacy_mode, int clock_speed, int pc_start_addr);
 
 // Reset the machine.
 void chip8_reset(CHIP8 *chip8);
