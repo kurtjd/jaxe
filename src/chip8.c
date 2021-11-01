@@ -17,11 +17,6 @@ void chip8_init(CHIP8 *chip8)
     chip8_reset_keypad(chip8);
     chip8_reset_display(chip8);
 
-    for (int i = 0; i < MAX_RAM; i++)
-    {
-        chip8->RAM[i] = 0x00;
-    }
-
     chip8->PC = PC_START_ADDR;
     chip8->SP = SP_START_ADDR;
     chip8->I = PC_START_ADDR;
