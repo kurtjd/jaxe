@@ -44,6 +44,13 @@ void chip8_reset(CHIP8 *chip8)
     chip8->I = chip8->PC;
     chip8->DT = 0;
     chip8->ST = 0;
+
+    chip8->timer_freq = CLOCKS_PER_SEC / 60;
+    chip8->cycle_start_ticks = 0;
+    chip8->cycle_total_ticks = 0;
+    chip8->sound_cum = 0;
+    chip8->delay_cum = 0;
+
     chip8->display_updated = false;
     chip8->beep = false;
 
@@ -214,6 +221,12 @@ void chip8_execute(CHIP8 *chip8)
     after fetching and decoding the current one. */
     chip8->PC += 2;
     chip8->display_updated = false;
+
+    /* Calculate how many ticks last cycle took. We have to add the cycles
+    that weren't counted while the CPU slept for accurate results. */
+    chip8->cycle_total_ticks = (clock() - chip8->cycle_start_ticks);
+    chip8->cycle_total_ticks += (CLOCKS_PER_SEC / chip8->clock_speed);
+    chip8->cycle_start_ticks = clock();
 
     /* Execute */
     switch (c)
@@ -524,25 +537,30 @@ void chip8_execute(CHIP8 *chip8)
 
 void chip8_handle_timers(CHIP8 *chip8)
 {
-    long freq = CLOCKS_PER_SEC / 60;
-    int cycle = clock() % freq;
-
-    // This whole thing will be modified in the future...
-    if (cycle >= 0 && cycle <= 1000)
+    if (chip8->DT > 0)
     {
-        if (chip8->DT > 0)
+        chip8->delay_cum += chip8->cycle_total_ticks;
+
+        if (chip8->delay_cum >= chip8->timer_freq)
         {
             chip8->DT--;
+            chip8->delay_cum = 0;
         }
-        if (chip8->ST > 0)
+    }
+    if (chip8->ST > 0)
+    {
+        chip8->beep = true;
+        chip8->sound_cum += chip8->cycle_total_ticks;
+
+        if (chip8->sound_cum >= chip8->timer_freq)
         {
             chip8->ST--;
-            chip8->beep = true;
+            chip8->sound_cum = 0;
         }
-        else
-        {
-            chip8->beep = false;
-        }
+    }
+    else
+    {
+        chip8->beep = false;
     }
 }
 

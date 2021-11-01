@@ -11,7 +11,6 @@ A basic CHIP-8 emulator written in C and SDL to practice emulator dev.
 
 TODO
 =====
-* Fix timers
 * Add misc features
 * Add debug mode
 

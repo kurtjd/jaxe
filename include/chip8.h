@@ -2,6 +2,7 @@
 #define CHIP8_H
 
 #include <stdbool.h>
+#include <time.h>
 
 #define MAX_WIDTH 64
 #define MAX_HEIGHT 32
@@ -36,16 +37,26 @@ typedef struct CHIP8
     A pixel can be either only on or off, no color. */
     bool display[MAX_HEIGHT][MAX_WIDTH];
 
-    /* Represents keys 0-F
-    Key up: 0
-    Key down: 1
-    Key released: 2 */
+    // Represents keys 0-F and if they are down, up, or released.
     int keypad[MAX_KEYS];
 
+    /* The emulator can be ran in SUPER CHIP-8 mode by default,
+    or legacy mode compatible with the original COSMAC VIP. */
     bool legacy_mode;
-    int clock_speed;
+
+    /* Where the emulator begins processing. Some programs,
+    such as those written for the ETI-600, begin at different addresses. */
     unsigned int pc_start_addr;
 
+    // These are used for handling clock and timer speed.
+    clock_t clock_speed;
+    clock_t timer_freq;
+    clock_t sound_cum;
+    clock_t delay_cum;
+    clock_t cycle_start_ticks;
+    clock_t cycle_total_ticks;
+
+    // Used to signal to main when to update the display and produce sound.
     bool display_updated;
     bool beep;
 } CHIP8;
