@@ -19,7 +19,7 @@ void chip8_init(CHIP8 *chip8)
 
     chip8->PC = PC_START_ADDR;
     chip8->SP = SP_START_ADDR;
-    chip8->I = 0x00;
+    chip8->I = PC_START_ADDR;
     chip8->DT = 0;
     chip8->ST = 0;
 
