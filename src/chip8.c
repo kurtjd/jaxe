@@ -9,24 +9,46 @@
 #include <time.h>
 #include "chip8.h"
 
-void chip8_init(CHIP8 *chip8)
+void chip8_init(CHIP8 *chip8, bool super_mode, int clock_speed, int pc_start_addr)
 {
     // Seed for the RND instruction.
     srand(time(NULL));
 
-    chip8_reset_keypad(chip8);
-    chip8_reset_display(chip8);
+    chip8->super_mode = super_mode;
 
+    if (clock_speed <= 0)
+    {
+        chip8->clock_speed = CLOCK_SPEED_DEFAULT;
+    }
+    else
+    {
+        chip8->clock_speed = clock_speed;
+    }
+
+    if (pc_start_addr < 0)
+    {
+        chip8->pc_start_addr = PC_START_ADDR_DEFAULT;
+    }
+    else
+    {
+        chip8->pc_start_addr = pc_start_addr;
+    }
+
+    chip8_reset(chip8);
+}
+
+void chip8_reset(CHIP8 *chip8)
+{
     chip8->PC = chip8->pc_start_addr;
     chip8->SP = SP_START_ADDR;
-    chip8->I = chip8->pc_start_addr;
+    chip8->I = chip8->PC;
     chip8->DT = 0;
     chip8->ST = 0;
-
     chip8->display_updated = false;
     chip8->beep = false;
 
-    chip8->super_mode = true;
+    chip8_reset_keypad(chip8);
+    chip8_reset_display(chip8);
 }
 
 void chip8_load_font(CHIP8 *chip8)

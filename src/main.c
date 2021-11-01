@@ -11,12 +11,15 @@
 #define AMPLITUDE 28000
 #define SAMPLE_RATE 44100
 
-bool SUPER_MODE = true;
+// SDL display globals
 int DISPLAY_SCALE = 10;
-unsigned int PC_START_ADDR = 0x200;
-int CLOCK_SPEED = 500;
 long ON_COLOR = 0xFFFFFF;
 long OFF_COLOR = 0x000000;
+
+// Globals passed to emulator
+bool SUPER_MODE = true; // Default to super_mode for now.
+unsigned int PC_START_ADDR = PC_START_ADDR_DEFAULT;
+int CLOCK_SPEED = CLOCK_SPEED_DEFAULT;
 
 // Black magic SDL sound stuff.
 void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
@@ -158,7 +161,7 @@ int main(int argc, char *argv[])
     /* Check command-line arguments. */
     if (argc < 2)
     {
-        printf("Usage: ./jace <path-to-ROM>\n");
+        printf("Usage: ./jace [options] <path-to-ROM>\n");
         return 1;
     }
     else if (argc > 2)
@@ -175,7 +178,7 @@ int main(int argc, char *argv[])
                 DISPLAY_SCALE = atoi(optarg);
                 break;
             case 'p':
-                PC_START_ADDR = atoi(optarg);
+                PC_START_ADDR = strtol(optarg, NULL, 16);
                 break;
             case 'c':
                 CLOCK_SPEED = atoi(optarg);
@@ -192,10 +195,7 @@ int main(int argc, char *argv[])
 
     /* Initialize the CHIP8 emulator. */
     CHIP8 chip8;
-    chip8.pc_start_addr = PC_START_ADDR;
-    chip8.clock_speed = CLOCK_SPEED;
-    chip8.super_mode = SUPER_MODE;
-    chip8_init(&chip8);
+    chip8_init(&chip8, SUPER_MODE, CLOCK_SPEED, PC_START_ADDR);
     chip8_load_font(&chip8);
 
     /* Load ROM into memory. */

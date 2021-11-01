@@ -29,7 +29,7 @@ Build
 
 Run
 ===
-`./jace <path-to-rom>`
+`./jace [options] <path-to-rom>`
 
 ROMs
 ====
