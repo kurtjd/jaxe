@@ -11,8 +11,12 @@ A basic CHIP-8 emulator written in C and SDL to practice emulator dev.
 
 TODO
 =====
-* Add misc features
-* Add debug mode
+* Add full S-CHIP support
+* Look into support for other CHIP-8 variants
+* Add GUI
+* Add more test cases
+* Test Windows support
+* Continue to refactor and optimize code
 
 Requirements
 ============
@@ -30,6 +34,10 @@ Build
 Run
 ===
 `./jace [options] <path-to-rom>`
+
+Options
+=======
+* `-l` Legacy mode (for programs that ran on the COSMAC VIP)
 
 ROMs
 ====
