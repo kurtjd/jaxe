@@ -110,4 +110,7 @@ void chip8_draw(CHIP8 *chip8, unsigned char x, unsigned char y, unsigned char n)
 // Waits for a key to be released then stores that key in Vx.
 void chip8_wait_key(CHIP8 *chip8, unsigned char x);
 
+// Dumps the current contents of RAM to a specified file.
+bool chip8_dump_RAM(CHIP8 *chip8, char *filename);
+
 #endif

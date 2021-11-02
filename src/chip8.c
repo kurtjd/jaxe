@@ -691,3 +691,19 @@ void chip8_wait_key(CHIP8 *chip8, unsigned char x)
         chip8->PC -= 2;
     }
 }
+
+bool chip8_dump_RAM(CHIP8 *chip8, char *filename)
+{
+    FILE *dmp = fopen(filename, "wb");
+    if (dmp)
+    {
+        size_t fw = fwrite(chip8->RAM, MAX_RAM, 1, dmp);
+        (void)fw; // Just to suppress fwrite unused return value warning.
+
+        fclose(dmp);
+
+        return true;
+    }
+
+    return false;
+}
