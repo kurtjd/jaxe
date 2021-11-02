@@ -103,12 +103,23 @@ void draw_debug(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
     char dbg_str[16];
 
     // [DEBUG]
+    font_color.r = 0;
+    font_color.g = 0;
+    font_color.b = 0;
+    font_dest_rect.x = 57;
+    font_dest_rect.y = 5;
+    txt = TTF_RenderText_Solid(DBG_FONT, "[DEBUG]", font_color);
+    SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
+    SDL_FreeSurface(txt);
+
+    // OPCODE
     font_color.r = 255;
     font_color.g = 0;
     font_color.b = 0;
-    font_dest_rect.x = (DBG_PANEL_SIZE / 2) - 45;
-    font_dest_rect.y = 5;
-    txt = TTF_RenderText_Solid(DBG_FONT, "[DEBUG]", font_color);
+    font_dest_rect.x = 41;
+    font_dest_rect.y = 30;
+    sprintf(dbg_str, "Next: %02X%02X", chip8->RAM[chip8->PC], chip8->RAM[chip8->PC + 1]);
+    txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
 
@@ -118,16 +129,16 @@ void draw_debug(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
     font_color.b = 0;
 
     // PC
-    font_dest_rect.x = (DBG_PANEL_SIZE / 2) - 45;
-    font_dest_rect.y = 40;
+    font_dest_rect.x = 57;
+    font_dest_rect.y = 56;
     sprintf(dbg_str, "PC: %03X", chip8->PC);
     txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
 
     // SP, I
-    font_dest_rect.x = 10;
-    font_dest_rect.y = 60;
+    font_dest_rect.x = 13;
+    font_dest_rect.y = 76;
     sprintf(dbg_str, "SP: %03X I: %03X", chip8->SP, chip8->I);
     txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
@@ -138,7 +149,7 @@ void draw_debug(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
     font_color.g = 0;
     font_color.b = 128;
     font_dest_rect.x = 17;
-    font_dest_rect.y = 90;
+    font_dest_rect.y = 97;
     sprintf(dbg_str, "DT: %02X ST: %02X", chip8->DT, chip8->ST);
     txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
