@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <time.h>
+#include <sys/time.h>
 #include "chip8.h"
 
 void chip8_init(CHIP8 *chip8, bool legacy_mode, int clock_speed, int pc_start_addr)
@@ -40,9 +40,15 @@ void chip8_reset(CHIP8 *chip8)
     chip8->DT = 0;
     chip8->ST = 0;
 
-    chip8->timer_freq = CLOCKS_PER_SEC / 60;
-    chip8->cycle_start_ticks = 0;
-    chip8->cycle_total_ticks = 0;
+    // Have cycle times default to current time.
+    gettimeofday(&chip8->cur_cycle_start, NULL);
+    gettimeofday(&chip8->prev_cycle_start, NULL);
+
+    /* Divide by the number of microseconds in a second by the frequency
+    to get number of miliseconds to wait between each tick. */
+    chip8->timer_max_cum = 1000000 / 60;
+    chip8->cpu_max_cum = 1000000 / chip8->clock_speed;
+
     chip8->cpu_cum = 0;
     chip8->sound_cum = 0;
     chip8->delay_cum = 0;
@@ -192,13 +198,11 @@ bool chip8_load_rom(CHIP8 *chip8, char *filename)
 
 void chip8_execute(CHIP8 *chip8)
 {
-    /* Calculate how many ticks last cycle took.
-    Slow down execution to match given clock speed. */
-    chip8->cycle_total_ticks = (clock() - chip8->cycle_start_ticks);
-    chip8->cycle_start_ticks = clock();
-    chip8->cpu_cum += chip8->cycle_total_ticks;
+    chip8_update_elapsed_time(chip8);
 
-    if (chip8->cpu_cum >= (CLOCKS_PER_SEC / chip8->clock_speed))
+    // Slow the CPU down to match given clock speed.
+    chip8->cpu_cum += chip8->total_cycle_time;
+    if (chip8->cpu_cum >= chip8->cpu_max_cum)
     {
         chip8->cpu_cum = 0;
     }
@@ -209,7 +213,8 @@ void chip8_execute(CHIP8 *chip8)
 
     /* Fetch */
     // The first and second byte of instruction respectively.
-    unsigned char b1 = chip8->RAM[chip8->PC], b2 = chip8->RAM[chip8->PC + 1];
+    unsigned char b1 = chip8->RAM[chip8->PC],
+                  b2 = chip8->RAM[chip8->PC + 1];
 
     /* Decode */
     // The code (first 4 bits) of instruction.
@@ -543,9 +548,9 @@ void chip8_handle_timers(CHIP8 *chip8)
 {
     if (chip8->DT > 0)
     {
-        chip8->delay_cum += chip8->cycle_total_ticks;
+        chip8->delay_cum += chip8->total_cycle_time;
 
-        if (chip8->delay_cum >= chip8->timer_freq)
+        if (chip8->delay_cum >= chip8->timer_max_cum)
         {
             chip8->DT--;
             chip8->delay_cum = 0;
@@ -554,9 +559,9 @@ void chip8_handle_timers(CHIP8 *chip8)
     if (chip8->ST > 0)
     {
         chip8->beep = true;
-        chip8->sound_cum += chip8->cycle_total_ticks;
+        chip8->sound_cum += chip8->total_cycle_time;
 
-        if (chip8->sound_cum >= chip8->timer_freq)
+        if (chip8->sound_cum >= chip8->timer_max_cum)
         {
             chip8->ST--;
             chip8->sound_cum = 0;
@@ -566,6 +571,15 @@ void chip8_handle_timers(CHIP8 *chip8)
     {
         chip8->beep = false;
     }
+}
+
+void chip8_update_elapsed_time(CHIP8 *chip8)
+{
+    chip8->prev_cycle_start.tv_sec = chip8->cur_cycle_start.tv_sec;
+    chip8->prev_cycle_start.tv_usec = chip8->cur_cycle_start.tv_usec;
+    gettimeofday(&chip8->cur_cycle_start, NULL);
+    chip8->total_cycle_time = ((chip8->cur_cycle_start.tv_sec - chip8->prev_cycle_start.tv_sec) * 1000000);
+    chip8->total_cycle_time += (chip8->cur_cycle_start.tv_usec - chip8->prev_cycle_start.tv_usec);
 }
 
 void chip8_reset_keypad(CHIP8 *chip8)

@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <time.h>
+#include <sys/time.h>
 
 #define MAX_WIDTH 64
 #define MAX_HEIGHT 32
@@ -49,13 +50,15 @@ typedef struct CHIP8
     unsigned int pc_start_addr;
 
     // These are used for handling clock and timer speed.
-    clock_t clock_speed;
-    clock_t timer_freq;
-    clock_t cpu_cum;
-    clock_t sound_cum;
-    clock_t delay_cum;
-    clock_t cycle_start_ticks;
-    clock_t cycle_total_ticks;
+    int clock_speed;
+    int timer_max_cum;
+    int cpu_max_cum;
+    long cpu_cum;
+    long sound_cum;
+    long delay_cum;
+    long total_cycle_time;
+    struct timeval cur_cycle_start;
+    struct timeval prev_cycle_start;
 
     // Used to signal to main when to update the display and produce sound.
     bool display_updated;
@@ -83,6 +86,9 @@ void chip8_execute(CHIP8 *chip8);
 
 // Decrements delay and sound timers at a frequency of 60Hz.
 void chip8_handle_timers(CHIP8 *chip8);
+
+// Updates the total cycle time since last call.
+void chip8_update_elapsed_time(CHIP8 *chip8);
 
 // Clears the keypad by setting all keys to up.
 void chip8_reset_keypad(CHIP8 *chip8);
