@@ -163,9 +163,9 @@ void draw_debug(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
     font_dest_rect.x = 18;
     font_dest_rect.y = 120;
 
-    for (int i = 0; i < 16; i += 2)
+    for (int i = 0; i < 8; i++)
     {
-        sprintf(dbg_str, "V%X: %02X V%X: %02X", i, chip8->V[i], i + 1, chip8->V[i + 1]);
+        sprintf(dbg_str, "V%X: %02X V%X: %02X", i, chip8->V[i], i + 8, chip8->V[i + 8]);
         txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
 
         SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
