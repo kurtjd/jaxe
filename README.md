@@ -17,6 +17,7 @@ TODO
 Requirements
 ============
 * SDL2
+* SDL2_ttf (for debug mode)
 
 Build
 =====

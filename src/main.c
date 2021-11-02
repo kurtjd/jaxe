@@ -5,17 +5,20 @@
 #include <unistd.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_audio.h>
+#include <SDL2/SDL_ttf.h>
 #include "chip8.h"
 
 #define BAD_KEY 0x42
 #define AMPLITUDE 28000
 #define SAMPLE_RATE 44100
 #define DBG_PANEL_SIZE 200
+#define DBG_FONT_FILE "../fonts/dbgfont.ttf"
 
 // SDL display globals
 int DISPLAY_SCALE = 10;
 long ON_COLOR = 0xFFFFFF;
 long OFF_COLOR = 0x000000;
+TTF_Font *DBG_FONT = NULL;
 
 // Black magic SDL sound stuff.
 void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
@@ -69,9 +72,11 @@ void draw_display(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
     SDL_UpdateWindowSurface(window);
 }
 
-// Display the debug panel.
-void draw_debug(SDL_Window *window, SDL_Surface *surface)
+/* Display the debug panel.
+This function is nasty and slow as hell, I am not proud of it. */
+void draw_debug(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
 {
+    // Create a gray rectangle surface as the side panel for debug.
     SDL_Surface *dbg_panel = SDL_CreateRGBSurface(0,
                                                   DBG_PANEL_SIZE,
                                                   MAX_HEIGHT * DISPLAY_SCALE,
@@ -84,7 +89,102 @@ void draw_debug(SDL_Window *window, SDL_Surface *surface)
     dest_rect.w = DBG_PANEL_SIZE - 1;
     dest_rect.h = MAX_HEIGHT * DISPLAY_SCALE;
 
+    // Now create text with useful information.
+    SDL_Surface *txt = NULL;
+    SDL_Color font_color;
+    font_color.a = 0;
+    SDL_Rect font_dest_rect;
+    font_dest_rect.w = 0;
+    font_dest_rect.h = 0;
+    char dbg_str[16];
+
+    // [DEBUG]
+    font_color.r = 255;
+    font_color.g = 0;
+    font_color.b = 0;
+    font_dest_rect.x = (DBG_PANEL_SIZE / 2) - 45;
+    font_dest_rect.y = 5;
+    txt = TTF_RenderText_Solid(DBG_FONT, "[DEBUG]", font_color);
+    SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
+    SDL_FreeSurface(txt);
+
+    // Address Holders
+    font_color.r = 0;
+    font_color.g = 100;
+    font_color.b = 0;
+
+    // PC
+    font_dest_rect.x = (DBG_PANEL_SIZE / 2) - 45;
+    font_dest_rect.y = 40;
+    sprintf(dbg_str, "PC: %03X", chip8->PC);
+    txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
+    SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
+    SDL_FreeSurface(txt);
+
+    // SP, I
+    font_dest_rect.x = 10;
+    font_dest_rect.y = 60;
+    sprintf(dbg_str, "SP: %03X I: %03X", chip8->SP, chip8->I);
+    txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
+    SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
+    SDL_FreeSurface(txt);
+
+    // Timers
+    font_color.r = 128;
+    font_color.g = 0;
+    font_color.b = 128;
+    font_dest_rect.x = 17;
+    font_dest_rect.y = 90;
+    sprintf(dbg_str, "DT: %02X ST: %02X", chip8->DT, chip8->ST);
+    txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
+    SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
+    SDL_FreeSurface(txt);
+
+    // Registers
+    font_color.r = 0;
+    font_color.g = 0;
+    font_color.b = 255;
+    font_dest_rect.x = 18;
+    font_dest_rect.y = 120;
+
+    for (int i = 0; i < 16; i += 2)
+    {
+        sprintf(dbg_str, "V%X: %02X V%X: %02X", i, chip8->V[i], i + 1, chip8->V[i + 1]);
+        txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
+
+        SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
+        SDL_FreeSurface(txt);
+
+        font_dest_rect.y += 15;
+    }
+
+    // Instructions
+    font_color.r = 0;
+    font_color.g = 0;
+    font_color.b = 0;
+    font_dest_rect.x = 4;
+
+    // UP
+    font_dest_rect.y = 120 + (15 * 8) + 20;
+    txt = TTF_RenderText_Solid(DBG_FONT, "UP:    Step", font_color);
+    SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
+    SDL_FreeSurface(txt);
+
+    // SPACE
+    font_dest_rect.y = 120 + (15 * 8) + 36;
+    txt = TTF_RenderText_Solid(DBG_FONT, "SPACE: Strt/Stop", font_color);
+    SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
+    SDL_FreeSurface(txt);
+
+    // ENTER
+    font_dest_rect.y = 120 + (15 * 8) + 52;
+    txt = TTF_RenderText_Solid(DBG_FONT, "ENTER: Dump RAM", font_color);
+    SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
+    SDL_FreeSurface(txt);
+
+    // Finally blit debug panel onto window.
     SDL_BlitSurface(dbg_panel, NULL, surface, &dest_rect);
+    SDL_FreeSurface(dbg_panel);
     SDL_UpdateWindowSurface(window);
 }
 
@@ -243,17 +343,31 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    int width = MAX_WIDTH * DISPLAY_SCALE;
-    int height = MAX_HEIGHT * DISPLAY_SCALE;
+    int window_width = MAX_WIDTH * DISPLAY_SCALE;
+    int window_height = MAX_HEIGHT * DISPLAY_SCALE;
     if (DEBUG_MODE)
     {
-        width += DBG_PANEL_SIZE;
+        // Change window size depending on if DEBUG_MODE is active or not.
+        window_width += DBG_PANEL_SIZE;
+
+        // Initialize fonts since debug mode relies on them.
+        if (TTF_Init() == -1)
+        {
+            fprintf(stderr, "Could not initialize SDL_ttf.\n");
+            return 1;
+        }
+
+        DBG_FONT = TTF_OpenFont(DBG_FONT_FILE, 12);
+        if (DBG_FONT == NULL)
+        {
+            fprintf(stderr, "Could not load font.\n");
+        }
     }
     SDL_Window *window = SDL_CreateWindow("JACE",
                                           SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED,
-                                          width,
-                                          height,
+                                          window_width,
+                                          window_height,
                                           SDL_WINDOW_SHOWN);
     if (window == NULL)
     {
@@ -320,11 +434,15 @@ int main(int argc, char **argv)
 
         if (DEBUG_MODE)
         {
-            draw_debug(window, surface);
+            draw_debug(window, surface, &chip8);
         }
     }
 
     /* Free Resources */
+    if (DEBUG_MODE)
+    {
+        TTF_CloseFont(DBG_FONT);
+    }
     SDL_FreeSurface(surface);
     SDL_DestroyWindow(window);
     SDL_CloseAudio();

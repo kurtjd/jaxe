@@ -11,7 +11,7 @@ add_executable("jace"
 
 target_include_directories("jace" PUBLIC include)
 target_compile_options("jace" PRIVATE -Wall -Wextra -Wpedantic)
-target_link_libraries("jace" -lSDL2 m)
+target_link_libraries("jace" -lSDL2 SDL2_ttf m)
 
 add_executable("test"
     tests/test.c
