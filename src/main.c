@@ -11,7 +11,8 @@
 #define BAD_KEY 0x42
 #define AMPLITUDE 28000
 #define SAMPLE_RATE 44100
-#define DBG_PANEL_SIZE 200
+#define DBG_PANEL_WIDTH 200
+#define DBG_PANEL_HEIGHT 320
 #define DBG_FONT_FILE "../fonts/dbgfont.ttf"
 
 // Globals
@@ -83,16 +84,16 @@ void draw_debug(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
 {
     // Create a gray rectangle surface as the side panel for debug.
     SDL_Surface *dbg_panel = SDL_CreateRGBSurface(0,
-                                                  DBG_PANEL_SIZE,
-                                                  MAX_HEIGHT * DISPLAY_SCALE,
+                                                  DBG_PANEL_WIDTH,
+                                                  DBG_PANEL_HEIGHT,
                                                   32, 0, 0, 0, 0);
     SDL_FillRect(dbg_panel, NULL, SDL_MapRGB(dbg_panel->format, 200, 200, 200));
 
     SDL_Rect dest_rect;
     dest_rect.x = (MAX_WIDTH * DISPLAY_SCALE) + 1;
     dest_rect.y = 0;
-    dest_rect.w = DBG_PANEL_SIZE - 1;
-    dest_rect.h = MAX_HEIGHT * DISPLAY_SCALE;
+    dest_rect.w = DBG_PANEL_WIDTH - 1;
+    dest_rect.h = DBG_PANEL_HEIGHT;
 
     // Now create text with useful information.
     SDL_Surface *txt = NULL;
@@ -389,7 +390,11 @@ int main(int argc, char **argv)
     if (DEBUG_MODE)
     {
         // Change window size depending on if DEBUG_MODE is active or not.
-        window_width += DBG_PANEL_SIZE;
+        window_width += DBG_PANEL_WIDTH;
+        if ((DISPLAY_SCALE * MAX_HEIGHT) < DBG_PANEL_HEIGHT)
+        {
+            window_height = DBG_PANEL_HEIGHT;
+        }
 
         // Initialize fonts since debug mode relies on them.
         if (TTF_Init() == -1)
