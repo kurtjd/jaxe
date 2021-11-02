@@ -38,6 +38,12 @@ Run
 Options
 =======
 * `-l` Legacy mode (for programs that ran on the COSMAC VIP)
+* `-d` Debug mode (with optional dump file specified, otherwise defaults to jace.dmp)
+* `-s` Display scale factor
+* `-p` Program start address
+* `-c` Clock speed (in Hz)
+* `-x` Pixel ON color
+* `-y` Pixel OFF color
 
 ROMs
 ====
