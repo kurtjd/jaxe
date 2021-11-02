@@ -39,3 +39,7 @@ References
 ==========
 * [Cowgod's Chip-8 Technical Reference v1.0](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)
 * [Matthew Mikolay's Instruction Set](https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Instruction-Set)
+
+Acknowledgements
+================
+* [Kongtext Font by codeman38](https://www.1001fonts.com/kongtext-font.html)
