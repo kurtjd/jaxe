@@ -10,6 +10,7 @@
 #define BAD_KEY 0x42
 #define AMPLITUDE 28000
 #define SAMPLE_RATE 44100
+#define DBG_PANEL_SIZE 200
 
 // SDL display globals
 int DISPLAY_SCALE = 10;
@@ -31,11 +32,11 @@ void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
     }
 }
 
-// Sets a pixel of the SDL surface to match the emulator.
-void set_pixel(SDL_Surface *surface, int x, int y, bool on)
+// Sets a pixel of the SDL surface to a certain color.
+void set_pixel(SDL_Surface *surface, int x, int y, long color)
 {
     Uint32 *pixels = (Uint32 *)surface->pixels;
-    pixels[(y * surface->w) + x] = on ? ON_COLOR : OFF_COLOR;
+    pixels[(y * surface->w) + x] = color;
 }
 
 // Makes the physical screen match the emulator display.
@@ -49,15 +50,41 @@ void draw_display(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
             {
                 for (int j = 0; j < DISPLAY_SCALE; j++)
                 {
-                    set_pixel(surface,
-                              (x * DISPLAY_SCALE) + j,
-                              (y * DISPLAY_SCALE) + i,
-                              chip8->display[y][x]);
+                    int sdl_x = (x * DISPLAY_SCALE) + j;
+                    int sdl_y = (y * DISPLAY_SCALE) + i;
+
+                    if (chip8->display[y][x])
+                    {
+                        set_pixel(surface, sdl_x, sdl_y, ON_COLOR);
+                    }
+                    else
+                    {
+                        set_pixel(surface, sdl_x, sdl_y, OFF_COLOR);
+                    }
                 }
             }
         }
     }
 
+    SDL_UpdateWindowSurface(window);
+}
+
+// Display the debug panel.
+void draw_debug(SDL_Window *window, SDL_Surface *surface)
+{
+    SDL_Surface *dbg_panel = SDL_CreateRGBSurface(0,
+                                                  DBG_PANEL_SIZE,
+                                                  MAX_HEIGHT * DISPLAY_SCALE,
+                                                  32, 0, 0, 0, 0);
+    SDL_FillRect(dbg_panel, NULL, SDL_MapRGB(dbg_panel->format, 200, 200, 200));
+
+    SDL_Rect dest_rect;
+    dest_rect.x = (MAX_WIDTH * DISPLAY_SCALE) + 1;
+    dest_rect.y = 0;
+    dest_rect.w = DBG_PANEL_SIZE - 1;
+    dest_rect.h = MAX_HEIGHT * DISPLAY_SCALE;
+
+    SDL_BlitSurface(dbg_panel, NULL, surface, &dest_rect);
     SDL_UpdateWindowSurface(window);
 }
 
@@ -151,10 +178,11 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
     return true;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
     // Emulator options
     bool LEGACY_MODE = false;
+    bool DEBUG_MODE = false;
     unsigned int PC_START_ADDR = PC_START_ADDR_DEFAULT;
     int CLOCK_SPEED = CLOCK_SPEED_DEFAULT;
 
@@ -167,7 +195,7 @@ int main(int argc, char *argv[])
     else if (argc > 2)
     {
         int opt;
-        while ((opt = getopt(argc, argv, "ld:p:c:f:b:")) != -1)
+        while ((opt = getopt(argc, argv, "lds:p:c:f:b:")) != -1)
         {
             switch (opt)
             {
@@ -175,6 +203,9 @@ int main(int argc, char *argv[])
                 LEGACY_MODE = true;
                 break;
             case 'd':
+                DEBUG_MODE = true;
+                break;
+            case 's':
                 DISPLAY_SCALE = atoi(optarg);
                 break;
             case 'p':
@@ -212,11 +243,17 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    int width = MAX_WIDTH * DISPLAY_SCALE;
+    int height = MAX_HEIGHT * DISPLAY_SCALE;
+    if (DEBUG_MODE)
+    {
+        width += DBG_PANEL_SIZE;
+    }
     SDL_Window *window = SDL_CreateWindow("JACE",
                                           SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED,
-                                          MAX_WIDTH * DISPLAY_SCALE,
-                                          MAX_HEIGHT * DISPLAY_SCALE,
+                                          width,
+                                          height,
                                           SDL_WINDOW_SHOWN);
     if (window == NULL)
     {
@@ -280,9 +317,15 @@ int main(int argc, char *argv[])
         {
             SDL_PauseAudio(1);
         }
+
+        if (DEBUG_MODE)
+        {
+            draw_debug(window, surface);
+        }
     }
 
     /* Free Resources */
+    SDL_FreeSurface(surface);
     SDL_DestroyWindow(window);
     SDL_CloseAudio();
     SDL_Quit();
