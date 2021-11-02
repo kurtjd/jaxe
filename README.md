@@ -37,13 +37,27 @@ Run
 
 Options
 =======
-* `-l` Legacy mode (for programs that ran on the COSMAC VIP)
-* `-d` Debug mode (with optional dump file specified, otherwise defaults to jace.dmp)
-* `-s` Display scale factor
-* `-p` Program start address
-* `-c` Clock speed (in Hz)
-* `-x` Pixel ON color
-* `-y` Pixel OFF color
+`-l` Enable legacy mode (for programs that ran on the COSMAC VIP)  
+`-d` Enable debug mode (with optional dump file specified, otherwise defaults to jace.dmp)  
+`-s` Set display scale factor  
+`-p` Set program start address (in hex)  
+`-c` Set clock speed (in Hz)  
+`-x` Set pixel ON color (in hex)  
+`-y` Set pixel OFF color (in hex)
+
+Controls
+========
+**Keyboard**:  
+`1` `2` `3` `4`  
+`Q` `W` `E` `R`  
+`A` `S` `D` `F`  
+`Z` `X` `C` `V`
+
+**Original Hexpad**:  
+`1` `2` `3` `C`  
+`4` `5` `6` `D`  
+`7` `8` `9` `E`  
+`A` `0` `B` `F`
 
 ROMs
 ====
