@@ -14,11 +14,15 @@
 #define DBG_PANEL_SIZE 200
 #define DBG_FONT_FILE "../fonts/dbgfont.ttf"
 
-// SDL display globals
+// Globals
 int DISPLAY_SCALE = 10;
 long ON_COLOR = 0xFFFFFF;
 long OFF_COLOR = 0x000000;
 TTF_Font *DBG_FONT = NULL;
+
+bool dbg_paused = false;
+bool dbg_step = false;
+bool DEBUG_MODE = false;
 
 // Black magic SDL sound stuff.
 void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
@@ -264,6 +268,14 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
             {
                 chip8->keypad[hexkey] = KEY_RELEASED;
             }
+            else if (e->key.keysym.sym == SDLK_SPACE && DEBUG_MODE)
+            {
+                dbg_paused = !dbg_paused;
+            }
+            else if (e->key.keysym.sym == SDLK_UP && DEBUG_MODE)
+            {
+                dbg_step = true;
+            }
         }
         else if (e->type == SDL_KEYDOWN)
         {
@@ -282,7 +294,6 @@ int main(int argc, char **argv)
 {
     // Emulator options
     bool LEGACY_MODE = false;
-    bool DEBUG_MODE = false;
     unsigned int PC_START_ADDR = PC_START_ADDR_DEFAULT;
     int CLOCK_SPEED = CLOCK_SPEED_DEFAULT;
 
@@ -304,6 +315,7 @@ int main(int argc, char **argv)
                 break;
             case 'd':
                 DEBUG_MODE = true;
+                dbg_paused = true;
                 break;
             case 's':
                 DISPLAY_SCALE = atoi(optarg);
@@ -414,6 +426,23 @@ int main(int argc, char **argv)
     SDL_Event e;
     while (handle_input(&e, &chip8))
     {
+        if (DEBUG_MODE)
+        {
+            draw_debug(window, surface, &chip8);
+        }
+
+        if (dbg_paused)
+        {
+            if (!dbg_step)
+            {
+                continue;
+            }
+            else
+            {
+                dbg_step = false;
+            }
+        }
+
         chip8_execute(&chip8);
         chip8_handle_timers(&chip8);
 
@@ -430,11 +459,6 @@ int main(int argc, char **argv)
         else
         {
             SDL_PauseAudio(1);
-        }
-
-        if (DEBUG_MODE)
-        {
-            draw_debug(window, surface, &chip8);
         }
     }
 

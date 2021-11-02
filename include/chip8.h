@@ -92,6 +92,12 @@ void chip8_reset_released_keys(CHIP8 *chip8);
 // Clears the display by setting all pixels to off.
 void chip8_reset_display(CHIP8 *chip8);
 
+// Clears the RAM.
+void chip8_reset_RAM(CHIP8 *chip8);
+
+// Clears all registers.
+void chip8_reset_registers(CHIP8 *chip8);
+
 // Makes the CPU sleep after every instruction to match the given clock speed.
 void chip8_sleep(CHIP8 *chip8);
 

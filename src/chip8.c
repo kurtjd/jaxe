@@ -54,6 +54,8 @@ void chip8_reset(CHIP8 *chip8)
     chip8->display_updated = false;
     chip8->beep = false;
 
+    chip8_reset_RAM(chip8);
+    chip8_reset_registers(chip8);
     chip8_reset_keypad(chip8);
     chip8_reset_display(chip8);
 }
@@ -594,6 +596,22 @@ void chip8_reset_display(CHIP8 *chip8)
     }
 
     chip8->display_updated = true;
+}
+
+void chip8_reset_RAM(CHIP8 *chip8)
+{
+    for (int i = 0; i < MAX_RAM; i++)
+    {
+        chip8->RAM[i] = 0x00;
+    }
+}
+
+void chip8_reset_registers(CHIP8 *chip8)
+{
+    for (int i = 0; i < MAX_REGISTERS; i++)
+    {
+        chip8->V[i] = 0x00;
+    }
 }
 
 void chip8_sleep(CHIP8 *chip8)

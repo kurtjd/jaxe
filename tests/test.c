@@ -597,6 +597,7 @@ void test_Fx65(CHIP8 *chip8)
 {
     chip8_load_instr(chip8, 0xF265);
 
+    chip8->I = 0xBAD;
     chip8->RAM[chip8->I] = 0x69;
     chip8->RAM[chip8->I + 1] = 0x42;
     chip8->RAM[chip8->I + 2] = 0xAB;
