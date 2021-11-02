@@ -456,15 +456,14 @@ int main(int argc, char **argv)
     }
     /******************************/
 
+    if (DEBUG_MODE)
+    {
+        draw_debug(window, surface, &chip8);
+    }
     /* Main Loop */
     SDL_Event e;
     while (handle_input(&e, &chip8))
     {
-        if (DEBUG_MODE)
-        {
-            draw_debug(window, surface, &chip8);
-        }
-
         if (dbg_paused)
         {
             if (!dbg_step)
@@ -484,6 +483,11 @@ int main(int argc, char **argv)
         if (chip8.display_updated)
         {
             draw_display(window, surface, &chip8);
+        }
+
+        if (DEBUG_MODE)
+        {
+            draw_debug(window, surface, &chip8);
         }
 
         if (chip8.beep)

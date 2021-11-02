@@ -51,6 +51,7 @@ typedef struct CHIP8
     // These are used for handling clock and timer speed.
     clock_t clock_speed;
     clock_t timer_freq;
+    clock_t cpu_cum;
     clock_t sound_cum;
     clock_t delay_cum;
     clock_t cycle_start_ticks;
@@ -97,9 +98,6 @@ void chip8_reset_RAM(CHIP8 *chip8);
 
 // Clears all registers.
 void chip8_reset_registers(CHIP8 *chip8);
-
-// Makes the CPU sleep after every instruction to match the given clock speed.
-void chip8_sleep(CHIP8 *chip8);
 
 // Loads an instruction into PC_START_ADDR.
 void chip8_load_instr(CHIP8 *chip8, unsigned int instr);

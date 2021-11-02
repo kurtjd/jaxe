@@ -1,8 +1,3 @@
-#ifdef WIN32
-#include <windows.h>
-#elif _POSIX_C_SOURCE < 199309L
-#include <unistd.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -48,6 +43,7 @@ void chip8_reset(CHIP8 *chip8)
     chip8->timer_freq = CLOCKS_PER_SEC / 60;
     chip8->cycle_start_ticks = 0;
     chip8->cycle_total_ticks = 0;
+    chip8->cpu_cum = 0;
     chip8->sound_cum = 0;
     chip8->delay_cum = 0;
 
@@ -196,6 +192,21 @@ bool chip8_load_rom(CHIP8 *chip8, char *filename)
 
 void chip8_execute(CHIP8 *chip8)
 {
+    /* Calculate how many ticks last cycle took.
+    Slow down execution to match given clock speed. */
+    chip8->cycle_total_ticks = (clock() - chip8->cycle_start_ticks);
+    chip8->cycle_start_ticks = clock();
+    chip8->cpu_cum += chip8->cycle_total_ticks;
+
+    if (chip8->cpu_cum >= (CLOCKS_PER_SEC / chip8->clock_speed))
+    {
+        chip8->cpu_cum = 0;
+    }
+    else
+    {
+        return;
+    }
+
     /* Fetch */
     // The first and second byte of instruction respectively.
     unsigned char b1 = chip8->RAM[chip8->PC], b2 = chip8->RAM[chip8->PC + 1];
@@ -223,12 +234,6 @@ void chip8_execute(CHIP8 *chip8)
     after fetching and decoding the current one. */
     chip8->PC += 2;
     chip8->display_updated = false;
-
-    /* Calculate how many ticks last cycle took. We have to add the cycles
-    that weren't counted while the CPU slept for accurate results. */
-    chip8->cycle_total_ticks = (clock() - chip8->cycle_start_ticks);
-    chip8->cycle_total_ticks += (CLOCKS_PER_SEC / chip8->clock_speed);
-    chip8->cycle_start_ticks = clock();
 
     /* Execute */
     switch (c)
@@ -532,9 +537,6 @@ void chip8_execute(CHIP8 *chip8)
 
     // Any key that was released previous frame gets turned off.
     chip8_reset_released_keys(chip8);
-
-    // Slow the processor down to match old hardware.
-    chip8_sleep(chip8);
 }
 
 void chip8_handle_timers(CHIP8 *chip8)
@@ -612,20 +614,6 @@ void chip8_reset_registers(CHIP8 *chip8)
     {
         chip8->V[i] = 0x00;
     }
-}
-
-void chip8_sleep(CHIP8 *chip8)
-{
-#ifdef WIN32
-    Sleep(1000 / chip8->clock_speed);
-#elif _POSIX_C_SOURCE >= 199309L
-    struct timespec ts;
-    ts.tv_sec = 0;
-    ts.tv_nsec = 1000000000 / chip8->clock_speed;
-    nanosleep(&ts, NULL);
-#else
-    usleep(1000000 / chip8->clock_speed);
-#endif
 }
 
 void chip8_load_instr(CHIP8 *chip8, unsigned int instr)
