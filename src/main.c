@@ -460,6 +460,7 @@ int main(int argc, char **argv)
     {
         draw_debug(window, surface, &chip8);
     }
+
     /* Main Loop */
     SDL_Event e;
     while (handle_input(&e, &chip8))
@@ -476,8 +477,7 @@ int main(int argc, char **argv)
             }
         }
 
-        chip8_execute(&chip8);
-        chip8_handle_timers(&chip8);
+        chip8_cycle(&chip8);
 
         // Prevents wasting time drawing every frame when unnecessary.
         if (chip8.display_updated)

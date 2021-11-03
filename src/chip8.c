@@ -196,7 +196,7 @@ bool chip8_load_rom(CHIP8 *chip8, char *filename)
     return false;
 }
 
-void chip8_execute(CHIP8 *chip8)
+void chip8_cycle(CHIP8 *chip8)
 {
     chip8_update_elapsed_time(chip8);
 
@@ -205,12 +205,14 @@ void chip8_execute(CHIP8 *chip8)
     if (chip8->cpu_cum >= chip8->cpu_max_cum)
     {
         chip8->cpu_cum = 0;
-    }
-    else
-    {
-        return;
+        chip8_execute(chip8);
     }
 
+    chip8_handle_timers(chip8);
+}
+
+void chip8_execute(CHIP8 *chip8)
+{
     /* Fetch */
     // The first and second byte of instruction respectively.
     unsigned char b1 = chip8->RAM[chip8->PC],
