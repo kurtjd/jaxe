@@ -1,10 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <sys/time.h>
 #include "chip8.h"
 
-void chip8_init(CHIP8 *chip8, bool legacy_mode, int clock_speed, int pc_start_addr)
+void chip8_init(CHIP8 *chip8, bool legacy_mode, uint16_t clock_speed, uint16_t pc_start_addr)
 {
     // Seed for the RND instruction.
     srand(time(NULL));
@@ -20,14 +18,7 @@ void chip8_init(CHIP8 *chip8, bool legacy_mode, int clock_speed, int pc_start_ad
         chip8->clock_speed = clock_speed;
     }
 
-    if (pc_start_addr < 0)
-    {
-        chip8->pc_start_addr = PC_START_ADDR_DEFAULT;
-    }
-    else
-    {
-        chip8->pc_start_addr = pc_start_addr;
-    }
+    chip8->pc_start_addr = pc_start_addr;
 
     chip8_reset(chip8);
 }
@@ -64,7 +55,7 @@ void chip8_reset(CHIP8 *chip8)
 
 void chip8_load_font(CHIP8 *chip8)
 {
-    unsigned char font_data[] = {
+    uint8_t font_data[] = {
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
         0x20, 0x60, 0x20, 0x20, 0x70, // 1
         0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -83,7 +74,7 @@ void chip8_load_font(CHIP8 *chip8)
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 
-    for (unsigned int i = 0; i < sizeof(font_data); i++)
+    for (uint8_t i = 0; i < sizeof(font_data); i++)
     {
         chip8->RAM[FONT_START_ADDR + i] = font_data[i];
     }
@@ -127,27 +118,27 @@ void chip8_execute(CHIP8 *chip8)
 {
     /* Fetch */
     // The first and second byte of instruction respectively.
-    unsigned char b1 = chip8->RAM[chip8->PC],
-                  b2 = chip8->RAM[chip8->PC + 1];
+    uint8_t b1 = chip8->RAM[chip8->PC],
+            b2 = chip8->RAM[chip8->PC + 1];
 
     /* Decode */
     // The code (first 4 bits) of instruction.
-    unsigned char c = b1 >> 4;
+    uint8_t c = b1 >> 4;
 
     // The last 12 bits of instruction.
-    unsigned int nnn = ((b1 & 0xF) << 8) | b2;
+    uint16_t nnn = ((b1 & 0xF) << 8) | b2;
 
     // The last 4 bits of instruction.
-    unsigned char n = b2 & 0xF;
+    uint8_t n = b2 & 0xF;
 
     // The last 4 bits of first byte of instruction.
-    unsigned char x = b1 & 0xF;
+    uint8_t x = b1 & 0xF;
 
     // The first 4 bits of second byte of instruction.
-    unsigned char y = b2 >> 4;
+    uint8_t y = b2 >> 4;
 
     // The last 8 bits of instruction.
-    unsigned char kk = b2;
+    uint8_t kk = b2;
 
     /* Immediately set PC to next instruction
     after fetching and decoding the current one. */
@@ -545,13 +536,13 @@ void chip8_reset_registers(CHIP8 *chip8)
     }
 }
 
-void chip8_load_instr(CHIP8 *chip8, unsigned int instr)
+void chip8_load_instr(CHIP8 *chip8, uint16_t instr)
 {
     chip8->RAM[chip8->pc_start_addr] = instr >> 8;
     chip8->RAM[chip8->pc_start_addr + 1] = instr & 0x00FF;
 }
 
-void chip8_draw(CHIP8 *chip8, unsigned char x, unsigned char y, unsigned char n)
+void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
 {
     chip8->V[0x0F] = 0;
 
@@ -589,7 +580,7 @@ void chip8_draw(CHIP8 *chip8, unsigned char x, unsigned char y, unsigned char n)
     chip8->display_updated = true;
 }
 
-void chip8_wait_key(CHIP8 *chip8, unsigned char x)
+void chip8_wait_key(CHIP8 *chip8, uint8_t x)
 {
     bool key_released = false;
 

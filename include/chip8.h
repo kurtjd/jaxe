@@ -2,6 +2,7 @@
 #define CHIP8_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <time.h>
 #include <sys/time.h>
 
@@ -23,23 +24,23 @@
 typedef struct CHIP8
 {
     // Represents 4096 bytes (4KB) of addressable memory.
-    unsigned char RAM[MAX_RAM];
+    uint8_t RAM[MAX_RAM];
 
     // Represents 16 general-purpose 8-bit registers (V0-VF).
-    unsigned char V[MAX_REGISTERS];
+    uint8_t V[MAX_REGISTERS];
 
     // Program counter, stack pointer, and index 16-bit registers.
-    unsigned int PC, SP, I;
+    uint16_t PC, SP, I;
 
     // Delay timer and sound timer 8-bit registers.
-    unsigned char DT, ST;
+    uint8_t DT, ST;
 
     /* A monochrome display of 64x32 pixels.
     A pixel can be either only on or off, no color. */
     bool display[MAX_HEIGHT][MAX_WIDTH];
 
     // Represents keys 0-F and if they are down, up, or released.
-    int keypad[MAX_KEYS];
+    uint8_t keypad[MAX_KEYS];
 
     /* The emulator can be ran in SUPER CHIP-8 mode by default,
     or legacy mode compatible with the original COSMAC VIP. */
@@ -47,16 +48,16 @@ typedef struct CHIP8
 
     /* Where the emulator begins processing. Some programs,
     such as those written for the ETI-600, begin at different addresses. */
-    unsigned int pc_start_addr;
+    uint16_t pc_start_addr;
 
     // These are used for handling clock and timer speed.
-    int clock_speed;
-    int timer_max_cum;
-    int cpu_max_cum;
-    long cpu_cum;
-    long sound_cum;
-    long delay_cum;
-    long total_cycle_time;
+    uint16_t clock_speed;
+    uint32_t timer_max_cum;
+    uint32_t cpu_max_cum;
+    uint32_t cpu_cum;
+    uint32_t sound_cum;
+    uint32_t delay_cum;
+    uint32_t total_cycle_time;
     struct timeval cur_cycle_start;
     struct timeval prev_cycle_start;
 
@@ -66,7 +67,7 @@ typedef struct CHIP8
 } CHIP8;
 
 // Set some things to useful default values.
-void chip8_init(CHIP8 *chip8, bool legacy_mode, int clock_speed, int pc_start_addr);
+void chip8_init(CHIP8 *chip8, bool legacy_mode, uint16_t clock_speed, uint16_t pc_start_addr);
 
 // Reset the machine.
 void chip8_reset(CHIP8 *chip8);
@@ -110,13 +111,13 @@ void chip8_reset_RAM(CHIP8 *chip8);
 void chip8_reset_registers(CHIP8 *chip8);
 
 // Loads an instruction into PC_START_ADDR.
-void chip8_load_instr(CHIP8 *chip8, unsigned int instr);
+void chip8_load_instr(CHIP8 *chip8, uint16_t instr);
 
 // Draws n bytes starting at address I onto the display at coordinates (Vx, Vy).
-void chip8_draw(CHIP8 *chip8, unsigned char x, unsigned char y, unsigned char n);
+void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n);
 
 // Waits for a key to be released then stores that key in Vx.
-void chip8_wait_key(CHIP8 *chip8, unsigned char x);
+void chip8_wait_key(CHIP8 *chip8, uint8_t x);
 
 // Dumps the current contents of RAM to a specified file.
 bool chip8_dump_RAM(CHIP8 *chip8, char *filename);
