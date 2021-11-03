@@ -45,9 +45,9 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 ## Options
 `-l` Enable legacy mode (for programs that ran on the COSMAC VIP)  
 `-d` Enable debug mode (with optional dump file specified, otherwise defaults to jace.dmp)  
-`-s` Set display scale factor  
 `-p` Set program start address (in hex)  
 `-c` Set clock speed (in Hz)  
+`-s` Set display scale factor  
 `-x` Set pixel ON color (in hex)  
 `-y` Set pixel OFF color (in hex)
 
@@ -63,6 +63,17 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 `4` `5` `6` `D`  
 `7` `8` `9` `E`  
 `A` `0` `B` `F`
+
+## Troubleshooting
+* This emulator defaults to S-CHIP mode, which has become more popular since the 90s. Unfortunately, S-CHIP changed the behavior of several instructions, making some programs developed for the original COSMAC VIP not backwards-compatible. If a ROM is not working correctly (especially one written before 1990), try enabling legacy mode with the `-l` flag.
+* This emulator defaults to 0x200 as the start address, however some programs assume other defaults (namely, those written for the ETI-660 which default to 0x600). Try to find out what default address the program assumes and set that with the `-p` option.
+* There are many CHIP-8 variants and this emulator does not support all of them. If a ROM still does not work correctly after trying the suggestions above, it may have been written for an unsupported variant and thus will simply not work.
+
+## Contributing
+Anyone is welcome to contribute! I will try to review pull requests as quickly as possible.
+
+## License
+JACE is licensed under the MIT license so you are free to do almost whatever you please with this code.
 
 ## ROMs
 * [Revival Studio's Chip-8 Program Pack](https://github.com/kripod/chip8-roms)
