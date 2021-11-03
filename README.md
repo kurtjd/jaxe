@@ -31,6 +31,7 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 * Add more test cases
 * Test Windows support
 * Continue to refactor and optimize code
+* Continue to tweak README and add documentation
 
 ## Requirements
 * SDL2
@@ -81,7 +82,7 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 Anyone is welcome to contribute! I will try to review pull requests as quickly as possible.
 
 ## License
-JACE is licensed under the MIT license so you are free to do almost whatever you please with this code.
+JACE is licensed under the MIT license so you are free to do almost whatever you please with this code (see LICENSE file).
 
 ## ROMs
 * [Revival Studio's Chip-8 Program Pack](https://github.com/kripod/chip8-roms)
