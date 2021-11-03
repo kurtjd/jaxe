@@ -18,11 +18,20 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 
 ## TODO
 * Add full S-CHIP support
+* Add ETI-660 and HI-RES support
+* Allow user to reset emulator
+* Allow user to pause in non-debug mode
+* Allow user to change clock speed while running
+* Allow user to change color while running
+* Allow user to create save states (RAM dumps) while in non-debug mode
+* Allow user to rewind in debug mode
+* Enhance debug display
 * Look into support for other CHIP-8 variants
 * Add GUI
 * Add more test cases
 * Test Windows support
 * Continue to refactor and optimize code
+* Continue to tweak README and add documentation
 
 ## Requirements
 * SDL2
@@ -73,7 +82,7 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 Anyone is welcome to contribute! I will try to review pull requests as quickly as possible.
 
 ## License
-JACE is licensed under the MIT license so you are free to do almost whatever you please with this code.
+JACE is licensed under the MIT license so you are free to do almost whatever you please with this code (see LICENSE file).
 
 ## ROMs
 * [Revival Studio's Chip-8 Program Pack](https://github.com/kripod/chip8-roms)
