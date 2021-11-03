@@ -560,7 +560,8 @@ void chip8_handle_timers(CHIP8 *chip8)
     }
     if (chip8->ST > 0)
     {
-        chip8->beep = true;
+        // On original COSMAC VIP, sound is only produced when ST >= 2
+        chip8->beep = chip8->ST >= 2;
         chip8->sound_cum += chip8->total_cycle_time;
 
         if (chip8->sound_cum >= chip8->timer_max_cum)
