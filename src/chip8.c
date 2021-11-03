@@ -319,7 +319,15 @@ void chip8_execute(CHIP8 *chip8)
     /* JP V0, addr (Bnnn)
        Jump to location nnn + V0. */
     case 0x0B:
-        chip8->PC = chip8->V[0] + nnn;
+        if (chip8->legacy_mode)
+        {
+            chip8->PC = chip8->V[0] + nnn;
+        }
+        else
+        {
+            chip8->PC = chip8->V[x] + nnn;
+        }
+
         break;
 
     /* RND Vx, byte (Cxkk)

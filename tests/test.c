@@ -358,9 +358,17 @@ void test_Annn(CHIP8 *chip8)
 
 void test_Bnnn(CHIP8 *chip8)
 {
-    chip8_load_instr(chip8, 0xBBAD);
+    /*chip8_load_instr(chip8, 0xBBAD);
 
     chip8->V[0] = 0x69;
+
+    chip8_execute(chip8);
+
+    assert(chip8->PC == 0xC16);*/
+
+    chip8_load_instr(chip8, 0xBBAD);
+
+    chip8->V[0xB] = 0x69;
 
     chip8_execute(chip8);
 
