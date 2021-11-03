@@ -1,5 +1,5 @@
 # JACE (Just Another CHIP-8 Emulator)
-![JACE Pong](/screenshots/jace_pong.png?raw=true)
+![JACE Brix](/screenshots/Brix_CH8.png?raw=true)
 
 CHIP-8 was a virtual machine/programming language developed by Joseph Weisbecker for the COSMAC VIP in the 1970s. It was designed with 35 opcodes and resembles assembly language, but was made for the easier development of video games on the VIP.
 
