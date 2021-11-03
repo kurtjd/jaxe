@@ -578,7 +578,7 @@ void chip8_draw(CHIP8 *chip8, unsigned char x, unsigned char y, unsigned char n)
 
             /* XOR the sprite onto display. 
                 If a pixel is erased, set the VF register to 1. */
-            chip8->display[disp_y][disp_x] = (pixel_on != bit);
+            chip8->display[disp_y][disp_x] = (pixel_on ^ bit);
             if (pixel_on && bit)
             {
                 chip8->V[0x0F] = 1;
