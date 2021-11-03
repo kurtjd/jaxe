@@ -1,7 +1,9 @@
-# Just Another CHIP-8 Emulator
+# JACE (Just Another CHIP-8 Emulator)
 ![JACE Pong](/screenshots/jace_pong.png?raw=true)
 
-A fully-featured CHIP-8 emulator written in C and SDL to practice emulator dev.
+CHIP-8 was a virtual machine/programming language developed by Joseph Weisbecker for the COSMAC VIP in the 1970s. It was designed with 35 opcodes and resembles assembly language, but was made for the easier development of video games on the VIP.
+
+Today, it is a popular target to be emulated because of its simplicity and charm.
 
 ## Features
 * Fully implemented instruction set
@@ -69,3 +71,4 @@ A fully-featured CHIP-8 emulator written in C and SDL to practice emulator dev.
 
 ## Acknowledgements
 * [Kongtext Font by codeman38](https://www.1001fonts.com/kongtext-font.html)
+* [J. Th.'s Sound Code](https://stackoverflow.com/a/45002609)
