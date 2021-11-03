@@ -64,117 +64,29 @@ void chip8_reset(CHIP8 *chip8)
 
 void chip8_load_font(CHIP8 *chip8)
 {
-    // 0:
-    chip8->RAM[FONT_START_ADDR + 0x00] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x01] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x02] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x03] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x04] = 0xF0;
+    unsigned char font_data[] = {
+        0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+        0x20, 0x60, 0x20, 0x20, 0x70, // 1
+        0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+        0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+        0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+        0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+        0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+        0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+        0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+        0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+        0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+        0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+        0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+        0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+        0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+        0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+    };
 
-    // 1:
-    chip8->RAM[FONT_START_ADDR + 0x05] = 0x20;
-    chip8->RAM[FONT_START_ADDR + 0x06] = 0x60;
-    chip8->RAM[FONT_START_ADDR + 0x07] = 0x20;
-    chip8->RAM[FONT_START_ADDR + 0x08] = 0x20;
-    chip8->RAM[FONT_START_ADDR + 0x09] = 0x70;
-
-    // 2:
-    chip8->RAM[FONT_START_ADDR + 0x0A] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x0B] = 0x10;
-    chip8->RAM[FONT_START_ADDR + 0x0C] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x0D] = 0x80;
-    chip8->RAM[FONT_START_ADDR + 0x0E] = 0xF0;
-
-    // 3:
-    chip8->RAM[FONT_START_ADDR + 0x0F] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x10] = 0x10;
-    chip8->RAM[FONT_START_ADDR + 0x11] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x12] = 0x10;
-    chip8->RAM[FONT_START_ADDR + 0x13] = 0xF0;
-
-    // 4:
-    chip8->RAM[FONT_START_ADDR + 0x14] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x15] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x16] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x17] = 0x10;
-    chip8->RAM[FONT_START_ADDR + 0x18] = 0x10;
-
-    // 5:
-    chip8->RAM[FONT_START_ADDR + 0x19] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x1A] = 0x80;
-    chip8->RAM[FONT_START_ADDR + 0x1B] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x1C] = 0x10;
-    chip8->RAM[FONT_START_ADDR + 0x1D] = 0xF0;
-
-    // 6:
-    chip8->RAM[FONT_START_ADDR + 0x1E] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x1F] = 0x80;
-    chip8->RAM[FONT_START_ADDR + 0x20] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x21] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x22] = 0xF0;
-
-    // 7:
-    chip8->RAM[FONT_START_ADDR + 0x23] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x24] = 0x10;
-    chip8->RAM[FONT_START_ADDR + 0x25] = 0x20;
-    chip8->RAM[FONT_START_ADDR + 0x26] = 0x40;
-    chip8->RAM[FONT_START_ADDR + 0x27] = 0x40;
-
-    // 8:
-    chip8->RAM[FONT_START_ADDR + 0x28] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x29] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x2A] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x2B] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x2C] = 0xF0;
-
-    // 9:
-    chip8->RAM[FONT_START_ADDR + 0x2D] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x2E] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x2F] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x30] = 0x10;
-    chip8->RAM[FONT_START_ADDR + 0x31] = 0xF0;
-
-    // A:
-    chip8->RAM[FONT_START_ADDR + 0x32] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x33] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x34] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x35] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x36] = 0x90;
-
-    // B:
-    chip8->RAM[FONT_START_ADDR + 0x37] = 0xE0;
-    chip8->RAM[FONT_START_ADDR + 0x38] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x39] = 0xE0;
-    chip8->RAM[FONT_START_ADDR + 0x3A] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x3B] = 0xE0;
-
-    // C:
-    chip8->RAM[FONT_START_ADDR + 0x3C] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x3D] = 0x80;
-    chip8->RAM[FONT_START_ADDR + 0x3E] = 0x80;
-    chip8->RAM[FONT_START_ADDR + 0x3F] = 0x80;
-    chip8->RAM[FONT_START_ADDR + 0x40] = 0xF0;
-
-    // D:
-    chip8->RAM[FONT_START_ADDR + 0x41] = 0xE0;
-    chip8->RAM[FONT_START_ADDR + 0x42] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x43] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x44] = 0x90;
-    chip8->RAM[FONT_START_ADDR + 0x45] = 0xE0;
-
-    // E:
-    chip8->RAM[FONT_START_ADDR + 0x46] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x47] = 0x80;
-    chip8->RAM[FONT_START_ADDR + 0x48] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x49] = 0x80;
-    chip8->RAM[FONT_START_ADDR + 0x4A] = 0xF0;
-
-    // F:
-    chip8->RAM[FONT_START_ADDR + 0x4B] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x4C] = 0x80;
-    chip8->RAM[FONT_START_ADDR + 0x4D] = 0xF0;
-    chip8->RAM[FONT_START_ADDR + 0x4E] = 0x80;
-    chip8->RAM[FONT_START_ADDR + 0x4F] = 0x80;
+    for (unsigned int i = 0; i < sizeof(font_data); i++)
+    {
+        chip8->RAM[FONT_START_ADDR + i] = font_data[i];
+    }
 }
 
 bool chip8_load_rom(CHIP8 *chip8, char *filename)
