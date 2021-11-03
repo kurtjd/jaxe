@@ -102,7 +102,7 @@ void draw_debug(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
     SDL_Rect font_dest_rect;
     font_dest_rect.w = 0;
     font_dest_rect.h = 0;
-    char dbg_str[16];
+    char dbg_str[32];
 
     // [DEBUG]
     font_color.r = 0;

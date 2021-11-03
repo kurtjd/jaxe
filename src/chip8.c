@@ -47,7 +47,10 @@ void chip8_reset(CHIP8 *chip8)
     chip8->display_updated = false;
     chip8->beep = false;
 
-    chip8_reset_RAM(chip8);
+    if (chip8->legacy_mode)
+    {
+        chip8_reset_RAM(chip8);
+    }
     chip8_reset_registers(chip8);
     chip8_reset_keypad(chip8);
     chip8_reset_display(chip8);
@@ -561,14 +564,11 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
             int disp_x = chip8->V[x] + j;
             int disp_y = chip8->V[y] + i;
 
-            // Allow out-of-bound sprite to wrap-around.
-            if (disp_x >= MAX_WIDTH)
+            // Allow out-of-bound sprite to wrap-around in legacy mode.
+            if (chip8->legacy_mode)
             {
-                disp_x -= MAX_WIDTH;
-            }
-            if (disp_y >= MAX_HEIGHT)
-            {
-                disp_y -= MAX_HEIGHT;
+                disp_x %= MAX_WIDTH;
+                disp_y %= MAX_HEIGHT;
             }
 
             // Get the pixel the loop is on and the corresponding bit.
