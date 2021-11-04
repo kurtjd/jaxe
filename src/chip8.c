@@ -387,8 +387,12 @@ void chip8_execute(CHIP8 *chip8)
         break;
 
     /* DRW Vx, Vy, n (Dxyn):
-       Display n-byte sprite starting at memory location I at (Vx, Vy),
-       set VF = collision. */
+       Legacy: Display n-byte sprite starting at memory location I at (Vx, Vy),
+       set VF = collision.
+       S-CHIP: If hires=false: If n=0, display 8x16 sprite. Else:
+       Same as Legacy. If hires=true: Same as Legacy, except
+       set VF = num rows collision. If n=0: Display 16x16 sprite starting at
+       memory location I at (Vx, Vy), set VF = num rows collision. */
     case 0x0D:
         chip8_draw(chip8, x, y, n);
         break;
@@ -642,10 +646,41 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
 {
     chip8->V[0x0F] = 0;
 
+    /* n==0 only has signifigance in S-CHIP mode,
+    otherwise nothing should be drawn. */
+    if (n == 0 && !chip8->legacy_mode)
+    {
+        /* Draw a 32-byte (16x16) sprite in hires or
+        a 16-byte (8x16) sprite in lores. */
+        n = chip8->hires ? 32 : 16;
+    }
+
+    if (chip8->hires)
+    {
+        int rows = (n == 32) ? 16 : n;
+        chip8->V[0x0F] += ((y + rows) - (MAX_HEIGHT - 1));
+    }
+
+    bool prev_byte_collide = false;
     for (int i = 0; i < n; i++)
     {
+        bool collide_row = false;
+
         for (int j = 0; j < 8; j++)
         {
+            unsigned y_start = i, x_start = j;
+
+            /* If drawing a hires sprite,
+            every odd byte is to be drawn along the x-axis. */
+            if (n == 32)
+            {
+                if (i % 2 != 0)
+                {
+                    y_start = i - 1;
+                    x_start = (j * 8);
+                }
+            }
+
             /* Now we have to scale the display if we are in lo-res mode
             by basically drawing each pixel twice. */
             int scale = chip8->hires ? 1 : 2;
@@ -653,8 +688,8 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
             {
                 for (int k = 0; k < scale; k++)
                 {
-                    int disp_x = (chip8->V[x] * scale) + (j * scale) + k;
-                    int disp_y = (chip8->V[y] * scale) + (i * scale) + h;
+                    int disp_x = (chip8->V[x] * scale) + (x_start * scale) + k;
+                    int disp_y = (chip8->V[y] * scale) + (y_start * scale) + h;
 
                     // Allow out-of-bound sprite to wrap-around in legacy mode.
                     if (chip8->legacy_mode)
@@ -672,11 +707,27 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
                     chip8->display[disp_y][disp_x] = (pixel_on ^ bit);
                     if (pixel_on && bit)
                     {
-                        chip8->V[0x0F] = 1;
+                        if (chip8->hires)
+                        {
+                            if (!collide_row)
+                            {
+                                if (n <= 16 || (((i % 2 == 0) && n == 32) || !prev_byte_collide))
+                                {
+                                    chip8->V[0x0F]++;
+                                    collide_row = true;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            chip8->V[0x0F] = 1;
+                        }
                     }
                 }
             }
         }
+
+        prev_byte_collide = collide_row;
     }
 
     chip8->display_updated = true;
