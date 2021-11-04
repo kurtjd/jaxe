@@ -47,6 +47,7 @@ void chip8_reset(CHIP8 *chip8)
     chip8->display_updated = false;
     chip8->beep = false;
     chip8->exit = false;
+    chip8->hires = false;
 
     chip8->ROM_path[0] = '\0';
     chip8->UF_path[0] = '\0';
@@ -195,6 +196,26 @@ void chip8_execute(CHIP8 *chip8)
             if (!chip8->legacy_mode)
             {
                 chip8->exit = true;
+            }
+
+            break;
+
+        /* LORES (00FE) (S-CHIP Only):
+           Disable HI-RES mode. */
+        case 0xFE:
+            if (!chip8->legacy_mode)
+            {
+                chip8->hires = false;
+            }
+
+            break;
+
+        /* HIRES (00FF) (S-CHIP Only):
+           Enable HI-RES mode. */
+        case 0xFF:
+            if (!chip8->legacy_mode)
+            {
+                chip8->hires = true;
             }
 
             break;
@@ -439,7 +460,7 @@ void chip8_execute(CHIP8 *chip8)
             chip8->I = FONT_START_ADDR + (chip8->V[x] * 0x05);
             break;
 
-        /* LD F, Vx (Fx30) (S-CHIP Only)
+        /* LD HF, Vx (Fx30) (S-CHIP Only)
            Set I = location of 10-byte sprite for digit Vx. */
         case 0x30:
             if (!chip8->legacy_mode)
@@ -625,26 +646,35 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
     {
         for (int j = 0; j < 8; j++)
         {
-            int disp_x = chip8->V[x] + j;
-            int disp_y = chip8->V[y] + i;
-
-            // Allow out-of-bound sprite to wrap-around in legacy mode.
-            if (chip8->legacy_mode)
+            /* Now we have to scale the display if we are in lo-res mode
+            by basically drawing each pixel twice. */
+            int scale = chip8->hires ? 1 : 2;
+            for (int h = 0; h < scale; h++)
             {
-                disp_x %= MAX_WIDTH;
-                disp_y %= MAX_HEIGHT;
-            }
+                for (int k = 0; k < scale; k++)
+                {
+                    int disp_x = (chip8->V[x] * scale) + (j * scale) + k;
+                    int disp_y = (chip8->V[y] * scale) + (i * scale) + h;
 
-            // Get the pixel the loop is on and the corresponding bit.
-            bool pixel_on = chip8->display[disp_y][disp_x];
-            bool bit = (chip8->RAM[chip8->I + i] >> (7 - j)) & 0x01;
+                    // Allow out-of-bound sprite to wrap-around in legacy mode.
+                    if (chip8->legacy_mode)
+                    {
+                        disp_x %= MAX_WIDTH;
+                        disp_y %= MAX_HEIGHT;
+                    }
 
-            /* XOR the sprite onto display. 
-                If a pixel is erased, set the VF register to 1. */
-            chip8->display[disp_y][disp_x] = (pixel_on ^ bit);
-            if (pixel_on && bit)
-            {
-                chip8->V[0x0F] = 1;
+                    // Get the pixel the loop is on and the corresponding bit.
+                    bool pixel_on = chip8->display[disp_y][disp_x];
+                    bool bit = (chip8->RAM[chip8->I + i] >> (7 - j)) & 0x01;
+
+                    /* XOR the sprite onto display. 
+                    If a pixel is erased, set the VF register to 1. */
+                    chip8->display[disp_y][disp_x] = (pixel_on ^ bit);
+                    if (pixel_on && bit)
+                    {
+                        chip8->V[0x0F] = 1;
+                    }
+                }
             }
         }
     }

@@ -6,8 +6,8 @@
 #include <time.h>
 #include <sys/time.h>
 
-#define MAX_WIDTH 64
-#define MAX_HEIGHT 32
+#define MAX_WIDTH 128
+#define MAX_HEIGHT 64
 #define MAX_KEYS 16
 #define MAX_RAM 4096
 #define MAX_REGISTERS 16
@@ -71,6 +71,9 @@ typedef struct CHIP8
 
     // Used to signal to main to exit the program.
     bool exit;
+
+    // Used to toggle between HI-RES and standard LO-RES modes.
+    bool hires;
 
     // The path and filename of currently loaded ROM.
     char ROM_path[1024];

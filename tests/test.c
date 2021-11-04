@@ -53,6 +53,28 @@ void test_00FD(CHIP8 *chip8)
     chip8_reset(chip8);
 }
 
+void test_00FE(CHIP8 *chip8)
+{
+    chip8_load_instr(chip8, 0x00FE);
+
+    chip8_execute(chip8);
+
+    assert(!chip8->hires);
+
+    chip8_reset(chip8);
+}
+
+void test_00FF(CHIP8 *chip8)
+{
+    chip8_load_instr(chip8, 0x00FF);
+
+    chip8_execute(chip8);
+
+    assert(chip8->hires);
+
+    chip8_reset(chip8);
+}
+
 void test_1nnn(CHIP8 *chip8)
 {
     chip8_load_instr(chip8, 0x1FFF);
@@ -397,6 +419,7 @@ void test_Cxkk(CHIP8 *chip8)
 void test_Dxyn(CHIP8 *chip8)
 {
     chip8_load_instr(chip8, 0xD693);
+    chip8->hires = true; // Will have to write lores tests in future.
 
     // 3x3 sprite in top left corner of display.
     chip8->display[0][0] = 1;
@@ -683,6 +706,8 @@ int main()
     test_00E0(&chip8);
     test_00EE(&chip8);
     test_00FD(&chip8);
+    test_00FE(&chip8);
+    test_00FF(&chip8);
     test_1nnn(&chip8);
     test_2nnn(&chip8);
     test_3xkk(&chip8);

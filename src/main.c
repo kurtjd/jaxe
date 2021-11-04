@@ -16,7 +16,7 @@
 #define DBG_FONT_FILE "../fonts/dbgfont.ttf"
 
 // Globals
-int DISPLAY_SCALE = 10;
+int DISPLAY_SCALE = 5;
 long ON_COLOR = 0xFFFFFF;
 long OFF_COLOR = 0x000000;
 TTF_Font *DBG_FONT = NULL;
