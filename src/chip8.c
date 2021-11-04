@@ -46,6 +46,7 @@ void chip8_reset(CHIP8 *chip8)
 
     chip8->display_updated = false;
     chip8->beep = false;
+    chip8->exit = false;
 
     if (chip8->legacy_mode)
     {
@@ -179,6 +180,16 @@ void chip8_execute(CHIP8 *chip8)
             chip8->PC = (chip8->RAM[chip8->SP] << 8);
             chip8->PC |= chip8->RAM[chip8->SP + 1];
             chip8->SP -= 2;
+            break;
+
+        /* EXIT (00FD) (S-CHIP Only):
+           Exit the interpreter. */
+        case 0xFD:
+            if (!chip8->legacy_mode)
+            {
+                chip8->exit = true;
+            }
+
             break;
         }
 

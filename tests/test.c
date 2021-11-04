@@ -42,6 +42,17 @@ void test_00EE(CHIP8 *chip8)
     chip8_reset(chip8);
 }
 
+void test_00FD(CHIP8 *chip8)
+{
+    chip8_load_instr(chip8, 0x00FD);
+
+    chip8_execute(chip8);
+
+    assert(chip8->exit);
+
+    chip8_reset(chip8);
+}
+
 void test_1nnn(CHIP8 *chip8)
 {
     chip8_load_instr(chip8, 0x1FFF);
@@ -646,6 +657,7 @@ int main()
             * Reset the machine */
     test_00E0(&chip8);
     test_00EE(&chip8);
+    test_00FD(&chip8);
     test_1nnn(&chip8);
     test_2nnn(&chip8);
     test_3xkk(&chip8);

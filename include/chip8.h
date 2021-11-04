@@ -62,9 +62,14 @@ typedef struct CHIP8
     struct timeval cur_cycle_start;
     struct timeval prev_cycle_start;
 
-    // Used to signal to main when to update the display and produce sound.
+    // Used to signal to main when to update the display.
     bool display_updated;
+
+    // Used to signal to main when to produce sound.
     bool beep;
+
+    // Used to signal to main to exit the program.
+    bool exit;
 } CHIP8;
 
 // Set some things to useful default values.

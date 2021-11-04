@@ -463,7 +463,7 @@ int main(int argc, char **argv)
 
     /* Main Loop */
     SDL_Event e;
-    while (handle_input(&e, &chip8))
+    while (!chip8.exit && handle_input(&e, &chip8))
     {
         if (dbg_paused)
         {
