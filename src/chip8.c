@@ -200,6 +200,26 @@ void chip8_execute(CHIP8 *chip8)
 
             break;
 
+        /* SCRR (00FB) (S-CHIP Only):
+           Scroll the display right by 4 pixels. */
+        case 0xFB:
+            if (!chip8->legacy_mode)
+            {
+                chip8_scroll(chip8, 1, 0, 4);
+            }
+
+            break;
+
+        /* SCRL (00FC) (S-CHIP Only):
+           Scroll the display left by 4 pixels. */
+        case 0xFC:
+            if (!chip8->legacy_mode)
+            {
+                chip8_scroll(chip8, -1, 0, 4);
+            }
+
+            break;
+
         /* LORES (00FE) (S-CHIP Only):
            Disable HI-RES mode. */
         case 0xFE:
@@ -216,6 +236,19 @@ void chip8_execute(CHIP8 *chip8)
             if (!chip8->legacy_mode)
             {
                 chip8->hires = true;
+            }
+
+            break;
+
+        default:
+            /* SCRD (00Cn) (S-CHIP Only):
+               Scroll the display down by n pixels. */
+            if (y == 0xC)
+            {
+                if (!chip8->legacy_mode)
+                {
+                    chip8_scroll(chip8, 0, 1, n);
+                }
             }
 
             break;
@@ -697,6 +730,13 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
                         disp_x %= MAX_WIDTH;
                         disp_y %= MAX_HEIGHT;
                     }
+                    else
+                    {
+                        if (disp_x >= MAX_WIDTH || disp_y >= MAX_HEIGHT)
+                        {
+                            break;
+                        }
+                    }
 
                     // Get the pixel the loop is on and the corresponding bit.
                     bool pixel_on = chip8->display[disp_y][disp_x];
@@ -731,6 +771,50 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
     }
 
     chip8->display_updated = true;
+}
+
+void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels)
+{
+    int x_start = 0;
+    int x_end = MAX_WIDTH;
+    int y_start = 0;
+    int y_end = MAX_HEIGHT;
+
+    if (xdir == 1)
+    {
+        x_end = MAX_WIDTH - num_pixels;
+    }
+    else if (xdir == -1)
+    {
+        x_start = num_pixels;
+    }
+    if (ydir == 1)
+    {
+        y_end = MAX_HEIGHT - num_pixels;
+    }
+    else if (ydir == -1)
+    {
+        y_start = num_pixels;
+    }
+
+    // Create updated display buffer.
+    uint8_t disp_buf[MAX_HEIGHT][MAX_WIDTH] = {false};
+    for (int y = y_start; y < y_end; y++)
+    {
+        for (int x = x_start; x < x_end; x++)
+        {
+            disp_buf[y + (ydir * num_pixels)][x + (xdir * num_pixels)] = chip8->display[y][x];
+        }
+    }
+
+    // Copy updated display buffer into actual display.
+    for (int y = 0; y < MAX_HEIGHT; y++)
+    {
+        for (int x = 0; x < MAX_WIDTH; x++)
+        {
+            chip8->display[y][x] = disp_buf[y][x];
+        }
+    }
 }
 
 void chip8_wait_key(CHIP8 *chip8, uint8_t x)

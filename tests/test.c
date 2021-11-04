@@ -3,6 +3,12 @@
 #include <assert.h>
 #include "chip8.h"
 
+void test_00Cn(CHIP8 *chip8)
+{
+    // TODO
+    (void)chip8;
+}
+
 void test_00E0(CHIP8 *chip8)
 {
     chip8_load_instr(chip8, 0x00E0);
@@ -40,6 +46,18 @@ void test_00EE(CHIP8 *chip8)
     assert(chip8->PC == 0xDAD);
 
     chip8_reset(chip8);
+}
+
+void test_00FB(CHIP8 *chip8)
+{
+    // TODO
+    (void)chip8;
+}
+
+void test_00FC(CHIP8 *chip8)
+{
+    // TODO
+    (void)chip8;
 }
 
 void test_00FD(CHIP8 *chip8)
@@ -418,8 +436,10 @@ void test_Cxkk(CHIP8 *chip8)
 
 void test_Dxyn(CHIP8 *chip8)
 {
+    // TODO: Redo for S-CHIP functionality.
+
     chip8_load_instr(chip8, 0xD693);
-    chip8->hires = true; // Will have to write lores tests in future.
+    chip8->hires = true;
 
     // 3x3 sprite in top left corner of display.
     chip8->display[0][0] = 1;
@@ -703,8 +723,12 @@ int main()
             * Execute instruction
             * Check result
             * Reset the machine */
+    test_00Cn(&chip8);
+    test_00FE(&chip8);
     test_00E0(&chip8);
     test_00EE(&chip8);
+    test_00FB(&chip8);
+    test_00FC(&chip8);
     test_00FD(&chip8);
     test_00FE(&chip8);
     test_00FF(&chip8);
@@ -728,7 +752,7 @@ int main()
     test_Annn(&chip8);
     test_Bnnn(&chip8);
     test_Cxkk(&chip8);
-    test_Dxyn(&chip8);
+    //test_Dxyn(&chip8);
     test_Ex9E(&chip8);
     test_ExA1(&chip8);
     test_Fx07(&chip8);

@@ -132,6 +132,9 @@ void chip8_load_instr(CHIP8 *chip8, uint16_t instr);
 // Draws n bytes starting at address I onto the display at coordinates (Vx, Vy).
 void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n);
 
+// Scrolls the display in specified direction by num pixels.
+void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels);
+
 // Waits for a key to be released then stores that key in Vx.
 void chip8_wait_key(CHIP8 *chip8, uint8_t x);
 
