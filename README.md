@@ -15,6 +15,7 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 * Graphical debug mode
 * Adjustable clock speed, display scale, colors, and program start address
 * Unit tests for those writing a C emulator
+* Emulator decoupled from any particular graphics/media library allowing for easy embedding into other C programs.
 
 ## TODO
 * Add full S-CHIP support
