@@ -11,6 +11,7 @@
 #define MAX_KEYS 16
 #define MAX_RAM 4096
 #define MAX_REGISTERS 16
+#define MAX_USER_FLAGS 8
 
 #define FONT_START_ADDR 0x0
 #define BIG_FONT_START_ADDR (FONT_START_ADDR + 80)
@@ -70,6 +71,12 @@ typedef struct CHIP8
 
     // Used to signal to main to exit the program.
     bool exit;
+
+    // The path and filename of currently loaded ROM.
+    char ROM_path[1024];
+
+    // The path and filename of associated user flags file.
+    char UF_path[1024];
 } CHIP8;
 
 // Set some things to useful default values.
@@ -127,5 +134,14 @@ void chip8_wait_key(CHIP8 *chip8, uint8_t x);
 
 // Dumps the current contents of RAM to a specified file.
 bool chip8_dump_RAM(CHIP8 *chip8, char *filename);
+
+// Saves user flags from registers to disk.
+bool chip8_save_user_flags(CHIP8 *chip8, int num_flags);
+
+// Loads user flags from disk into registers.
+bool chip8_load_user_flags(CHIP8 *chip8, int num_flags);
+
+// Saves/loads user flags to/from disk.
+bool chip8_handle_user_flags(CHIP8 *chip8, int num_flags, bool save);
 
 #endif

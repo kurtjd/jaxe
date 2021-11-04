@@ -643,6 +643,31 @@ void test_Fx65(CHIP8 *chip8)
     chip8_reset(chip8);
 }
 
+void test_Fx75_Fx85(CHIP8 *chip8)
+{
+    chip8_load_instr(chip8, 0xF275);
+
+    char tmp_file[] = "uf_save_test.ch8.uf";
+    chip8->V[0] = 0xB;
+    chip8->V[1] = 0xA;
+    chip8->V[2] = 0xD;
+    sprintf(chip8->UF_path, "%s", tmp_file);
+
+    chip8_execute(chip8);
+    chip8_reset(chip8);
+
+    chip8_load_instr(chip8, 0xF285);
+    sprintf(chip8->UF_path, "%s", tmp_file);
+    chip8_execute(chip8);
+    remove(tmp_file);
+
+    assert(chip8->V[0] == 0xB);
+    assert(chip8->V[1] == 0xA);
+    assert(chip8->V[2] == 0xD);
+
+    chip8_reset(chip8);
+}
+
 int main()
 {
     // The test machine.
@@ -691,6 +716,7 @@ int main()
     test_Fx33(&chip8);
     test_Fx55(&chip8);
     test_Fx65(&chip8);
+    test_Fx75_Fx85(&chip8);
 
     printf("All tests pass!\n");
 

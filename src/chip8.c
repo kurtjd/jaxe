@@ -18,6 +18,11 @@ void chip8_init(CHIP8 *chip8, bool legacy_mode, uint16_t clock_speed, uint16_t p
         chip8->clock_speed = clock_speed;
     }
 
+    /* Divide by the number of microseconds in a second by the frequency
+    to get number of miliseconds to wait between each tick. */
+    chip8->timer_max_cum = 1000000 / 60;
+    chip8->cpu_max_cum = 1000000 / chip8->clock_speed;
+
     chip8->pc_start_addr = pc_start_addr;
 
     chip8_reset(chip8);
@@ -35,11 +40,6 @@ void chip8_reset(CHIP8 *chip8)
     gettimeofday(&chip8->cur_cycle_start, NULL);
     gettimeofday(&chip8->prev_cycle_start, NULL);
 
-    /* Divide by the number of microseconds in a second by the frequency
-    to get number of miliseconds to wait between each tick. */
-    chip8->timer_max_cum = 1000000 / 60;
-    chip8->cpu_max_cum = 1000000 / chip8->clock_speed;
-
     chip8->cpu_cum = 0;
     chip8->sound_cum = 0;
     chip8->delay_cum = 0;
@@ -48,6 +48,10 @@ void chip8_reset(CHIP8 *chip8)
     chip8->beep = false;
     chip8->exit = false;
 
+    chip8->ROM_path[0] = '\0';
+    chip8->UF_path[0] = '\0';
+
+    // S-CHIP did not initialize RAM (does it matter though?)
     if (chip8->legacy_mode)
     {
         chip8_reset_RAM(chip8);
@@ -109,6 +113,9 @@ bool chip8_load_rom(CHIP8 *chip8, char *filename)
         (void)fr; // Just to suppress fread unused return value warning.
 
         fclose(rom);
+
+        sprintf(chip8->ROM_path, "%s", filename);
+        sprintf(chip8->UF_path, "%s.uf", filename);
 
         return true;
     }
@@ -482,6 +489,32 @@ void chip8_execute(CHIP8 *chip8)
             }
 
             break;
+
+        /* LD uflags_disk, V0..Vx (Fx75) (S-CHIP Only)
+           Save user flags to disk. */
+        case 0x75:
+            if (!chip8->legacy_mode)
+            {
+                if (!chip8_handle_user_flags(chip8, x + 1, true))
+                {
+                    fprintf(stderr, "Unable to save user flags to %s\n", chip8->UF_path);
+                }
+            }
+
+            break;
+
+        /* LD V0..Vx, uflags_disk (Fx85) (S-CHIP Only)
+           Load user flags from disk. */
+        case 0x85:
+            if (!chip8->legacy_mode)
+            {
+                if (!chip8_handle_user_flags(chip8, x + 1, false))
+                {
+                    fprintf(stderr, "Unable to load user flags from %s\n", chip8->UF_path);
+                }
+            }
+
+            break;
         }
 
         break;
@@ -650,6 +683,40 @@ bool chip8_dump_RAM(CHIP8 *chip8, char *filename)
         fclose(dmp);
 
         return true;
+    }
+
+    return false;
+}
+
+bool chip8_handle_user_flags(CHIP8 *chip8, int num_flags, bool save)
+{
+    if (num_flags <= MAX_USER_FLAGS)
+    {
+        char mode[] = "xb";
+        mode[0] = save ? 'w' : 'r';
+        FILE *fflags = fopen(chip8->UF_path, mode);
+
+        if (fflags)
+        {
+            size_t fop;
+            if (save)
+            {
+                fop = fwrite(chip8->V, num_flags, 1, fflags);
+            }
+            else
+            {
+                fop = fread(chip8->V, num_flags, 1, fflags);
+            }
+            (void)fop; // Just to suppress unused return value warning.
+
+            fclose(fflags);
+
+            return true;
+        }
+    }
+    else
+    {
+        return true; // Only return false on file open error.
     }
 
     return false;
