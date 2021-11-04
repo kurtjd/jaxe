@@ -51,6 +51,7 @@ void chip8_reset(CHIP8 *chip8)
     {
         chip8_reset_RAM(chip8);
     }
+
     chip8_reset_registers(chip8);
     chip8_reset_keypad(chip8);
     chip8_reset_display(chip8);
@@ -76,7 +77,7 @@ void chip8_load_font(CHIP8 *chip8)
         0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
         0xF0, 0x80, 0xF0, 0x80, 0x80, // F
 
-        // Big Hex (For S-CHIP):
+        // Big Hex (For S-CHIP, which does not include A-F):
         0xFF, 0xFF, 0xC2, 0xC2, 0xC2, 0xC2, 0xC2, 0xC2, 0xFF, 0xFF, // 0
         0x0C, 0x0C, 0x3C, 0x3C, 0x0C, 0x0C, 0x0C, 0x0C, 0x3F, 0x3F, // 1
         0xFF, 0xFF, 0x03, 0x03, 0xFF, 0xFF, 0xC0, 0xC0, 0xFF, 0xFF, // 2
@@ -282,7 +283,8 @@ void chip8_execute(CHIP8 *chip8)
             break;
 
         /* SHR Vx {, Vy} (8xy6)
-           Set Vx = Vx SHR 1. */
+           Legacy: Set Vx = Vy SHR 1.
+           S-CHIP: Set Vx = Vx SHR 1. */
         case 0x06:
             if (chip8->legacy_mode)
             {
@@ -301,7 +303,8 @@ void chip8_execute(CHIP8 *chip8)
             break;
 
         /* SHL Vx {, Vy} (8xyE)
-           Set Vx = Vx SHL 1. */
+           Legacy: Set Vx = Vy SHL 1.
+           S-CHIP: Set Vx = Vx SHL 1. */
         case 0x0E:
             if (chip8->legacy_mode)
             {
@@ -332,17 +335,10 @@ void chip8_execute(CHIP8 *chip8)
         break;
 
     /* JP V0, addr (Bnnn)
-       Jump to location nnn + V0. */
+       Legacy: Jump to location nnn + V0.
+       S-CHIP: Jump to location nnn + Vx. */
     case 0x0B:
-        if (chip8->legacy_mode)
-        {
-            chip8->PC = chip8->V[0] + nnn;
-        }
-        else
-        {
-            chip8->PC = chip8->V[x] + nnn;
-        }
-
+        chip8->PC = chip8->legacy_mode ? chip8->V[0] + nnn : chip8->V[x] + nnn;
         break;
 
     /* RND Vx, byte (Cxkk)
@@ -420,9 +416,19 @@ void chip8_execute(CHIP8 *chip8)
             break;
 
         /* LD F, Vx (Fx29)
-           Set I = location of sprite for digit Vx. */
+           Set I = location of 5-byte sprite for digit Vx. */
         case 0x29:
             chip8->I = FONT_START_ADDR + (chip8->V[x] * 0x05);
+            break;
+
+        /* LD F, Vx (Fx30) (S-CHIP Only)
+           Set I = location of 10-byte sprite for digit Vx. */
+        case 0x30:
+            if (!chip8->legacy_mode)
+            {
+                chip8->I = BIG_FONT_START_ADDR + (chip8->V[x] * 0x0A);
+            }
+
             break;
 
         /* LD B, Vx (Fx33)
@@ -435,7 +441,8 @@ void chip8_execute(CHIP8 *chip8)
             break;
 
         /* LD [I], Vx (Fx55)
-           Store registers V0 through Vx in memory starting at location I. */
+           Store registers V0 through Vx in memory starting at location I.
+           Legacy: Set I=I+x+1 */
         case 0x55:
             for (int r = 0; r <= x; r++)
             {
@@ -450,7 +457,8 @@ void chip8_execute(CHIP8 *chip8)
             break;
 
         /* LD Vx, [I] (Fx65)
-           Read registers V0 through Vx from memory starting at location I. */
+           Read registers V0 through Vx from memory starting at location I.
+           Legacy: Set I=I+x+1 */
         case 0x65:
             for (int r = 0; r <= x; r++)
             {

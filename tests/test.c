@@ -550,6 +550,19 @@ void test_Fx29(CHIP8 *chip8)
     chip8_reset(chip8);
 }
 
+void test_Fx30(CHIP8 *chip8)
+{
+    chip8_load_instr(chip8, 0xF030);
+
+    chip8->V[0] = 0x6;
+
+    chip8_execute(chip8);
+
+    assert(chip8->I == (BIG_FONT_START_ADDR + 60));
+
+    chip8_reset(chip8);
+}
+
 void test_Fx33(CHIP8 *chip8)
 {
     chip8_load_instr(chip8, 0xF033);
@@ -662,6 +675,7 @@ int main()
     test_Fx18(&chip8);
     test_Fx1E(&chip8);
     test_Fx29(&chip8);
+    test_Fx30(&chip8);
     test_Fx33(&chip8);
     test_Fx55(&chip8);
     test_Fx65(&chip8);
