@@ -95,7 +95,7 @@ Also includes flags for disabling specific S-CHIP "quirks" (which are all enable
 
 ## Troubleshooting
 * This emulator defaults to S-CHIP mode, which has become more popular since the 90s. Unfortunately, S-CHIP changed the behavior of several instructions, making some programs developed for the original COSMAC VIP not backwards-compatible. If a ROM is not working correctly (especially one written before 1990), try enabling legacy mode with the `-l` flag.
-* If using a program developed for Octo, you will need to enable Octo compatibility mode with the `-o` flag since Octo ignores all S-CHIP quirks.
+* If running a program developed for Octo, you will need to enable Octo compatibility mode with the `-o` flag since Octo ignores all S-CHIP quirks.
 * This emulator defaults to 0x200 as the start address, however some programs assume other defaults (namely, those written for the ETI-660 which default to 0x600). Try to find out what default address the program assumes and set that with the `-p` option.
 * There are many CHIP-8 variants and this emulator does not support all of them. If a ROM still does not work correctly after trying the suggestions above, it may have been written for an unsupported variant and thus will simply not work.
 
