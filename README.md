@@ -70,8 +70,8 @@ Also includes flags for disabling S-CHIP "quirks" (which are all enabled by defa
 `-4` Allow big sprites to be drawn in LO-RES mode  
 `-5` Clear display when 00FE/00FF execute  
 `-6` Allow sprite wrapping  
-`-7` Allow collision enumeration  
-`-8` Allow collision check with bottom of screen
+`-7` Disable collision enumeration  
+`-8` Disable collision check with bottom of screen
 
 
 ## Controls
