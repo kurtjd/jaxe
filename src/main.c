@@ -378,6 +378,7 @@ int main(int argc, char **argv)
                 CLOCK_SPEED = 500;
                 break;
             case 'o':
+                // Octo mode is essentially HI-RES without any S-CHIP quirks.
                 for (size_t i = 0; i < sizeof(q); i++)
                 {
                     q[i] = false;

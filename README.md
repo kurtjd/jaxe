@@ -53,7 +53,7 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 
 ## Options
 `-l` Enable legacy mode (for programs that ran on the COSMAC VIP)  
-`-o` Enable Octo compatibility mode (disables certain S-CHIP quirks)  
+`-o` Enable Octo compatibility mode (disables all S-CHIP quirks but offers HI-RES)  
 `-d` Enable debug mode (with optional dump file specified, otherwise defaults to jace.dmp)  
 `-p` Set program start address (in hex)  
 `-c` Set clock speed (in Hz)  
@@ -61,7 +61,7 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 `-x` Set pixel ON color (in hex)  
 `-y` Set pixel OFF color (in hex)
 
-Also includes flags for disabling S-CHIP "quirks" (which are all enabled by default):
+Also includes flags for disabling specific S-CHIP "quirks" (which are all enabled by default):
 
 `-0` Disable uninitialized RAM  
 `-1` Disable 8xy6/8xyE bug  
