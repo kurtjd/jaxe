@@ -62,17 +62,23 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 `-y` Set pixel OFF color (in hex)
 
 ## Controls
-**Keyboard**:  
+**Keyboard (This maps to the key layouts below)**:  
 `1` `2` `3` `4`  
 `Q` `W` `E` `R`  
 `A` `S` `D` `F`  
 `Z` `X` `C` `V`
 
-**Original Hexpad**:  
+**COSMAC VIP Keypad**:  
 `1` `2` `3` `C`  
 `4` `5` `6` `D`  
 `7` `8` `9` `E`  
 `A` `0` `B` `F`
+
+**HP48 Keypad**:  
+`7` `8` `9` `/`  
+`4` `5` `6` `*`  
+`1` `2` `3` `-`  
+`0` `.` `_` `+`
 
 ## Troubleshooting
 * This emulator defaults to S-CHIP mode, which has become more popular since the 90s. Unfortunately, S-CHIP changed the behavior of several instructions, making some programs developed for the original COSMAC VIP not backwards-compatible. If a ROM is not working correctly (especially one written before 1990), try enabling legacy mode with the `-l` flag.
