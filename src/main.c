@@ -320,7 +320,7 @@ int main(int argc, char **argv)
     bool LEGACY_MODE = false;
     unsigned int PC_START_ADDR = PC_START_ADDR_DEFAULT;
     int CLOCK_SPEED = CLOCK_SPEED_DEFAULT;
-    bool q[9] = {true};
+    bool q[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
 
     /* Check command-line arguments. */
     if (argc < 2)
@@ -378,11 +378,10 @@ int main(int argc, char **argv)
                 CLOCK_SPEED = 500;
                 break;
             case 'o':
-                q[2] = false;
-                q[4] = false;
-                q[5] = false;
-                q[7] = false;
-                q[8] = false;
+                for (size_t i = 0; i < sizeof(q); i++)
+                {
+                    q[i] = false;
+                }
                 break;
             case 'd':
                 DEBUG_MODE = true;
