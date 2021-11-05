@@ -17,7 +17,7 @@
 #define BIG_FONT_START_ADDR (FONT_START_ADDR + 80)
 #define SP_START_ADDR 0x1EF
 #define PC_START_ADDR_DEFAULT 0x200
-#define CLOCK_SPEED_DEFAULT 500
+#define CLOCK_SPEED_DEFAULT 750
 
 #define KEY_UP 0
 #define KEY_DOWN 1
@@ -80,10 +80,24 @@ typedef struct CHIP8
 
     // The path and filename of associated user flags file.
     char UF_path[1024];
+
+    // Flags for the various quirky behavior of S-CHIP
+    /* Quirks:
+        -0: RAM Initialization
+        -1: 8xy6/8xyE
+        -2: Fx55/Fx65
+        -3: Bnnn
+        -4: Big Sprite LORES
+        -5: 00FE/00FF
+        -6: Sprite Wrapping
+        -7: Collision Enumeration
+        -8: Collision with Bottom of Screen
+    */
+    bool *q;
 } CHIP8;
 
 // Set some things to useful default values.
-void chip8_init(CHIP8 *chip8, bool legacy_mode, uint16_t clock_speed, uint16_t pc_start_addr);
+void chip8_init(CHIP8 *chip8, bool legacy_mode, uint16_t clock_speed, uint16_t pc_start_addr, bool q[]);
 
 // Reset the machine.
 void chip8_reset(CHIP8 *chip8);

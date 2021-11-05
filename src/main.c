@@ -320,6 +320,7 @@ int main(int argc, char **argv)
     bool LEGACY_MODE = false;
     unsigned int PC_START_ADDR = PC_START_ADDR_DEFAULT;
     int CLOCK_SPEED = CLOCK_SPEED_DEFAULT;
+    bool q[9] = {false};
 
     /* Check command-line arguments. */
     if (argc < 2)
@@ -329,13 +330,52 @@ int main(int argc, char **argv)
     }
     else if (argc > 2)
     {
+        /* Quirks:
+           -0: RAM Initialization
+           -1: 8xy6/8xyE
+           -2: Fx55/Fx65
+           -3: Bnnn
+           -4: Big Sprite LORES
+           -5: 00FE/00FF
+           -6: Sprite Wrapping
+           -7: Collision Enumeration
+           -8: Collision with Bottom of Screen   
+        */
         int opt;
-        while ((opt = getopt(argc, argv, "ld::s:p:c:x:y:")) != -1)
+        while ((opt = getopt(argc, argv, "012345678ld::s:p:c:x:y:")) != -1)
         {
             switch (opt)
             {
+            case '0':
+                q[0] = true;
+                break;
+            case '1':
+                q[1] = true;
+                break;
+            case '2':
+                q[2] = true;
+                break;
+            case '3':
+                q[3] = true;
+                break;
+            case '4':
+                q[4] = true;
+                break;
+            case '5':
+                q[5] = true;
+                break;
+            case '6':
+                q[6] = true;
+                break;
+            case '7':
+                q[7] = true;
+                break;
+            case '8':
+                q[8] = true;
+                break;
             case 'l':
                 LEGACY_MODE = true;
+                CLOCK_SPEED = 500;
                 break;
             case 'd':
                 DEBUG_MODE = true;
@@ -368,7 +408,7 @@ int main(int argc, char **argv)
 
     /* Initialize the CHIP8 emulator. */
     CHIP8 chip8;
-    chip8_init(&chip8, LEGACY_MODE, CLOCK_SPEED, PC_START_ADDR);
+    chip8_init(&chip8, LEGACY_MODE, CLOCK_SPEED, PC_START_ADDR, q);
     chip8_load_font(&chip8);
 
     /* Load ROM into memory. */

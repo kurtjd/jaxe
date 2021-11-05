@@ -2,12 +2,13 @@
 #include <stdlib.h>
 #include "chip8.h"
 
-void chip8_init(CHIP8 *chip8, bool legacy_mode, uint16_t clock_speed, uint16_t pc_start_addr)
+void chip8_init(CHIP8 *chip8, bool legacy_mode, uint16_t clock_speed, uint16_t pc_start_addr, bool q[])
 {
     // Seed for the RND instruction.
     srand(time(NULL));
 
     chip8->legacy_mode = legacy_mode;
+    chip8->q = q;
 
     if (clock_speed <= 0)
     {
@@ -47,14 +48,13 @@ void chip8_reset(CHIP8 *chip8)
     chip8->display_updated = false;
     chip8->beep = false;
     chip8->exit = false;
-    //chip8->hires = chip8->legacy_mode ? false : true;
     chip8->hires = false;
 
     chip8->ROM_path[0] = '\0';
     chip8->UF_path[0] = '\0';
 
     // S-CHIP did not initialize RAM (does it matter though?)
-    if (chip8->legacy_mode)
+    if (chip8->legacy_mode || chip8->q[0])
     {
         chip8_reset_RAM(chip8);
     }
@@ -227,7 +227,11 @@ void chip8_execute(CHIP8 *chip8)
             if (!chip8->legacy_mode)
             {
                 chip8->hires = false;
-                chip8_reset_display(chip8);
+
+                if (!chip8->q[5])
+                {
+                    chip8_reset_display(chip8);
+                }
             }
 
             break;
@@ -238,7 +242,11 @@ void chip8_execute(CHIP8 *chip8)
             if (!chip8->legacy_mode)
             {
                 chip8->hires = true;
-                chip8_reset_display(chip8);
+
+                if (!chip8->q[5])
+                {
+                    chip8_reset_display(chip8);
+                }
             }
 
             break;
@@ -361,7 +369,7 @@ void chip8_execute(CHIP8 *chip8)
            Legacy: Set Vx = Vy SHR 1.
            S-CHIP: Set Vx = Vx SHR 1. */
         case 0x06:
-            if (chip8->legacy_mode)
+            if (chip8->legacy_mode || chip8->q[1])
             {
                 chip8->V[x] = chip8->V[y];
             }
@@ -381,7 +389,7 @@ void chip8_execute(CHIP8 *chip8)
            Legacy: Set Vx = Vy SHL 1.
            S-CHIP: Set Vx = Vx SHL 1. */
         case 0x0E:
-            if (chip8->legacy_mode)
+            if (chip8->legacy_mode || chip8->q[1])
             {
                 chip8->V[x] = chip8->V[y];
             }
@@ -413,7 +421,7 @@ void chip8_execute(CHIP8 *chip8)
        Legacy: Jump to location nnn + V0.
        S-CHIP: Jump to location nnn + Vx. */
     case 0x0B:
-        chip8->PC = chip8->legacy_mode ? chip8->V[0] + nnn : chip8->V[x] + nnn;
+        chip8->PC = (chip8->legacy_mode || chip8->q[3]) ? chip8->V[0] + nnn : chip8->V[x] + nnn;
         break;
 
     /* RND Vx, byte (Cxkk)
@@ -528,7 +536,7 @@ void chip8_execute(CHIP8 *chip8)
                 chip8->RAM[chip8->I + r] = chip8->V[r];
             }
 
-            if (chip8->legacy_mode)
+            if (chip8->legacy_mode || chip8->q[2])
             {
                 chip8->I += (x + 1);
             }
@@ -544,7 +552,7 @@ void chip8_execute(CHIP8 *chip8)
                 chip8->V[r] = chip8->RAM[chip8->I + r];
             }
 
-            if (chip8->legacy_mode)
+            if (chip8->legacy_mode || chip8->q[2])
             {
                 chip8->I += (x + 1);
             }
@@ -688,11 +696,10 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
     {
         /* Draw a 32-byte (16x16) sprite in hires or
         a 16-byte (8x16) sprite in lores. */
-        n = chip8->hires ? 32 : 16;
+        n = (chip8->hires || !chip8->q[4]) ? 32 : 16;
     }
 
-    //if (chip8->hires)
-    if (0)
+    if (chip8->hires && chip8->q[8])
     {
         int rows = (n == 32) ? 16 : n;
         chip8->V[0x0F] += ((y + rows) - (MAX_HEIGHT - 1));
@@ -705,18 +712,12 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
 
         for (int j = 0; j < 8; j++)
         {
-            unsigned y_start = i, x_start = j;
-
-            /* If drawing a hires sprite,
-            every odd byte is to be drawn along the x-axis. */
-            if (n == 32)
-            {
-                if (i % 2 != 0)
-                {
-                    y_start = i - 1;
-                    x_start = (j + 8);
-                }
-            }
+            /* For big sprites, every odd byte needs to be drawn on the same
+            row as the previous byte. This is achieved through integer division
+            truncation. The odd byte also needs to be drawn 8 pixels to the
+            right of the previous byte. */
+            unsigned y_start = (n == 32) ? (i / 2) : i;
+            unsigned x_start = (n == 32 && (i % 2 != 0)) ? (j + 8) : j;
 
             /* Now we have to scale the display if we are in lo-res mode
             by basically drawing each pixel twice. */
@@ -729,7 +730,7 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
                     int disp_y = (chip8->V[y] * scale) + (y_start * scale) + h;
 
                     // Allow out-of-bound sprite to wrap-around in legacy mode.
-                    if (chip8->legacy_mode)
+                    if (chip8->legacy_mode || chip8->q[6])
                     {
                         disp_x %= MAX_WIDTH;
                         disp_y %= MAX_HEIGHT;
@@ -751,8 +752,7 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
                     chip8->display[disp_y][disp_x] = (pixel_on ^ bit);
                     if (pixel_on && bit)
                     {
-                        //if (chip8->hires)
-                        if (0)
+                        if (chip8->hires && chip8->q[7])
                         {
                             if (!collide_row)
                             {
@@ -803,7 +803,15 @@ void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels)
     }
 
     // Create updated display buffer.
-    uint8_t disp_buf[MAX_HEIGHT][MAX_WIDTH] = {false};
+    uint8_t disp_buf[MAX_HEIGHT][MAX_WIDTH];
+    for (int i = 0; i < MAX_HEIGHT; i++)
+    {
+        for (int j = 0; j < MAX_WIDTH; j++)
+        {
+            disp_buf[i][j] = false;
+        }
+    }
+
     for (int y = y_start; y < y_end; y++)
     {
         for (int x = x_start; x < x_end; x++)
