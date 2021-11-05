@@ -47,6 +47,7 @@ void chip8_reset(CHIP8 *chip8)
     chip8->display_updated = false;
     chip8->beep = false;
     chip8->exit = false;
+    //chip8->hires = chip8->legacy_mode ? false : true;
     chip8->hires = false;
 
     chip8->ROM_path[0] = '\0';
@@ -226,6 +227,7 @@ void chip8_execute(CHIP8 *chip8)
             if (!chip8->legacy_mode)
             {
                 chip8->hires = false;
+                chip8_reset_display(chip8);
             }
 
             break;
@@ -236,6 +238,7 @@ void chip8_execute(CHIP8 *chip8)
             if (!chip8->legacy_mode)
             {
                 chip8->hires = true;
+                chip8_reset_display(chip8);
             }
 
             break;
@@ -688,7 +691,8 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
         n = chip8->hires ? 32 : 16;
     }
 
-    if (chip8->hires)
+    //if (chip8->hires)
+    if (0)
     {
         int rows = (n == 32) ? 16 : n;
         chip8->V[0x0F] += ((y + rows) - (MAX_HEIGHT - 1));
@@ -710,7 +714,7 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
                 if (i % 2 != 0)
                 {
                     y_start = i - 1;
-                    x_start = (j * 8);
+                    x_start = (j + 8);
                 }
             }
 
@@ -747,7 +751,8 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
                     chip8->display[disp_y][disp_x] = (pixel_on ^ bit);
                     if (pixel_on && bit)
                     {
-                        if (chip8->hires)
+                        //if (chip8->hires)
+                        if (0)
                         {
                             if (!collide_row)
                             {
