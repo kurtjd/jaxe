@@ -19,7 +19,7 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 
 ## TODO
 * Add full S-CHIP support
-* Add ETI-660 and HI-RES support
+* Autodetect legacy ROMs
 * Allow user to reset emulator
 * Allow user to pause in non-debug mode
 * Allow user to change clock speed while running
@@ -27,8 +27,6 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 * Allow user to create save states (RAM dumps) while in non-debug mode
 * Allow user to rewind in debug mode
 * Enhance debug display
-* Look into support for other CHIP-8 variants
-* Add GUI
 * Add more test cases
 * Test Windows support
 * Continue to refactor and optimize code
