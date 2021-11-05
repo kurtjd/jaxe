@@ -369,16 +369,22 @@ void chip8_execute(CHIP8 *chip8)
         /* ADD Vx, Vy (8xy4)
            Set Vx = Vx + Vy, set VF = carry. */
         case 0x04:
-            chip8->V[0x0F] = ((chip8->V[x] + chip8->V[y]) > 0xFF);
+        {
+            bool carry = ((chip8->V[x] + chip8->V[y]) > 0xFF);
             chip8->V[x] += chip8->V[y];
+            chip8->V[0x0F] = carry;
             break;
+        }
 
         /* SUB Vx, Vy (8xy5)
            Set Vx = Vx - Vy, set VF = NOT borrow. */
         case 0x05:
-            chip8->V[0x0F] = (chip8->V[x] >= chip8->V[y]);
-            chip8->V[x] -= chip8->V[y];
+        {
+            bool no_borrow = (chip8->V[x] >= chip8->V[y]);
+            chip8->V[x] = chip8->V[x] - chip8->V[y];
+            chip8->V[0x0F] = no_borrow;
             break;
+        }
 
         /* SHR Vx {, Vy} (8xy6)
            Legacy: Set Vx = Vy SHR 1.
