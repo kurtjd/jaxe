@@ -53,7 +53,7 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 
 ## Options
 `-l` Enable legacy mode (for programs that ran on the COSMAC VIP)  
-`-o` Enable Octo compatibility mode (disables certain S-CHIP quirks)
+`-o` Enable Octo compatibility mode (disables certain S-CHIP quirks)  
 `-d` Enable debug mode (with optional dump file specified, otherwise defaults to jace.dmp)  
 `-p` Set program start address (in hex)  
 `-c` Set clock speed (in Hz)  
@@ -63,14 +63,14 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 
 Also includes flags for disabling S-CHIP "quirks" (which are all enabled by default):
 
-`-0` Disable uninitialized RAM
-`-1` Disable 8xy6/8xyE bug
-`-2` Disable Fx55/Fx65 bug
-`-3` Disable Bnnn bug
-`-4` Allow big sprites to be drawn in LO-RES mode
-`-5` Clear display when 00FE/00FF execute
-`-6` Allow sprite wrapping
-`-7` Allow collision enumeration
+`-0` Disable uninitialized RAM  
+`-1` Disable 8xy6/8xyE bug  
+`-2` Disable Fx55/Fx65 bug  
+`-3` Disable Bnnn bug  
+`-4` Allow big sprites to be drawn in LO-RES mode  
+`-5` Clear display when 00FE/00FF execute  
+`-6` Allow sprite wrapping  
+`-7` Allow collision enumeration  
 `-8` Allow collision check with bottom of screen
 
 
