@@ -8,17 +8,18 @@ CHIP-8 was a virtual machine/programming language developed by Joseph Weisbecker
 Today, it is a popular target to be emulated because of its simplicity and charm.
 
 ## Features
-* Fully implemented instruction set
+* Fully implemented instruction set (including S-CHIP)
+* HI-RES (128x64) mode
 * Accurate delay and sound timers
 * Graphical display
 * Sound
 * Graphical debug mode
-* Adjustable clock speed, display scale, colors, and program start address
+* Adjustable clock speed, display scale, colors, program start address
+* Toggle S-CHIP "quirks" for compatibility with a wide variety of ROMs
 * Unit tests for those writing a C emulator
 * Emulator decoupled from any particular graphics/media library allowing for easy embedding into other C programs
 
 ## TODO
-* Add full S-CHIP support
 * Autodetect legacy ROMs
 * Allow user to reset emulator
 * Allow user to pause in non-debug mode
@@ -52,12 +53,26 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 
 ## Options
 `-l` Enable legacy mode (for programs that ran on the COSMAC VIP)  
+`-o` Enable Octo compatibility mode (disables certain S-CHIP quirks)
 `-d` Enable debug mode (with optional dump file specified, otherwise defaults to jace.dmp)  
 `-p` Set program start address (in hex)  
 `-c` Set clock speed (in Hz)  
 `-s` Set display scale factor  
 `-x` Set pixel ON color (in hex)  
 `-y` Set pixel OFF color (in hex)
+
+Also includes flags for disabling S-CHIP "quirks" (which are all enabled by default):
+
+`-0` Disable uninitialized RAM
+`-1` Disable 8xy6/8xyE bug
+`-2` Disable Fx55/Fx65 bug
+`-3` Disable Bnnn bug
+`-4` Allow big sprites to be drawn in LO-RES mode
+`-5` Clear display when 00FE/00FF execute
+`-6` Allow sprite wrapping
+`-7` Allow collision enumeration
+`-8` Allow collision check with bottom of screen
+
 
 ## Controls
 **Keyboard (This maps to the key layouts below)**:  

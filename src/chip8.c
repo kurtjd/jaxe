@@ -186,6 +186,12 @@ void chip8_execute(CHIP8 *chip8)
     case 0x00:
         switch (b2)
         {
+        /* HALT (0000)
+           Halt the program. Only used by Octo programs. */
+        case 0x00:
+            chip8->PC -= 2;
+            break;
+
         /* CLS (00E0)
            Clear the display. */
         case 0xE0:

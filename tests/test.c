@@ -3,6 +3,12 @@
 #include <assert.h>
 #include "chip8.h"
 
+void test_0000(CHIP8 *chip8)
+{
+    (void)chip8;
+    // TODO
+}
+
 void test_00Cn(CHIP8 *chip8)
 {
     // TODO
@@ -314,6 +320,7 @@ void test_8xy6(CHIP8 *chip8)
 
     chip8_execute(chip8);
 
+    printf("0x%x\n", chip8->V[6]);
     assert(chip8->V[6] == 0x34);
     assert(chip8->V[0x0F] == 0x01);
 
@@ -713,9 +720,10 @@ void test_Fx75_Fx85(CHIP8 *chip8)
 
 int main()
 {
+    bool q[9] = {1};
     // The test machine.
     CHIP8 chip8;
-    chip8_init(&chip8, false, CLOCK_SPEED_DEFAULT, PC_START_ADDR_DEFAULT);
+    chip8_init(&chip8, false, CLOCK_SPEED_DEFAULT, PC_START_ADDR_DEFAULT, q);
 
     /* All tests follow similar pattern:
             * Load instruction into RAM
@@ -723,6 +731,7 @@ int main()
             * Execute instruction
             * Check result
             * Reset the machine */
+    test_0000(&chip8);
     test_00Cn(&chip8);
     test_00FE(&chip8);
     test_00E0(&chip8);
