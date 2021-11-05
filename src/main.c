@@ -320,7 +320,7 @@ int main(int argc, char **argv)
     bool LEGACY_MODE = false;
     unsigned int PC_START_ADDR = PC_START_ADDR_DEFAULT;
     int CLOCK_SPEED = CLOCK_SPEED_DEFAULT;
-    bool q[9] = {false};
+    bool q[9] = {true};
 
     /* Check command-line arguments. */
     if (argc < 2)
@@ -347,31 +347,31 @@ int main(int argc, char **argv)
             switch (opt)
             {
             case '0':
-                q[0] = true;
+                q[0] = false;
                 break;
             case '1':
-                q[1] = true;
+                q[1] = false;
                 break;
             case '2':
-                q[2] = true;
+                q[2] = false;
                 break;
             case '3':
-                q[3] = true;
+                q[3] = false;
                 break;
             case '4':
-                q[4] = true;
+                q[4] = false;
                 break;
             case '5':
-                q[5] = true;
+                q[5] = false;
                 break;
             case '6':
-                q[6] = true;
+                q[6] = false;
                 break;
             case '7':
-                q[7] = true;
+                q[7] = false;
                 break;
             case '8':
-                q[8] = true;
+                q[8] = false;
                 break;
             case 'l':
                 LEGACY_MODE = true;

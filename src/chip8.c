@@ -54,7 +54,7 @@ void chip8_reset(CHIP8 *chip8)
     chip8->UF_path[0] = '\0';
 
     // S-CHIP did not initialize RAM (does it matter though?)
-    if (chip8->legacy_mode || chip8->q[0])
+    if (chip8->legacy_mode || !chip8->q[0])
     {
         chip8_reset_RAM(chip8);
     }
@@ -369,7 +369,7 @@ void chip8_execute(CHIP8 *chip8)
            Legacy: Set Vx = Vy SHR 1.
            S-CHIP: Set Vx = Vx SHR 1. */
         case 0x06:
-            if (chip8->legacy_mode || chip8->q[1])
+            if (chip8->legacy_mode || !chip8->q[1])
             {
                 chip8->V[x] = chip8->V[y];
             }
@@ -389,7 +389,7 @@ void chip8_execute(CHIP8 *chip8)
            Legacy: Set Vx = Vy SHL 1.
            S-CHIP: Set Vx = Vx SHL 1. */
         case 0x0E:
-            if (chip8->legacy_mode || chip8->q[1])
+            if (chip8->legacy_mode || !chip8->q[1])
             {
                 chip8->V[x] = chip8->V[y];
             }
@@ -421,7 +421,7 @@ void chip8_execute(CHIP8 *chip8)
        Legacy: Jump to location nnn + V0.
        S-CHIP: Jump to location nnn + Vx. */
     case 0x0B:
-        chip8->PC = (chip8->legacy_mode || chip8->q[3]) ? chip8->V[0] + nnn : chip8->V[x] + nnn;
+        chip8->PC = (chip8->legacy_mode || !chip8->q[3]) ? chip8->V[0] + nnn : chip8->V[x] + nnn;
         break;
 
     /* RND Vx, byte (Cxkk)
@@ -536,7 +536,7 @@ void chip8_execute(CHIP8 *chip8)
                 chip8->RAM[chip8->I + r] = chip8->V[r];
             }
 
-            if (chip8->legacy_mode || chip8->q[2])
+            if (chip8->legacy_mode || !chip8->q[2])
             {
                 chip8->I += (x + 1);
             }
@@ -552,7 +552,7 @@ void chip8_execute(CHIP8 *chip8)
                 chip8->V[r] = chip8->RAM[chip8->I + r];
             }
 
-            if (chip8->legacy_mode || chip8->q[2])
+            if (chip8->legacy_mode || !chip8->q[2])
             {
                 chip8->I += (x + 1);
             }
@@ -730,7 +730,7 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
                     int disp_y = (chip8->V[y] * scale) + (y_start * scale) + h;
 
                     // Allow out-of-bound sprite to wrap-around in legacy mode.
-                    if (chip8->legacy_mode || chip8->q[6])
+                    if (chip8->legacy_mode || !chip8->q[6])
                     {
                         disp_x %= MAX_WIDTH;
                         disp_y %= MAX_HEIGHT;
