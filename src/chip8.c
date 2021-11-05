@@ -459,7 +459,7 @@ void chip8_execute(CHIP8 *chip8)
        set VF = num rows collision. If n=0: Display 16x16 sprite starting at
        memory location I at (Vx, Vy), set VF = num rows collision. */
     case 0x0D:
-        chip8_draw(chip8, x, y, n);
+        chip8_draw(chip8, chip8->V[x], chip8->V[y], n);
         break;
 
     case 0x0E:
@@ -747,8 +747,8 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
             {
                 for (int k = 0; k < scale; k++)
                 {
-                    int disp_x = (chip8->V[x] * scale) + (x_start * scale) + k;
-                    int disp_y = (chip8->V[y] * scale) + (y_start * scale) + h;
+                    int disp_x = (x * scale) + (x_start * scale) + k;
+                    int disp_y = (y * scale) + (y_start * scale) + h;
 
                     // Allow out-of-bound sprite to wrap-around in legacy mode.
                     if (chip8->legacy_mode || !chip8->q[6])
