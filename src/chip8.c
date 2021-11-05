@@ -402,9 +402,12 @@ void chip8_execute(CHIP8 *chip8)
         /* SUBN Vx, Vy (8xy7)
            Set Vx = Vy - Vx, set VF = NOT borrow. */
         case 0x07:
-            chip8->V[0x0F] = (chip8->V[y] > chip8->V[x]);
+        {
+            bool no_borrow = (chip8->V[y] >= chip8->V[x]);
             chip8->V[x] = chip8->V[y] - chip8->V[x];
+            chip8->V[0x0F] = no_borrow;
             break;
+        }
 
         /* SHL Vx {, Vy} (8xyE)
            Legacy: Set Vx = Vy SHL 1.
