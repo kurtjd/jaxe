@@ -33,7 +33,7 @@ void chip8_reset(CHIP8 *chip8)
 {
     chip8->PC = chip8->pc_start_addr;
     chip8->SP = SP_START_ADDR;
-    chip8->I = chip8->PC;
+    chip8->I = 0x00;
     chip8->DT = 0;
     chip8->ST = 0;
 
@@ -370,7 +370,7 @@ void chip8_execute(CHIP8 *chip8)
         /* SUB Vx, Vy (8xy5)
            Set Vx = Vx - Vy, set VF = NOT borrow. */
         case 0x05:
-            chip8->V[0x0F] = (chip8->V[x] > chip8->V[y]);
+            chip8->V[0x0F] = (chip8->V[x] >= chip8->V[y]);
             chip8->V[x] -= chip8->V[y];
             break;
 

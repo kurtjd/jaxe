@@ -342,7 +342,7 @@ int main(int argc, char **argv)
            -8: Collision with Bottom of Screen   
         */
         int opt;
-        while ((opt = getopt(argc, argv, "012345678ld::s:p:c:x:y:")) != -1)
+        while ((opt = getopt(argc, argv, "012345678lod::s:p:c:x:y:")) != -1)
         {
             switch (opt)
             {
@@ -376,6 +376,13 @@ int main(int argc, char **argv)
             case 'l':
                 LEGACY_MODE = true;
                 CLOCK_SPEED = 500;
+                break;
+            case 'o':
+                q[2] = false;
+                q[4] = false;
+                q[5] = false;
+                q[7] = false;
+                q[8] = false;
                 break;
             case 'd':
                 DEBUG_MODE = true;
