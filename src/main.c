@@ -14,6 +14,7 @@
 #define DBG_PANEL_WIDTH 200
 #define DBG_PANEL_HEIGHT 320
 #define DBG_FONT_FILE "../fonts/dbgfont.ttf"
+#define DBG_STACK_MAX 1000
 
 // Globals
 int DISPLAY_SCALE = 5;
@@ -22,8 +23,14 @@ long OFF_COLOR = 0x000000;
 TTF_Font *DBG_FONT = NULL;
 
 bool DEBUG_MODE = false;
-bool dbg_paused = false;
+bool paused = false;
 bool dbg_step = false;
+bool dbg_step_back = false;
+
+/* This stack holds instances of the chip8 emulator after every execution.
+It is used to be able to step back the emulator. */
+CHIP8 dbg_stack[DBG_STACK_MAX];
+int dbg_stack_pntr = 0;
 
 // Black magic SDL sound stuff.
 void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
@@ -182,7 +189,7 @@ void draw_debug(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
 
     // UP
     font_dest_rect.y = 120 + (15 * 8) + 20;
-    txt = TTF_RenderText_Solid(DBG_FONT, "UP:    Step", font_color);
+    txt = TTF_RenderText_Solid(DBG_FONT, "UP/DWN: Fwd/Bk", font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
 
@@ -282,11 +289,22 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
             }
             else if (e->key.keysym.sym == SDLK_SPACE)
             {
-                dbg_paused = !dbg_paused;
+                paused = !paused;
             }
-            else if (e->key.keysym.sym == SDLK_UP)
+            else if (e->key.keysym.sym == SDLK_UP && DEBUG_MODE)
             {
                 dbg_step = true;
+            }
+            else if (e->key.keysym.sym == SDLK_DOWN && DEBUG_MODE)
+            {
+                dbg_stack_pntr--;
+                if (dbg_stack_pntr < 0)
+                {
+                    dbg_stack_pntr = DBG_STACK_MAX - 1;
+                }
+                *chip8 = dbg_stack[dbg_stack_pntr];
+                dbg_step = true;
+                dbg_step_back = true;
             }
             else if (e->key.keysym.sym == SDLK_RETURN)
             {
@@ -369,7 +387,7 @@ int main(int argc, char **argv)
                 break;
             case 'd':
                 DEBUG_MODE = true;
-                dbg_paused = true;
+                paused = true;
                 break;
             case 'm':
                 load_dmp = true;
@@ -414,6 +432,12 @@ int main(int argc, char **argv)
     {
         fprintf(stderr, "Unable to open dump: %s\n", argv[argc - 1]);
         return 1;
+    }
+
+    // Initialize the dbg stack with instances of the initial emulator state.
+    for (int i = 0; i < DBG_STACK_MAX; i++)
+    {
+        dbg_stack[i] = chip8;
     }
 
     /* Initialize SDL */
@@ -503,7 +527,7 @@ int main(int argc, char **argv)
     SDL_Event e;
     while (!chip8.exit && handle_input(&e, &chip8))
     {
-        if (dbg_paused)
+        if (paused)
         {
             if (!dbg_step)
             {
@@ -515,7 +539,21 @@ int main(int argc, char **argv)
             }
         }
 
-        chip8_cycle(&chip8);
+        /* Push the state of the emulator into stack if the cycle actually
+        executed an instruction and wasn't sleeping. */
+        if (!dbg_step_back && chip8_cycle(&chip8))
+        {
+            dbg_stack_pntr++;
+            if (dbg_stack_pntr >= DBG_STACK_MAX)
+            {
+                dbg_stack_pntr = 0;
+            }
+            dbg_stack[dbg_stack_pntr] = chip8;
+        }
+        else
+        {
+            dbg_step_back = false;
+        }
 
         // Prevents wasting time drawing every frame when unnecessary.
         if (chip8.display_updated)

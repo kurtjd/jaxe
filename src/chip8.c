@@ -148,8 +148,9 @@ bool chip8_load_rom(CHIP8 *chip8, char *filename)
     return false;
 }
 
-void chip8_cycle(CHIP8 *chip8)
+bool chip8_cycle(CHIP8 *chip8)
 {
+    bool executed = false;
     chip8_update_elapsed_time(chip8);
 
     // Slow the CPU down to match given clock speed.
@@ -158,9 +159,11 @@ void chip8_cycle(CHIP8 *chip8)
     {
         chip8->cpu_cum = 0;
         chip8_execute(chip8);
+        executed = true;
     }
 
     chip8_handle_timers(chip8);
+    return executed;
 }
 
 void chip8_execute(CHIP8 *chip8)

@@ -27,7 +27,6 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 * Autodetect legacy ROMs
 * Allow user to change clock speed while running
 * Allow user to change color while running
-* Allow user to rewind in debug mode
 * Enhance debug display
 * Add more test cases
 * Test Windows support
@@ -96,7 +95,8 @@ Also includes flags for disabling specific S-CHIP "quirks" (which are all enable
 
 **Other Controls**:  
 `SPACE` Pause/Unpause  
-`UP` Next Cycle  
+`UP` Step Forward (DBG Mode Only)  
+`DOWN` Step Back (DBG Mode Only)  
 `ENTER` Save/Create Dump File  
 `ESC` Reset Emulator  
 

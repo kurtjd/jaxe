@@ -115,9 +115,10 @@ void chip8_load_font(CHIP8 *chip8);
 Everything before that is system. */
 bool chip8_load_rom(CHIP8 *chip8, char *filename);
 
-/* Performs a full cycle of the emulator including
-executing an instruction and handling timers. */
-void chip8_cycle(CHIP8 *chip8);
+/* Performs a full cycle of the emulator including executing an instruction and
+handling timers. Returns true if instruction was executed
+or false if the CPU was sleeping. */
+bool chip8_cycle(CHIP8 *chip8);
 
 // Fetches, decodes, and executes the next instruction.
 void chip8_execute(CHIP8 *chip8);
