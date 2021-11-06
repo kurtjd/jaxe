@@ -25,6 +25,7 @@ void chip8_init(CHIP8 *chip8, uint16_t clock_speed, uint16_t pc_start_addr, bool
     to get number of miliseconds to wait between each tick. */
     chip8->timer_max_cum = 1000000 / 60;
     chip8->cpu_max_cum = 1000000 / chip8->clock_speed;
+    chip8->refresh_max_cum = 1000000 / REFRESH_RATE;
 
     chip8->pc_start_addr = pc_start_addr;
 
@@ -195,7 +196,6 @@ void chip8_execute(CHIP8 *chip8)
     /* Immediately set PC to next instruction
     after fetching and decoding the current one. */
     chip8->PC += 2;
-    chip8->display_updated = false;
 
     /* Execute */
     switch (c)
@@ -632,6 +632,15 @@ void chip8_handle_timers(CHIP8 *chip8)
     {
         chip8->beep = false;
     }
+
+    // Limit the display refresh rate.
+    chip8->display_updated = false;
+    chip8->refresh_cum += chip8->total_cycle_time;
+    if (chip8->refresh_cum >= chip8->refresh_max_cum)
+    {
+        chip8->display_updated = true;
+        chip8->refresh_cum = 0;
+    }
 }
 
 void chip8_update_elapsed_time(CHIP8 *chip8)
@@ -672,7 +681,7 @@ void chip8_reset_display(CHIP8 *chip8)
         }
     }
 
-    chip8->display_updated = true;
+    //chip8->display_updated = true;
 }
 
 void chip8_reset_RAM(CHIP8 *chip8)
@@ -786,7 +795,7 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
         prev_byte_collide = collide_row;
     }
 
-    chip8->display_updated = true;
+    //chip8->display_updated = true;
 }
 
 void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels)

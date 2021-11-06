@@ -19,6 +19,7 @@
 #define SP_START_ADDR (BIG_FONT_START_ADDR + 160)
 #define PC_START_ADDR_DEFAULT 0x200
 #define CLOCK_SPEED_DEFAULT 1000
+#define REFRESH_RATE 60
 
 #define KEY_UP 0
 #define KEY_DOWN 1
@@ -56,6 +57,8 @@ typedef struct CHIP8
     uint32_t cpu_cum;
     uint32_t sound_cum;
     uint32_t delay_cum;
+    uint32_t refresh_max_cum;
+    uint32_t refresh_cum;
     uint32_t total_cycle_time;
     struct timeval cur_cycle_start;
     struct timeval prev_cycle_start;

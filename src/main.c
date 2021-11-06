@@ -363,7 +363,7 @@ int main(int argc, char **argv)
            -8: Collision with Bottom of Screen   
         */
         int opt;
-        while ((opt = getopt(argc, argv, "012345678cdms:p:x:f:b:")) != -1)
+        while ((opt = getopt(argc, argv, "012345678xdms:p:c:f:b:")) != -1)
         {
             switch (opt)
             {
