@@ -25,11 +25,8 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 
 ## TODO
 * Autodetect legacy ROMs
-* Allow user to reset emulator
-* Allow user to pause in non-debug mode
 * Allow user to change clock speed while running
 * Allow user to change color while running
-* Allow user to create save states (RAM dumps) while in non-debug mode
 * Allow user to rewind in debug mode
 * Enhance debug display
 * Add more test cases
@@ -97,6 +94,12 @@ Also includes flags for disabling specific S-CHIP "quirks" (which are all enable
 `4` `5` `6` `*`  
 `1` `2` `3` `-`  
 `0` `.` `_` `+`
+
+Other Controls:
+* `SPACE`: Pause/Unpause
+* `UP`: Next Cycle
+* `ENTER`: Save/Create Dump File
+* `ESC`: Reset Emulator
 
 ## Troubleshooting
 * This emulator defaults to S-CHIP mode, which has become more popular since the 90s. Unfortunately, S-CHIP changed the behavior of several instructions, making some programs developed for the original COSMAC VIP not backwards-compatible. If a ROM is not working correctly (especially one written before 1990), try enabling legacy mode with the `-l` flag.

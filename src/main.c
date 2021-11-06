@@ -280,15 +280,15 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
             {
                 chip8->keypad[hexkey] = KEY_RELEASED;
             }
-            else if (e->key.keysym.sym == SDLK_SPACE && DEBUG_MODE)
+            else if (e->key.keysym.sym == SDLK_SPACE)
             {
                 dbg_paused = !dbg_paused;
             }
-            else if (e->key.keysym.sym == SDLK_UP && DEBUG_MODE)
+            else if (e->key.keysym.sym == SDLK_UP)
             {
                 dbg_step = true;
             }
-            else if (e->key.keysym.sym == SDLK_RETURN && DEBUG_MODE)
+            else if (e->key.keysym.sym == SDLK_RETURN)
             {
                 if (chip8_dump(chip8))
                 {
@@ -298,6 +298,10 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
                 {
                     fprintf(stderr, "Unable to take a dump in %s\n", chip8->DMP_path);
                 }
+            }
+            else if (e->key.keysym.sym == SDLK_ESCAPE)
+            {
+                chip8_soft_reset(chip8);
             }
         }
         else if (e->type == SDL_KEYDOWN)

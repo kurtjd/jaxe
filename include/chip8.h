@@ -12,6 +12,7 @@
 #define MAX_RAM 4096
 #define MAX_REGISTERS 16
 #define MAX_USER_FLAGS 8
+#define MAX_FILENAME 256
 
 #define FONT_START_ADDR 0x0
 #define BIG_FONT_START_ADDR (FONT_START_ADDR + 80)
@@ -76,13 +77,13 @@ typedef struct CHIP8
     bool hires;
 
     // The path and filename of currently loaded ROM.
-    char ROM_path[1024];
+    char ROM_path[MAX_FILENAME];
 
     // The path and filename of associated user flags file.
-    char UF_path[1024];
+    char UF_path[MAX_FILENAME];
 
     // The path and filename of associated dump file.
-    char DMP_path[1024];
+    char DMP_path[MAX_FILENAME];
 
     // Flags for the various quirky behavior of S-CHIP
     /* Quirks:
@@ -104,6 +105,9 @@ void chip8_init(CHIP8 *chip8, bool legacy_mode, uint16_t clock_speed, uint16_t p
 
 // Reset the machine.
 void chip8_reset(CHIP8 *chip8);
+
+// Soft reset the machine (keep ROM and fonts loaded).
+void chip8_soft_reset(CHIP8 *chip8);
 
 /* Load hexadecimal font into memory.
 Each hex character is represented by 5 bytes in memory

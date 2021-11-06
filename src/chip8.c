@@ -56,6 +56,7 @@ void chip8_reset(CHIP8 *chip8)
 
     chip8->ROM_path[0] = '\0';
     chip8->UF_path[0] = '\0';
+    chip8->DMP_path[0] = '\0';
 
     // S-CHIP did not initialize RAM (does it matter though?)
     if (chip8->legacy_mode || !chip8->quirks[0])
@@ -66,6 +67,16 @@ void chip8_reset(CHIP8 *chip8)
     chip8_reset_registers(chip8);
     chip8_reset_keypad(chip8);
     chip8_reset_display(chip8);
+}
+
+void chip8_soft_reset(CHIP8 *chip8)
+{
+    char tmp_path[MAX_FILENAME];
+    sprintf(tmp_path, "%s", chip8->ROM_path);
+
+    chip8_reset(chip8);
+    chip8_load_font(chip8);
+    chip8_load_rom(chip8, tmp_path);
 }
 
 void chip8_load_font(CHIP8 *chip8)
