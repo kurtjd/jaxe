@@ -59,6 +59,7 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 `-l` Enable legacy mode (for programs that ran on the COSMAC VIP)  
 `-o` Enable Octo compatibility mode (disables all S-CHIP quirks but keeps HI-RES and new instructions)  
 `-d` Enable debug mode  
+`-m` Load dump file instead of ROM  
 `-p` Set program start address (in hex)  
 `-c` Set clock speed (in Hz)  
 `-s` Set display scale factor  
