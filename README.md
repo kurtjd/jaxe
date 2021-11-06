@@ -93,14 +93,16 @@ Also includes flags for disabling specific S-CHIP "quirks" (which are all enable
 `0` `.` `_` `+`
 
 **Other Controls**:  
-`SPACE` Pause/Unpause  
-`UP` Step Forward (DBG Mode Only)  
-`DOWN` Step Back (DBG Mode Only)  
-`RIGHT` Increase CPU Speed  
-`LEFT` Decrease CPU Speed  
-`ENTER` Save/Create Dump File  
-`BACKSPACE` Cycle Color Themes  
-`ESC` Reset Emulator  
+|Key|Action|
+|---|------|
+|`SPACE`|Pause/Unpause|
+|`UP`|Step Forward (DBG Mode Only)|
+|`DOWN`|Step Back (DBG Mode Only)|
+|`RIGHT`|Increase CPU Speed|
+|`LEFT`|Decrease CPU Speed|
+|`ENTER`|Save/Create Dump File|
+|`BACKSPACE`|Cycle Color Themes|
+|`ESC`|Reset Emulator|
 
 ## Troubleshooting
 * This emulator defaults to S-CHIP mode, which has become more popular since the 90s. Unfortunately, S-CHIP changed the behavior of several instructions and introduced some other quirks, making some programs developed for the original COSMAC VIP not backwards-compatible. If a ROM is not working correctly (especially one written before 1990), try enabling compatibility mode with the `-x` flag.
