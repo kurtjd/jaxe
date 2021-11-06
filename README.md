@@ -25,8 +25,6 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 * Emulator decoupled from any particular graphics/media library allowing for easy embedding into other C programs
 
 ## TODO
-* Autodetect legacy ROMs
-* Enhance debug display
 * Add more test cases
 * Test Windows support
 * Continue to refactor and optimize code
