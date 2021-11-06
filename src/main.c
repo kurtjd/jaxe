@@ -320,7 +320,6 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
 int main(int argc, char **argv)
 {
     // Emulator options
-    bool LEGACY_MODE = false;
     unsigned int PC_START_ADDR = PC_START_ADDR_DEFAULT;
     int CLOCK_SPEED = CLOCK_SPEED_DEFAULT;
     bool quirks[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
@@ -346,7 +345,7 @@ int main(int argc, char **argv)
            -8: Collision with Bottom of Screen   
         */
         int opt;
-        while ((opt = getopt(argc, argv, "012345678lodms:p:c:x:y:")) != -1)
+        while ((opt = getopt(argc, argv, "012345678cdms:p:x:f:b:")) != -1)
         {
             switch (opt)
             {
@@ -361,16 +360,12 @@ int main(int argc, char **argv)
             case '8':
                 quirks[opt - '0'] = false;
                 break;
-            case 'l':
-                LEGACY_MODE = true;
-                CLOCK_SPEED = 500;
-                break;
-            case 'o':
-                // Octo mode is essentially HI-RES without any S-CHIP quirks.
+            case 'x':
                 for (size_t i = 0; i < sizeof(quirks); i++)
                 {
                     quirks[i] = false;
                 }
+
                 break;
             case 'd':
                 DEBUG_MODE = true;
@@ -388,10 +383,10 @@ int main(int argc, char **argv)
             case 'c':
                 CLOCK_SPEED = atoi(optarg);
                 break;
-            case 'x':
+            case 'f':
                 ON_COLOR = strtol(optarg, NULL, 16);
                 break;
-            case 'y':
+            case 'b':
                 OFF_COLOR = strtol(optarg, NULL, 16);
                 break;
             }
@@ -405,7 +400,7 @@ int main(int argc, char **argv)
     all necessary data. */
     if (!load_dmp)
     {
-        chip8_init(&chip8, LEGACY_MODE, CLOCK_SPEED, PC_START_ADDR, quirks);
+        chip8_init(&chip8, CLOCK_SPEED, PC_START_ADDR, quirks);
         chip8_load_font(&chip8);
 
         /* Load ROM into memory. */

@@ -45,10 +45,6 @@ typedef struct CHIP8
     // Represents keys 0-F and if they are down, up, or released.
     uint8_t keypad[MAX_KEYS];
 
-    /* The emulator can be ran in SUPER CHIP-8 mode by default,
-    or legacy mode compatible with the original COSMAC VIP. */
-    bool legacy_mode;
-
     /* Where the emulator begins processing. Some programs,
     such as those written for the ETI-600, begin at different addresses. */
     uint16_t pc_start_addr;
@@ -101,7 +97,7 @@ typedef struct CHIP8
 } CHIP8;
 
 // Set some things to useful default values.
-void chip8_init(CHIP8 *chip8, bool legacy_mode, uint16_t clock_speed, uint16_t pc_start_addr, bool quirks[]);
+void chip8_init(CHIP8 *chip8, uint16_t clock_speed, uint16_t pc_start_addr, bool quirks[]);
 
 // Reset the machine.
 void chip8_reset(CHIP8 *chip8);

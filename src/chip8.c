@@ -2,12 +2,10 @@
 #include <stdlib.h>
 #include "chip8.h"
 
-void chip8_init(CHIP8 *chip8, bool legacy_mode, uint16_t clock_speed, uint16_t pc_start_addr, bool quirks[])
+void chip8_init(CHIP8 *chip8, uint16_t clock_speed, uint16_t pc_start_addr, bool quirks[])
 {
     // Seed for the RND instruction.
     srand(time(NULL));
-
-    chip8->legacy_mode = legacy_mode;
 
     for (int i = 0; i < 9; i++)
     {
@@ -59,7 +57,7 @@ void chip8_reset(CHIP8 *chip8)
     chip8->DMP_path[0] = '\0';
 
     // S-CHIP did not initialize RAM (does it matter though?)
-    if (chip8->legacy_mode || !chip8->quirks[0])
+    if (!chip8->quirks[0])
     {
         chip8_reset_RAM(chip8);
     }
@@ -225,44 +223,29 @@ void chip8_execute(CHIP8 *chip8)
         /* EXIT (00FD) (S-CHIP Only):
            Exit the interpreter. */
         case 0xFD:
-            if (!chip8->legacy_mode)
-            {
-                chip8->exit = true;
-            }
-
+            chip8->exit = true;
             break;
 
         /* SCRR (00FB) (S-CHIP Only):
            Scroll the display right by 4 pixels. */
         case 0xFB:
-            if (!chip8->legacy_mode)
-            {
-                chip8_scroll(chip8, 1, 0, 4);
-            }
-
+            chip8_scroll(chip8, 1, 0, 4);
             break;
 
         /* SCRL (00FC) (S-CHIP Only):
            Scroll the display left by 4 pixels. */
         case 0xFC:
-            if (!chip8->legacy_mode)
-            {
-                chip8_scroll(chip8, -1, 0, 4);
-            }
-
+            chip8_scroll(chip8, -1, 0, 4);
             break;
 
         /* LORES (00FE) (S-CHIP Only):
            Disable HI-RES mode. */
         case 0xFE:
-            if (!chip8->legacy_mode)
-            {
-                chip8->hires = false;
+            chip8->hires = false;
 
-                if (!chip8->quirks[5])
-                {
-                    chip8_reset_display(chip8);
-                }
+            if (!chip8->quirks[5])
+            {
+                chip8_reset_display(chip8);
             }
 
             break;
@@ -270,14 +253,11 @@ void chip8_execute(CHIP8 *chip8)
         /* HIRES (00FF) (S-CHIP Only):
            Enable HI-RES mode. */
         case 0xFF:
-            if (!chip8->legacy_mode)
-            {
-                chip8->hires = true;
+            chip8->hires = true;
 
-                if (!chip8->quirks[5])
-                {
-                    chip8_reset_display(chip8);
-                }
+            if (!chip8->quirks[5])
+            {
+                chip8_reset_display(chip8);
             }
 
             break;
@@ -287,10 +267,7 @@ void chip8_execute(CHIP8 *chip8)
                Scroll the display down by n pixels. */
             if (y == 0xC)
             {
-                if (!chip8->legacy_mode)
-                {
-                    chip8_scroll(chip8, 0, 1, n);
-                }
+                chip8_scroll(chip8, 0, 1, n);
             }
 
             break;
@@ -406,7 +383,7 @@ void chip8_execute(CHIP8 *chip8)
            Legacy: Set Vx = Vy SHR 1.
            S-CHIP: Set Vx = Vx SHR 1. */
         case 0x06:
-            if (chip8->legacy_mode || !chip8->quirks[1])
+            if (!chip8->quirks[1])
             {
                 chip8->V[x] = chip8->V[y];
             }
@@ -429,7 +406,7 @@ void chip8_execute(CHIP8 *chip8)
            Legacy: Set Vx = Vy SHL 1.
            S-CHIP: Set Vx = Vx SHL 1. */
         case 0x0E:
-            if (chip8->legacy_mode || !chip8->quirks[1])
+            if (!chip8->quirks[1])
             {
                 chip8->V[x] = chip8->V[y];
             }
@@ -461,7 +438,7 @@ void chip8_execute(CHIP8 *chip8)
        Legacy: Jump to location nnn + V0.
        S-CHIP: Jump to location nnn + Vx. */
     case 0x0B:
-        chip8->PC = (chip8->legacy_mode || !chip8->quirks[3]) ? chip8->V[0] + nnn : chip8->V[x] + nnn;
+        chip8->PC = (!chip8->quirks[3]) ? chip8->V[0] + nnn : chip8->V[x] + nnn;
         break;
 
     /* RND Vx, byte (Cxkk)
@@ -551,10 +528,7 @@ void chip8_execute(CHIP8 *chip8)
         /* LD HF, Vx (Fx30) (S-CHIP Only)
            Set I = location of 10-byte sprite for digit Vx. */
         case 0x30:
-            if (!chip8->legacy_mode)
-            {
-                chip8->I = BIG_FONT_START_ADDR + (chip8->V[x] * 0x0A);
-            }
+            chip8->I = BIG_FONT_START_ADDR + (chip8->V[x] * 0x0A);
 
             break;
 
@@ -576,7 +550,7 @@ void chip8_execute(CHIP8 *chip8)
                 chip8->RAM[chip8->I + r] = chip8->V[r];
             }
 
-            if (chip8->legacy_mode || !chip8->quirks[2])
+            if (!chip8->quirks[2])
             {
                 chip8->I += (x + 1);
             }
@@ -592,7 +566,7 @@ void chip8_execute(CHIP8 *chip8)
                 chip8->V[r] = chip8->RAM[chip8->I + r];
             }
 
-            if (chip8->legacy_mode || !chip8->quirks[2])
+            if (!chip8->quirks[2])
             {
                 chip8->I += (x + 1);
             }
@@ -602,12 +576,9 @@ void chip8_execute(CHIP8 *chip8)
         /* LD uflags_disk, V0..Vx (Fx75) (S-CHIP Only)
            Save user flags to disk. */
         case 0x75:
-            if (!chip8->legacy_mode)
+            if (!chip8_handle_user_flags(chip8, x + 1, true))
             {
-                if (!chip8_handle_user_flags(chip8, x + 1, true))
-                {
-                    fprintf(stderr, "Unable to save user flags to %s\n", chip8->UF_path);
-                }
+                fprintf(stderr, "Unable to save user flags to %s\n", chip8->UF_path);
             }
 
             break;
@@ -615,12 +586,9 @@ void chip8_execute(CHIP8 *chip8)
         /* LD V0..Vx, uflags_disk (Fx85) (S-CHIP Only)
            Load user flags from disk. */
         case 0x85:
-            if (!chip8->legacy_mode)
+            if (!chip8_handle_user_flags(chip8, x + 1, false))
             {
-                if (!chip8_handle_user_flags(chip8, x + 1, false))
-                {
-                    fprintf(stderr, "Unable to load user flags from %s\n", chip8->UF_path);
-                }
+                fprintf(stderr, "Unable to load user flags from %s\n", chip8->UF_path);
             }
 
             break;
@@ -732,7 +700,7 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
 
     /* n==0 only has signifigance in S-CHIP mode,
     otherwise nothing should be drawn. */
-    if (n == 0 && !chip8->legacy_mode)
+    if (n == 0)
     {
         /* Draw a 32-byte (16x16) sprite in hires or
         a 16-byte (8x16) sprite in lores. */
@@ -770,7 +738,7 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
                     int disp_y = (y * scale) + (y_start * scale) + h;
 
                     // Allow out-of-bound sprite to wrap-around in legacy mode.
-                    if (chip8->legacy_mode || !chip8->quirks[6])
+                    if (!chip8->quirks[6])
                     {
                         disp_x %= MAX_WIDTH;
                         disp_y %= MAX_HEIGHT;
