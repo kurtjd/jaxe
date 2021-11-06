@@ -96,11 +96,11 @@ typedef struct CHIP8
         -7: Collision Enumeration
         -8: Collision with Bottom of Screen
     */
-    bool *q;
+    bool *quirks;
 } CHIP8;
 
 // Set some things to useful default values.
-void chip8_init(CHIP8 *chip8, bool legacy_mode, uint16_t clock_speed, uint16_t pc_start_addr, bool q[]);
+void chip8_init(CHIP8 *chip8, bool legacy_mode, uint16_t clock_speed, uint16_t pc_start_addr, bool quirks[]);
 
 // Reset the machine.
 void chip8_reset(CHIP8 *chip8);

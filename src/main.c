@@ -319,7 +319,7 @@ int main(int argc, char **argv)
     bool LEGACY_MODE = false;
     unsigned int PC_START_ADDR = PC_START_ADDR_DEFAULT;
     int CLOCK_SPEED = CLOCK_SPEED_DEFAULT;
-    bool q[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+    bool quirks[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
 
     /* Check command-line arguments. */
     if (argc < 2)
@@ -346,31 +346,15 @@ int main(int argc, char **argv)
             switch (opt)
             {
             case '0':
-                q[0] = false;
-                break;
             case '1':
-                q[1] = false;
-                break;
             case '2':
-                q[2] = false;
-                break;
             case '3':
-                q[3] = false;
-                break;
             case '4':
-                q[4] = false;
-                break;
             case '5':
-                q[5] = false;
-                break;
             case '6':
-                q[6] = false;
-                break;
             case '7':
-                q[7] = false;
-                break;
             case '8':
-                q[8] = false;
+                quirks[opt - '0'] = false;
                 break;
             case 'l':
                 LEGACY_MODE = true;
@@ -378,9 +362,9 @@ int main(int argc, char **argv)
                 break;
             case 'o':
                 // Octo mode is essentially HI-RES without any S-CHIP quirks.
-                for (size_t i = 0; i < sizeof(q); i++)
+                for (size_t i = 0; i < sizeof(quirks); i++)
                 {
-                    q[i] = false;
+                    quirks[i] = false;
                 }
                 break;
             case 'd':
@@ -408,7 +392,7 @@ int main(int argc, char **argv)
 
     /* Initialize the CHIP8 emulator. */
     CHIP8 chip8;
-    chip8_init(&chip8, LEGACY_MODE, CLOCK_SPEED, PC_START_ADDR, q);
+    chip8_init(&chip8, LEGACY_MODE, CLOCK_SPEED, PC_START_ADDR, quirks);
     chip8_load_font(&chip8);
 
     /* Load ROM into memory. */

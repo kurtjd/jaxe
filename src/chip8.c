@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include "chip8.h"
 
-void chip8_init(CHIP8 *chip8, bool legacy_mode, uint16_t clock_speed, uint16_t pc_start_addr, bool q[])
+void chip8_init(CHIP8 *chip8, bool legacy_mode, uint16_t clock_speed, uint16_t pc_start_addr, bool quirks[])
 {
     // Seed for the RND instruction.
     srand(time(NULL));
 
     chip8->legacy_mode = legacy_mode;
-    chip8->q = q;
+    chip8->quirks = quirks;
 
     if (clock_speed <= 0)
     {
@@ -54,7 +54,7 @@ void chip8_reset(CHIP8 *chip8)
     chip8->UF_path[0] = '\0';
 
     // S-CHIP did not initialize RAM (does it matter though?)
-    if (chip8->legacy_mode || !chip8->q[0])
+    if (chip8->legacy_mode || !chip8->quirks[0])
     {
         chip8_reset_RAM(chip8);
     }
@@ -244,7 +244,7 @@ void chip8_execute(CHIP8 *chip8)
             {
                 chip8->hires = false;
 
-                if (!chip8->q[5])
+                if (!chip8->quirks[5])
                 {
                     chip8_reset_display(chip8);
                 }
@@ -259,7 +259,7 @@ void chip8_execute(CHIP8 *chip8)
             {
                 chip8->hires = true;
 
-                if (!chip8->q[5])
+                if (!chip8->quirks[5])
                 {
                     chip8_reset_display(chip8);
                 }
@@ -391,7 +391,7 @@ void chip8_execute(CHIP8 *chip8)
            Legacy: Set Vx = Vy SHR 1.
            S-CHIP: Set Vx = Vx SHR 1. */
         case 0x06:
-            if (chip8->legacy_mode || !chip8->q[1])
+            if (chip8->legacy_mode || !chip8->quirks[1])
             {
                 chip8->V[x] = chip8->V[y];
             }
@@ -414,7 +414,7 @@ void chip8_execute(CHIP8 *chip8)
            Legacy: Set Vx = Vy SHL 1.
            S-CHIP: Set Vx = Vx SHL 1. */
         case 0x0E:
-            if (chip8->legacy_mode || !chip8->q[1])
+            if (chip8->legacy_mode || !chip8->quirks[1])
             {
                 chip8->V[x] = chip8->V[y];
             }
@@ -446,7 +446,7 @@ void chip8_execute(CHIP8 *chip8)
        Legacy: Jump to location nnn + V0.
        S-CHIP: Jump to location nnn + Vx. */
     case 0x0B:
-        chip8->PC = (chip8->legacy_mode || !chip8->q[3]) ? chip8->V[0] + nnn : chip8->V[x] + nnn;
+        chip8->PC = (chip8->legacy_mode || !chip8->quirks[3]) ? chip8->V[0] + nnn : chip8->V[x] + nnn;
         break;
 
     /* RND Vx, byte (Cxkk)
@@ -561,7 +561,7 @@ void chip8_execute(CHIP8 *chip8)
                 chip8->RAM[chip8->I + r] = chip8->V[r];
             }
 
-            if (chip8->legacy_mode || !chip8->q[2])
+            if (chip8->legacy_mode || !chip8->quirks[2])
             {
                 chip8->I += (x + 1);
             }
@@ -577,7 +577,7 @@ void chip8_execute(CHIP8 *chip8)
                 chip8->V[r] = chip8->RAM[chip8->I + r];
             }
 
-            if (chip8->legacy_mode || !chip8->q[2])
+            if (chip8->legacy_mode || !chip8->quirks[2])
             {
                 chip8->I += (x + 1);
             }
@@ -721,10 +721,10 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
     {
         /* Draw a 32-byte (16x16) sprite in hires or
         a 16-byte (8x16) sprite in lores. */
-        n = (chip8->hires || !chip8->q[4]) ? 32 : 16;
+        n = (chip8->hires || !chip8->quirks[4]) ? 32 : 16;
     }
 
-    if (chip8->hires && chip8->q[8])
+    if (chip8->hires && chip8->quirks[8])
     {
         int rows = (n == 32) ? 16 : n;
         chip8->V[0x0F] += ((y + rows) - (MAX_HEIGHT - 1));
@@ -755,7 +755,7 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
                     int disp_y = (y * scale) + (y_start * scale) + h;
 
                     // Allow out-of-bound sprite to wrap-around in legacy mode.
-                    if (chip8->legacy_mode || !chip8->q[6])
+                    if (chip8->legacy_mode || !chip8->quirks[6])
                     {
                         disp_x %= MAX_WIDTH;
                         disp_y %= MAX_HEIGHT;
@@ -777,7 +777,7 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
                     chip8->display[disp_y][disp_x] = (pixel_on ^ bit);
                     if (pixel_on && bit)
                     {
-                        if (chip8->hires && chip8->q[7])
+                        if (chip8->hires && chip8->quirks[7])
                         {
                             if (!collide_row)
                             {
