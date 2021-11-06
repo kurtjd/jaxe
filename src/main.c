@@ -194,7 +194,7 @@ void draw_debug(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
 
     // ENTER
     font_dest_rect.y = 120 + (15 * 8) + 52;
-    txt = TTF_RenderText_Solid(DBG_FONT, "ENTER: Dump RAM", font_color);
+    txt = TTF_RenderText_Solid(DBG_FONT, "ENTER: Dump Mem", font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
 
@@ -290,7 +290,7 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
             }
             else if (e->key.keysym.sym == SDLK_RETURN && DEBUG_MODE)
             {
-                if (chip8_dump_RAM(chip8))
+                if (chip8_dump(chip8))
                 {
                     printf("Took a dump in %s\n", chip8->DMP_path);
                 }
@@ -320,6 +320,7 @@ int main(int argc, char **argv)
     unsigned int PC_START_ADDR = PC_START_ADDR_DEFAULT;
     int CLOCK_SPEED = CLOCK_SPEED_DEFAULT;
     bool quirks[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+    bool load_dmp = false;
 
     /* Check command-line arguments. */
     if (argc < 2)
@@ -341,7 +342,7 @@ int main(int argc, char **argv)
            -8: Collision with Bottom of Screen   
         */
         int opt;
-        while ((opt = getopt(argc, argv, "012345678lods:p:c:x:y:")) != -1)
+        while ((opt = getopt(argc, argv, "012345678lodms:p:c:x:y:")) != -1)
         {
             switch (opt)
             {
@@ -371,6 +372,9 @@ int main(int argc, char **argv)
                 DEBUG_MODE = true;
                 dbg_paused = true;
                 break;
+            case 'm':
+                load_dmp = true;
+                break;
             case 's':
                 DISPLAY_SCALE = atoi(optarg);
                 break;
@@ -392,13 +396,24 @@ int main(int argc, char **argv)
 
     /* Initialize the CHIP8 emulator. */
     CHIP8 chip8;
-    chip8_init(&chip8, LEGACY_MODE, CLOCK_SPEED, PC_START_ADDR, quirks);
-    chip8_load_font(&chip8);
 
-    /* Load ROM into memory. */
-    if (!chip8_load_rom(&chip8, argv[argc - 1]))
+    /* If a dump file is given, skip initialization since dump contains
+    all necessary data. */
+    if (!load_dmp)
     {
-        fprintf(stderr, "Unable to open ROM file.\n");
+        chip8_init(&chip8, LEGACY_MODE, CLOCK_SPEED, PC_START_ADDR, quirks);
+        chip8_load_font(&chip8);
+
+        /* Load ROM into memory. */
+        if (!chip8_load_rom(&chip8, argv[argc - 1]))
+        {
+            fprintf(stderr, "Unable to open ROM: %s\n", argv[argc - 1]);
+            return 1;
+        }
+    }
+    else if (!chip8_load_dump(&chip8, argv[argc - 1]))
+    {
+        fprintf(stderr, "Unable to open dump: %s\n", argv[argc - 1]);
         return 1;
     }
 

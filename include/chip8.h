@@ -96,7 +96,7 @@ typedef struct CHIP8
         -7: Collision Enumeration
         -8: Collision with Bottom of Screen
     */
-    bool *quirks;
+    bool quirks[9];
 } CHIP8;
 
 // Set some things to useful default values.
@@ -155,8 +155,11 @@ void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels);
 // Waits for a key to be released then stores that key in Vx.
 void chip8_wait_key(CHIP8 *chip8, uint8_t x);
 
-// Dumps the current contents of RAM to disk.
-bool chip8_dump_RAM(CHIP8 *chip8);
+// Dump memory to disk.
+bool chip8_dump(CHIP8 *chip8);
+
+// Read dump file into memory.
+bool chip8_load_dump(CHIP8 *chip8, char *filename);
 
 // Saves user flags from registers to disk.
 bool chip8_save_user_flags(CHIP8 *chip8, int num_flags);

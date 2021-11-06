@@ -8,7 +8,11 @@ void chip8_init(CHIP8 *chip8, bool legacy_mode, uint16_t clock_speed, uint16_t p
     srand(time(NULL));
 
     chip8->legacy_mode = legacy_mode;
-    chip8->quirks = quirks;
+
+    for (int i = 0; i < 9; i++)
+    {
+        chip8->quirks[i] = quirks[i];
+    }
 
     if (clock_speed <= 0)
     {
@@ -127,7 +131,7 @@ bool chip8_load_rom(CHIP8 *chip8, char *filename)
 
         sprintf(chip8->ROM_path, "%s", filename);
         sprintf(chip8->UF_path, "%s.uf", filename);
-        sprintf(chip8->DMP_path, "%s.sav", filename);
+        sprintf(chip8->DMP_path, "%s.dmp", filename);
 
         return true;
     }
@@ -875,13 +879,29 @@ void chip8_wait_key(CHIP8 *chip8, uint8_t x)
     }
 }
 
-bool chip8_dump_RAM(CHIP8 *chip8)
+bool chip8_dump(CHIP8 *chip8)
 {
     FILE *dmp = fopen(chip8->DMP_path, "wb");
     if (dmp)
     {
-        size_t fw = fwrite(chip8->RAM, MAX_RAM, 1, dmp);
+        size_t fw = fwrite(chip8, sizeof(CHIP8), 1, dmp);
         (void)fw; // Just to suppress fwrite unused return value warning.
+
+        fclose(dmp);
+
+        return true;
+    }
+
+    return false;
+}
+
+bool chip8_load_dump(CHIP8 *chip8, char *filename)
+{
+    FILE *dmp = fopen(filename, "rb");
+    if (dmp)
+    {
+        size_t fr = fread(chip8, sizeof(CHIP8), 1, dmp);
+        (void)fr; // Just to suppress fread unused return value warning.
 
         fclose(dmp);
 
