@@ -81,6 +81,9 @@ typedef struct CHIP8
     // The path and filename of associated user flags file.
     char UF_path[1024];
 
+    // The path and filename of associated dump file.
+    char DMP_path[1024];
+
     // Flags for the various quirky behavior of S-CHIP
     /* Quirks:
         -0: RAM Initialization
@@ -152,8 +155,8 @@ void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels);
 // Waits for a key to be released then stores that key in Vx.
 void chip8_wait_key(CHIP8 *chip8, uint8_t x);
 
-// Dumps the current contents of RAM to a specified file.
-bool chip8_dump_RAM(CHIP8 *chip8, char *filename);
+// Dumps the current contents of RAM to disk.
+bool chip8_dump_RAM(CHIP8 *chip8);
 
 // Saves user flags from registers to disk.
 bool chip8_save_user_flags(CHIP8 *chip8, int num_flags);

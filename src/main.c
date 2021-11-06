@@ -24,7 +24,6 @@ TTF_Font *DBG_FONT = NULL;
 bool DEBUG_MODE = false;
 bool dbg_paused = false;
 bool dbg_step = false;
-char dump_file[1024] = "jace.dmp";
 
 // Black magic SDL sound stuff.
 void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
@@ -291,13 +290,13 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
             }
             else if (e->key.keysym.sym == SDLK_RETURN && DEBUG_MODE)
             {
-                if (chip8_dump_RAM(chip8, dump_file))
+                if (chip8_dump_RAM(chip8))
                 {
-                    printf("Took a dump in %s\n", dump_file);
+                    printf("Took a dump in %s\n", chip8->DMP_path);
                 }
                 else
                 {
-                    fprintf(stderr, "Unable to take a dump in %s\n", dump_file);
+                    fprintf(stderr, "Unable to take a dump in %s\n", chip8->DMP_path);
                 }
             }
         }
@@ -342,7 +341,7 @@ int main(int argc, char **argv)
            -8: Collision with Bottom of Screen   
         */
         int opt;
-        while ((opt = getopt(argc, argv, "012345678lod::s:p:c:x:y:")) != -1)
+        while ((opt = getopt(argc, argv, "012345678lods:p:c:x:y:")) != -1)
         {
             switch (opt)
             {
@@ -387,12 +386,6 @@ int main(int argc, char **argv)
             case 'd':
                 DEBUG_MODE = true;
                 dbg_paused = true;
-
-                if (optarg != NULL)
-                {
-                    sprintf(dump_file, "%s", optarg);
-                }
-
                 break;
             case 's':
                 DISPLAY_SCALE = atoi(optarg);

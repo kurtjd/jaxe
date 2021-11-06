@@ -127,6 +127,7 @@ bool chip8_load_rom(CHIP8 *chip8, char *filename)
 
         sprintf(chip8->ROM_path, "%s", filename);
         sprintf(chip8->UF_path, "%s.uf", filename);
+        sprintf(chip8->DMP_path, "%s.sav", filename);
 
         return true;
     }
@@ -874,9 +875,9 @@ void chip8_wait_key(CHIP8 *chip8, uint8_t x)
     }
 }
 
-bool chip8_dump_RAM(CHIP8 *chip8, char *filename)
+bool chip8_dump_RAM(CHIP8 *chip8)
 {
-    FILE *dmp = fopen(filename, "wb");
+    FILE *dmp = fopen(chip8->DMP_path, "wb");
     if (dmp)
     {
         size_t fw = fwrite(chip8->RAM, MAX_RAM, 1, dmp);
