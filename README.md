@@ -114,11 +114,13 @@ Anyone is welcome to contribute! I will try to review pull requests as quickly a
 JACE is licensed under the MIT license so you are free to do almost whatever you please with this code (see LICENSE file).
 
 ## ROMs
+* [CHIP-8 Archive](https://johnearnest.github.io/chip8Archive/)
 * [Revival Studio's Chip-8 Program Pack](https://github.com/kripod/chip8-roms)
 
 ## References
 * [Cowgod's Chip-8 Technical Reference v1.0](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)
 * [Matthew Mikolay's Instruction Set](https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Instruction-Set)
+* [John Earnest's Octo](https://github.com/JohnEarnest/Octo)
 
 ## Acknowledgements
 * [Kongtext Font by codeman38](https://www.1001fonts.com/kongtext-font.html)
