@@ -98,6 +98,7 @@ Also includes flags for disabling specific S-CHIP "quirks" (which are all enable
 `UP` Step Forward (DBG Mode Only)  
 `DOWN` Step Back (DBG Mode Only)  
 `ENTER` Save/Create Dump File  
+`BACKSPACE` Cycle Color Themes  
 `ESC` Reset Emulator  
 
 ## Troubleshooting

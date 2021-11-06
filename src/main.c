@@ -16,12 +16,25 @@
 #define DBG_FONT_FILE "../fonts/dbgfont.ttf"
 #define DBG_STACK_MAX 1000
 
-// Globals
+// Allows for quick switching among different colors.
+// TODO: Add more cool themes!
+long color_themes[] = {
+    0xFFFFFF, 0x000000, // User defined
+    0xFFFFFF, 0x000000, // Black and white
+    0x000000, 0xFFFFFF, // Inverted black and white
+    0xFF0000, 0x000000, // Blood
+    0x00FF00, 0x000000, // Hacker
+    0x0000FF, 0x000000  // Space
+};
+
+// Control how pixels are displayed.
 int DISPLAY_SCALE = 5;
-long ON_COLOR = 0xFFFFFF;
-long OFF_COLOR = 0x000000;
+long ON_COLOR;
+long OFF_COLOR;
+int color_theme_pntr = 0;
 TTF_Font *DBG_FONT = NULL;
 
+// Control the debugger.
 bool DEBUG_MODE = false;
 bool paused = false;
 bool dbg_step = false;
@@ -283,19 +296,21 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
         if (e->type == SDL_KEYUP)
         {
             unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
+            SDL_Keycode keyc = e->key.keysym.sym;
+
             if (hexkey != BAD_KEY)
             {
                 chip8->keypad[hexkey] = KEY_RELEASED;
             }
-            else if (e->key.keysym.sym == SDLK_SPACE)
+            else if (keyc == SDLK_SPACE)
             {
                 paused = !paused;
             }
-            else if (e->key.keysym.sym == SDLK_UP && DEBUG_MODE)
+            else if (keyc == SDLK_UP && DEBUG_MODE)
             {
                 dbg_step = true;
             }
-            else if (e->key.keysym.sym == SDLK_DOWN && DEBUG_MODE)
+            else if (keyc == SDLK_DOWN && DEBUG_MODE)
             {
                 dbg_stack_pntr--;
                 if (dbg_stack_pntr < 0)
@@ -306,7 +321,7 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
                 dbg_step = true;
                 dbg_step_back = true;
             }
-            else if (e->key.keysym.sym == SDLK_RETURN)
+            else if (keyc == SDLK_RETURN)
             {
                 if (chip8_dump(chip8))
                 {
@@ -317,9 +332,20 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
                     fprintf(stderr, "Unable to take a dump in %s\n", chip8->DMP_path);
                 }
             }
-            else if (e->key.keysym.sym == SDLK_ESCAPE)
+            else if (keyc == SDLK_ESCAPE)
             {
                 chip8_soft_reset(chip8);
+            }
+            else if (keyc == SDLK_BACKSPACE)
+            {
+                color_theme_pntr += 2;
+                if (color_theme_pntr >= (int)(sizeof(color_themes) / sizeof(color_themes[0])))
+                {
+                    color_theme_pntr = 0;
+                }
+
+                ON_COLOR = color_themes[color_theme_pntr];
+                OFF_COLOR = color_themes[color_theme_pntr + 1];
             }
         }
         else if (e->type == SDL_KEYDOWN)
@@ -402,10 +428,10 @@ int main(int argc, char **argv)
                 CLOCK_SPEED = atoi(optarg);
                 break;
             case 'f':
-                ON_COLOR = strtol(optarg, NULL, 16);
+                color_themes[0] = strtol(optarg, NULL, 16);
                 break;
             case 'b':
-                OFF_COLOR = strtol(optarg, NULL, 16);
+                color_themes[1] = strtol(optarg, NULL, 16);
                 break;
             }
         }
@@ -449,6 +475,8 @@ int main(int argc, char **argv)
 
     int window_width = MAX_WIDTH * DISPLAY_SCALE;
     int window_height = MAX_HEIGHT * DISPLAY_SCALE;
+    ON_COLOR = color_themes[0];
+    OFF_COLOR = color_themes[1];
     if (DEBUG_MODE)
     {
         // Change window size depending on if DEBUG_MODE is active or not.
