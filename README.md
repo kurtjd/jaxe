@@ -96,8 +96,8 @@ Also includes flags for disabling specific S-CHIP "quirks" (which are all enable
 `SPACE` Pause/Unpause  
 `UP` Step Forward (DBG Mode Only)  
 `DOWN` Step Back (DBG Mode Only)  
-`RIGHT` Increase CPU Speed
-`LEFT` Decrease CPU Speed
+`RIGHT` Increase CPU Speed  
+`LEFT` Decrease CPU Speed  
 `ENTER` Save/Create Dump File  
 `BACKSPACE` Cycle Color Themes  
 `ESC` Reset Emulator  
