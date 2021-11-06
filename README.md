@@ -95,11 +95,11 @@ Also includes flags for disabling specific S-CHIP "quirks" (which are all enable
 `1` `2` `3` `-`  
 `0` `.` `_` `+`
 
-Other Controls:
-* `SPACE`: Pause/Unpause
-* `UP`: Next Cycle
-* `ENTER`: Save/Create Dump File
-* `ESC`: Reset Emulator
+**Other Controls**:  
+`SPACE` Pause/Unpause  
+`UP` Next Cycle  
+`ENTER` Save/Create Dump File  
+`ESC` Reset Emulator  
 
 ## Troubleshooting
 * This emulator defaults to S-CHIP mode, which has become more popular since the 90s. Unfortunately, S-CHIP changed the behavior of several instructions, making some programs developed for the original COSMAC VIP not backwards-compatible. If a ROM is not working correctly (especially one written before 1990), try enabling legacy mode with the `-l` flag.
