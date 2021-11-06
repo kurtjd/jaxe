@@ -321,6 +321,14 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
                 dbg_step = true;
                 dbg_step_back = true;
             }
+            else if (keyc == SDLK_RIGHT)
+            {
+                chip8_set_clock_speed(chip8, chip8->clock_speed + 100);
+            }
+            else if (keyc == SDLK_LEFT)
+            {
+                chip8_set_clock_speed(chip8, chip8->clock_speed - 100);
+            }
             else if (keyc == SDLK_RETURN)
             {
                 if (chip8_dump(chip8))

@@ -13,7 +13,9 @@
 #define MAX_REGISTERS 16
 #define MAX_USER_FLAGS 8
 #define MAX_FILENAME 256
+#define MAX_CLOCK_SPEED 10000
 
+#define ONE_SEC 1000000
 #define FONT_START_ADDR 0x0
 #define BIG_FONT_START_ADDR (FONT_START_ADDR + 80)
 #define SP_START_ADDR (BIG_FONT_START_ADDR + 160)
@@ -107,6 +109,9 @@ void chip8_reset(CHIP8 *chip8);
 
 // Soft reset the machine (keep ROM and fonts loaded).
 void chip8_soft_reset(CHIP8 *chip8);
+
+// Sets the clock speed of the machine.
+void chip8_set_clock_speed(CHIP8 *chip8, uint16_t clock_speed);
 
 /* Load hexadecimal font into memory.
 Each hex character is represented by 5 bytes in memory

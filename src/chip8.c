@@ -12,20 +12,10 @@ void chip8_init(CHIP8 *chip8, uint16_t clock_speed, uint16_t pc_start_addr, bool
         chip8->quirks[i] = quirks[i];
     }
 
-    if (clock_speed <= 0)
-    {
-        chip8->clock_speed = CLOCK_SPEED_DEFAULT;
-    }
-    else
-    {
-        chip8->clock_speed = clock_speed;
-    }
+    chip8_set_clock_speed(chip8, clock_speed);
 
-    /* Divide by the number of microseconds in a second by the frequency
-    to get number of miliseconds to wait between each tick. */
-    chip8->timer_max_cum = 1000000 / 60;
-    chip8->cpu_max_cum = 1000000 / chip8->clock_speed;
-    chip8->refresh_max_cum = 1000000 / REFRESH_RATE;
+    chip8->timer_max_cum = ONE_SEC / 60;
+    chip8->refresh_max_cum = ONE_SEC / REFRESH_RATE;
 
     chip8->pc_start_addr = pc_start_addr;
 
@@ -76,6 +66,20 @@ void chip8_soft_reset(CHIP8 *chip8)
     chip8_reset(chip8);
     chip8_load_font(chip8);
     chip8_load_rom(chip8, tmp_path);
+}
+
+void chip8_set_clock_speed(CHIP8 *chip8, uint16_t clock_speed)
+{
+    if (clock_speed >= MAX_CLOCK_SPEED || clock_speed == 0)
+    {
+        chip8->clock_speed = CLOCK_SPEED_DEFAULT;
+    }
+    else
+    {
+        chip8->clock_speed = clock_speed;
+    }
+
+    chip8->cpu_max_cum = ONE_SEC / chip8->clock_speed;
 }
 
 void chip8_load_font(CHIP8 *chip8)

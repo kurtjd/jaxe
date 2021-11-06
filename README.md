@@ -17,16 +17,15 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 * Accurate delay and sound timers
 * Graphical display
 * Sound
-* Graphical debug mode
+* Graphical debug mode allowing to step forward and back through program execution
 * Adjustable clock speed, display scale, colors, program start address
 * Toggle S-CHIP "quirks" for compatibility with a wide variety of ROMs
+* Save and load memory dumps
 * Unit tests for those writing a C emulator
 * Emulator decoupled from any particular graphics/media library allowing for easy embedding into other C programs
 
 ## TODO
 * Autodetect legacy ROMs
-* Allow user to change clock speed while running
-* Allow user to change color while running
 * Enhance debug display
 * Add more test cases
 * Test Windows support
@@ -97,6 +96,8 @@ Also includes flags for disabling specific S-CHIP "quirks" (which are all enable
 `SPACE` Pause/Unpause  
 `UP` Step Forward (DBG Mode Only)  
 `DOWN` Step Back (DBG Mode Only)  
+`RIGHT` Increase CPU Speed
+`LEFT` Decrease CPU Speed
 `ENTER` Save/Create Dump File  
 `BACKSPACE` Cycle Color Themes  
 `ESC` Reset Emulator  
