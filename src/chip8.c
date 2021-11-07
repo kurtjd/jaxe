@@ -248,12 +248,6 @@ void chip8_execute(CHIP8 *chip8)
             chip8->SP -= 2;
             break;
 
-        /* EXIT (00FD) (S-CHIP Only):
-           Exit the interpreter. */
-        case 0xFD:
-            chip8->exit = true;
-            break;
-
         /* SCRR (00FB) (S-CHIP Only):
            Scroll the display right by 4 pixels. */
         case 0xFB:
@@ -264,6 +258,12 @@ void chip8_execute(CHIP8 *chip8)
            Scroll the display left by 4 pixels. */
         case 0xFC:
             chip8_scroll(chip8, -1, 0, 4);
+            break;
+
+        /* EXIT (00FD) (S-CHIP Only):
+           Exit the interpreter. */
+        case 0xFD:
+            chip8->exit = true;
             break;
 
         /* LORES (00FE) (S-CHIP Only):
