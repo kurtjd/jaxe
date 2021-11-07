@@ -27,7 +27,7 @@
 
 // Emulator
 CHIP8 chip8;
-char ROM_path[MAX_FILENAME];
+char ROM_path[MAX_FILEPATH_LEN];
 uint16_t pc_start_addr = PC_START_ADDR_DEFAULT;
 unsigned long cpu_freq = CPU_FREQ_DEFAULT;
 unsigned long timer_freq = TIMER_FREQ_DEFAULT;
@@ -135,7 +135,7 @@ void clean_exit(int status)
 void get_ROM_name(char *rom_name)
 {
     // Find the string after the last occurrence of /
-    char tmp_path[MAX_FILENAME];
+    char tmp_path[MAX_FILEPATH_LEN];
     sprintf(tmp_path, "%s", ROM_path);
 
     char *token = strtok(tmp_path, "/");
@@ -299,7 +299,7 @@ bool handle_args(int argc, char **argv)
     return true;
 }
 
-// Set up the emulator to being running.
+// Set up the emulator to begin running.
 bool init_emulator()
 {
     /* If a dump file is given, skip initialization since dump contains
@@ -360,8 +360,8 @@ SDL_Window *create_window()
         }
     }
 
-    char rom_name[MAX_FILENAME];
-    char title[MAX_FILENAME + 10];
+    char rom_name[MAX_FILEPATH_LEN];
+    char title[MAX_FILEPATH_LEN + 10];
     get_ROM_name(rom_name);
     sprintf(title, "JACE - %s", rom_name);
 

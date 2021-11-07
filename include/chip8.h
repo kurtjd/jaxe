@@ -14,7 +14,7 @@
 #define NUM_QUIRKS 9
 
 #define MAX_RAM 4096
-#define MAX_FILENAME 256
+#define MAX_FILEPATH_LEN 256
 
 #define FONT_START_ADDR 0x0
 #define BIG_FONT_START_ADDR (FONT_START_ADDR + 80)
@@ -69,13 +69,13 @@ typedef struct CHIP8
     struct timeval prev_cycle_start;
 
     // The path and filename of currently loaded ROM.
-    char ROM_path[MAX_FILENAME];
+    char ROM_path[MAX_FILEPATH_LEN];
 
     // The path and filename of associated user flags file.
-    char UF_path[MAX_FILENAME];
+    char UF_path[MAX_FILEPATH_LEN];
 
     // The path and filename of associated dump file.
-    char DMP_path[MAX_FILENAME];
+    char DMP_path[MAX_FILEPATH_LEN];
 
     // Flags for the various quirky behavior of S-CHIP
     /* Quirks:

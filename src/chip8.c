@@ -62,7 +62,7 @@ void chip8_reset(CHIP8 *chip8)
 
 void chip8_soft_reset(CHIP8 *chip8)
 {
-    char tmp_path[MAX_FILENAME];
+    char tmp_path[MAX_FILEPATH_LEN];
     sprintf(tmp_path, "%s", chip8->ROM_path);
 
     chip8_reset(chip8);
