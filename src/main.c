@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdbool.h>
-#include <math.h>
+#include <stdint.h>
 #include <string.h>
+#include <math.h>
 #include <unistd.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_audio.h>
@@ -9,53 +10,59 @@
 #include "chip8.h"
 
 #define BAD_KEY 0x42
+
 #define AMPLITUDE 28000
 #define SAMPLE_RATE 44100
+
 #define DBG_PANEL_WIDTH 200
 #define DBG_PANEL_HEIGHT 320
 #define DBG_FONT_FILE "../fonts/dbgfont.ttf"
 #define DBG_STACK_MAX 1000
 
-// Allows for quick switching among different colors.
-// TODO: Add more cool themes!
-long color_themes[] = {
-    0xFFFFFF, 0x000000, // User defined
-    0xFFFFFF, 0x000000, // Black and white
-    0x000000, 0xFFFFFF, // Inverted black and white
-    0xFF0000, 0x000000, // Blood
-    0x00FF00, 0x000000, // Hacker
-    0x0000FF, 0x000000  // Space
-};
+#define DISPLAY_SCALE_DEFAULT 5
+#define ON_COLOR_DEFAULT 0xFFFFFF
+#define OFF_COLOR_DEFAULT 0x000000
+#define NUM_COLOR_THEMES (int)(sizeof(color_themes) / sizeof(color_themes[0]))
 
-char ROM_path[MAX_FILENAME];
+// Emulator
 CHIP8 chip8;
+char ROM_path[MAX_FILENAME];
+uint16_t pc_start_addr = PC_START_ADDR_DEFAULT;
+int cpu_freq = CPU_FREQ_DEFAULT;
+int timer_freq = TIMER_FREQ_DEFAULT;
+int refresh_freq = REFRESH_FREQ_DEFAULT;
+bool quirks[] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+bool load_dmp = false;
 
-// Control how pixels are displayed.
+// Color/Display
+// TODO: Add more themes!
+long color_themes[] = {
+    ON_COLOR_DEFAULT, OFF_COLOR_DEFAULT, // User defined
+    0xFFFFFF, 0x000000,                  // Black and white
+    0x000000, 0xFFFFFF,                  // Inverted black and white
+    0xFF0000, 0x000000,                  // Blood
+    0x00FF00, 0x000000,                  // Hacker
+    0x0000FF, 0x000000                   // Space
+};
+int color_theme_pntr = 0;
 SDL_Window *window = NULL;
 SDL_Surface *surface = NULL;
-int DISPLAY_SCALE = 5;
-long ON_COLOR = 0xFFFFFF;
-long OFF_COLOR = 0x000000;
-int color_theme_pntr = 0;
-TTF_Font *DBG_FONT = NULL;
+int display_scale = DISPLAY_SCALE_DEFAULT;
+long on_color = ON_COLOR_DEFAULT;
+long off_color = OFF_COLOR_DEFAULT;
+TTF_Font *dbg_font = NULL;
 
-// Control the debugger.
-bool DEBUG_MODE = false;
-bool paused = false;
-bool dbg_step = false;
-bool dbg_step_back = false;
-
+// Debugger
 /* This stack holds instances of the chip8 emulator after every execution.
 It is used to be able to step back the emulator. */
 CHIP8 dbg_stack[DBG_STACK_MAX];
 int dbg_stack_pntr = 0;
+bool debug_mode = false;
+bool paused = false;
+bool dbg_step = false;
+bool dbg_step_back = false;
 
-// Emulator options
-unsigned int PC_START_ADDR = PC_START_ADDR_DEFAULT;
-int CLOCK_SPEED = CLOCK_SPEED_DEFAULT;
-bool quirks[] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
-bool load_dmp = false;
-
+// Push the emulator state onto the debug stack.
 void dbg_stack_push()
 {
     dbg_stack_pntr++;
@@ -68,6 +75,7 @@ void dbg_stack_push()
     dbg_stack[dbg_stack_pntr] = chip8;
 }
 
+// Pop the previous emulator state from debug stack.
 void dbg_stack_pop()
 {
     dbg_stack_pntr--;
@@ -82,13 +90,26 @@ void dbg_stack_pop()
     dbg_step_back = true;
 }
 
+// Cycles between color themes.
+void cycle_color_theme()
+{
+    color_theme_pntr += 2;
+    if (color_theme_pntr >= NUM_COLOR_THEMES)
+    {
+        color_theme_pntr = 0;
+    }
+
+    on_color = color_themes[color_theme_pntr];
+    off_color = color_themes[color_theme_pntr + 1];
+}
+
 // Frees all resources and exits.
 void clean_exit(int status)
 {
-    if (DEBUG_MODE && DBG_FONT)
+    if (debug_mode && dbg_font)
     {
-        TTF_CloseFont(DBG_FONT);
-        DBG_FONT = NULL;
+        TTF_CloseFont(dbg_font);
+        dbg_font = NULL;
     }
 
     if (surface)
@@ -198,7 +219,7 @@ bool handle_args(int argc, char **argv)
            -8: Collision with Bottom of Screen   
         */
         int opt;
-        while ((opt = getopt(argc, argv, "012345678xdms:p:c:f:b:")) != -1)
+        while ((opt = getopt(argc, argv, "012345678xdms:p:c:t:r:f:b:")) != -1)
         {
             switch (opt)
             {
@@ -223,7 +244,7 @@ bool handle_args(int argc, char **argv)
                 break;
 
             case 'd':
-                DEBUG_MODE = true;
+                debug_mode = true;
                 paused = true;
                 break;
 
@@ -232,25 +253,33 @@ bool handle_args(int argc, char **argv)
                 break;
 
             case 's':
-                DISPLAY_SCALE = atoi(optarg);
+                display_scale = atoi(optarg);
                 break;
 
             case 'p':
-                PC_START_ADDR = strtol(optarg, NULL, 16);
+                pc_start_addr = strtol(optarg, NULL, 16);
                 break;
 
             case 'c':
-                CLOCK_SPEED = atoi(optarg);
+                cpu_freq = atoi(optarg);
+                break;
+
+            case 't':
+                timer_freq = atoi(optarg);
+                break;
+
+            case 'r':
+                refresh_freq = atoi(optarg);
                 break;
 
             case 'f':
                 color_themes[0] = strtol(optarg, NULL, 16);
-                ON_COLOR = color_themes[0];
+                on_color = color_themes[0];
                 break;
 
             case 'b':
                 color_themes[1] = strtol(optarg, NULL, 16);
-                OFF_COLOR = color_themes[1];
+                off_color = color_themes[1];
                 break;
             }
         }
@@ -266,7 +295,7 @@ bool init_emulator()
     all necessary data. */
     if (!load_dmp)
     {
-        chip8_init(&chip8, CLOCK_SPEED, PC_START_ADDR, quirks);
+        chip8_init(&chip8, cpu_freq, timer_freq, refresh_freq, pc_start_addr, quirks);
         chip8_load_font(&chip8);
 
         /* Load ROM into memory. */
@@ -294,14 +323,14 @@ bool init_emulator()
 // Create the SDL window.
 SDL_Window *create_window()
 {
-    int window_width = MAX_WIDTH * DISPLAY_SCALE;
-    int window_height = MAX_HEIGHT * DISPLAY_SCALE;
+    int window_width = MAX_WIDTH * display_scale;
+    int window_height = MAX_HEIGHT * display_scale;
 
-    if (DEBUG_MODE)
+    if (debug_mode)
     {
-        // Change window size depending on if DEBUG_MODE is active or not.
+        // Change window size depending on if debug_mode is active or not.
         window_width += DBG_PANEL_WIDTH;
-        if ((DISPLAY_SCALE * MAX_HEIGHT) < DBG_PANEL_HEIGHT)
+        if ((display_scale * MAX_HEIGHT) < DBG_PANEL_HEIGHT)
         {
             window_height = DBG_PANEL_HEIGHT;
         }
@@ -313,8 +342,8 @@ SDL_Window *create_window()
             return NULL;
         }
 
-        DBG_FONT = TTF_OpenFont(DBG_FONT_FILE, 12);
-        if (DBG_FONT == NULL)
+        dbg_font = TTF_OpenFont(DBG_FONT_FILE, 12);
+        if (dbg_font == NULL)
         {
             fprintf(stderr, "Could not load font: %s\n", SDL_GetError());
         }
@@ -348,20 +377,20 @@ void draw_display()
     {
         for (int x = 0; x < MAX_WIDTH; x++)
         {
-            for (int i = 0; i < DISPLAY_SCALE; i++)
+            for (int i = 0; i < display_scale; i++)
             {
-                for (int j = 0; j < DISPLAY_SCALE; j++)
+                for (int j = 0; j < display_scale; j++)
                 {
-                    int sdl_x = (x * DISPLAY_SCALE) + j;
-                    int sdl_y = (y * DISPLAY_SCALE) + i;
+                    int sdl_x = (x * display_scale) + j;
+                    int sdl_y = (y * display_scale) + i;
 
                     if (chip8.display[y][x])
                     {
-                        set_pixel(sdl_x, sdl_y, ON_COLOR);
+                        set_pixel(sdl_x, sdl_y, on_color);
                     }
                     else
                     {
-                        set_pixel(sdl_x, sdl_y, OFF_COLOR);
+                        set_pixel(sdl_x, sdl_y, off_color);
                     }
                 }
             }
@@ -383,7 +412,7 @@ void draw_debug()
     SDL_FillRect(dbg_panel, NULL, SDL_MapRGB(dbg_panel->format, 200, 200, 200));
 
     SDL_Rect dest_rect;
-    dest_rect.x = (MAX_WIDTH * DISPLAY_SCALE) + 1;
+    dest_rect.x = (MAX_WIDTH * display_scale) + 1;
     dest_rect.y = 0;
     dest_rect.w = DBG_PANEL_WIDTH - 1;
     dest_rect.h = DBG_PANEL_HEIGHT;
@@ -403,7 +432,7 @@ void draw_debug()
     font_color.b = 0;
     font_dest_rect.x = 57;
     font_dest_rect.y = 5;
-    txt = TTF_RenderText_Solid(DBG_FONT, "[DEBUG]", font_color);
+    txt = TTF_RenderText_Solid(dbg_font, "[DEBUG]", font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
 
@@ -414,7 +443,7 @@ void draw_debug()
     font_dest_rect.x = 41;
     font_dest_rect.y = 30;
     sprintf(dbg_str, "Next: %02X%02X", chip8.RAM[chip8.PC], chip8.RAM[chip8.PC + 1]);
-    txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
+    txt = TTF_RenderText_Solid(dbg_font, dbg_str, font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
 
@@ -427,7 +456,7 @@ void draw_debug()
     font_dest_rect.x = 57;
     font_dest_rect.y = 56;
     sprintf(dbg_str, "PC: %03X", chip8.PC);
-    txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
+    txt = TTF_RenderText_Solid(dbg_font, dbg_str, font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
 
@@ -435,7 +464,7 @@ void draw_debug()
     font_dest_rect.x = 13;
     font_dest_rect.y = 76;
     sprintf(dbg_str, "SP: %03X I: %03X", chip8.SP, chip8.I);
-    txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
+    txt = TTF_RenderText_Solid(dbg_font, dbg_str, font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
 
@@ -446,7 +475,7 @@ void draw_debug()
     font_dest_rect.x = 17;
     font_dest_rect.y = 97;
     sprintf(dbg_str, "DT: %02X ST: %02X", chip8.DT, chip8.ST);
-    txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
+    txt = TTF_RenderText_Solid(dbg_font, dbg_str, font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
 
@@ -460,7 +489,7 @@ void draw_debug()
     for (int i = 0; i < 8; i++)
     {
         sprintf(dbg_str, "V%X: %02X V%X: %02X", i, chip8.V[i], i + 8, chip8.V[i + 8]);
-        txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
+        txt = TTF_RenderText_Solid(dbg_font, dbg_str, font_color);
 
         SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
         SDL_FreeSurface(txt);
@@ -476,19 +505,19 @@ void draw_debug()
 
     // UP
     font_dest_rect.y = 120 + (15 * 8) + 20;
-    txt = TTF_RenderText_Solid(DBG_FONT, "UP/DWN: Fwd/Bk", font_color);
+    txt = TTF_RenderText_Solid(dbg_font, "UP/DWN: Fwd/Bk", font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
 
     // SPACE
     font_dest_rect.y = 120 + (15 * 8) + 36;
-    txt = TTF_RenderText_Solid(DBG_FONT, "SPACE: Strt/Stop", font_color);
+    txt = TTF_RenderText_Solid(dbg_font, "SPACE: Strt/Stop", font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
 
     // ENTER
     font_dest_rect.y = 120 + (15 * 8) + 52;
-    txt = TTF_RenderText_Solid(DBG_FONT, "ENTER: Dump Mem", font_color);
+    txt = TTF_RenderText_Solid(dbg_font, "ENTER: Dump Mem", font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
 
@@ -580,21 +609,21 @@ bool handle_input(SDL_Event *e)
             {
                 paused = !paused;
             }
-            else if (keyc == SDLK_UP && DEBUG_MODE)
+            else if (keyc == SDLK_UP && debug_mode)
             {
                 dbg_step = true;
             }
-            else if (keyc == SDLK_DOWN && DEBUG_MODE)
+            else if (keyc == SDLK_DOWN && debug_mode)
             {
                 dbg_stack_pop();
             }
             else if (keyc == SDLK_RIGHT)
             {
-                chip8_set_clock_speed(&chip8, chip8.clock_speed + 100);
+                chip8_set_cpu_freq(&chip8, chip8.cpu_freq + 100);
             }
             else if (keyc == SDLK_LEFT)
             {
-                chip8_set_clock_speed(&chip8, chip8.clock_speed - 100);
+                chip8_set_cpu_freq(&chip8, chip8.cpu_freq - 100);
             }
             else if (keyc == SDLK_RETURN)
             {
@@ -613,14 +642,7 @@ bool handle_input(SDL_Event *e)
             }
             else if (keyc == SDLK_BACKSPACE)
             {
-                color_theme_pntr += 2;
-                if (color_theme_pntr >= (int)(sizeof(color_themes) / sizeof(color_themes[0])))
-                {
-                    color_theme_pntr = 0;
-                }
-
-                ON_COLOR = color_themes[color_theme_pntr];
-                OFF_COLOR = color_themes[color_theme_pntr + 1];
+                cycle_color_theme();
             }
         }
         else if (e->type == SDL_KEYDOWN)
@@ -643,13 +665,11 @@ int main(int argc, char **argv)
         clean_exit(1);
     }
 
-    /* Initialize the CHIP8 emulator. */
     if (!init_emulator(&chip8))
     {
         clean_exit(1);
     }
 
-    /* Initialize SDL */
     if (!init_SDL())
     {
         clean_exit(1);
@@ -668,7 +688,6 @@ int main(int argc, char **argv)
         clean_exit(1);
     }
 
-    /* Main Loop */
     SDL_Event e;
     while (!chip8.exit && handle_input(&e))
     {
@@ -687,25 +706,17 @@ int main(int argc, char **argv)
             draw_display();
         }
 
-        if (DEBUG_MODE)
+        if (debug_mode)
         {
             draw_debug();
         }
 
-        if (chip8.beep)
-        {
-            SDL_PauseAudio(0);
-        }
-        else
-        {
-            SDL_PauseAudio(1);
-        }
+        SDL_PauseAudio(!chip8.beep);
 
         dbg_step = false;
         dbg_step_back = false;
     }
 
-    /* Free Resources */
     clean_exit(0);
 
     return 0;

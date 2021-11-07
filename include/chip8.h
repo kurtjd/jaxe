@@ -13,16 +13,18 @@
 #define MAX_REGISTERS 16
 #define MAX_USER_FLAGS 8
 #define MAX_FILENAME 256
-#define MAX_CLOCK_SPEED 10000
+#define MAX_CPU_FREQ 10000
+#define MAX_TIMER_FREQ 10000
+#define MAX_REFRESH_FREQ 10000
 
 #define ONE_SEC 1000000
 #define FONT_START_ADDR 0x0
 #define BIG_FONT_START_ADDR (FONT_START_ADDR + 80)
 #define SP_START_ADDR (BIG_FONT_START_ADDR + 160)
 #define PC_START_ADDR_DEFAULT 0x200
-#define CLOCK_SPEED_DEFAULT 1000
-#define REFRESH_RATE 60
-#define TIMER_FREQ 60
+#define CPU_FREQ_DEFAULT 1000
+#define REFRESH_FREQ_DEFAULT 60
+#define TIMER_FREQ_DEFAULT 60
 
 #define KEY_UP 0
 #define KEY_DOWN 1
@@ -53,16 +55,18 @@ typedef struct CHIP8
     such as those written for the ETI-600, begin at different addresses. */
     uint16_t pc_start_addr;
 
-    // These are used for handling clock and timer speed.
-    uint16_t clock_speed;
-    uint32_t timer_max_cum;
-    uint32_t cpu_max_cum;
-    uint32_t cpu_cum;
-    uint32_t sound_cum;
-    uint32_t delay_cum;
-    uint32_t refresh_max_cum;
-    uint32_t refresh_cum;
-    uint32_t total_cycle_time;
+    // These are used for handling CPU and timer speed.
+    int cpu_freq;
+    int timer_freq;
+    int refresh_freq;
+    double timer_max_cum;
+    double cpu_max_cum;
+    double cpu_cum;
+    double sound_cum;
+    double delay_cum;
+    double refresh_max_cum;
+    double refresh_cum;
+    double total_cycle_time;
     struct timeval cur_cycle_start;
     struct timeval prev_cycle_start;
 
@@ -103,7 +107,7 @@ typedef struct CHIP8
 } CHIP8;
 
 // Set some things to useful default values.
-void chip8_init(CHIP8 *chip8, uint16_t clock_speed, uint16_t pc_start_addr, bool quirks[]);
+void chip8_init(CHIP8 *chip8, int cpu_freq, int timer_freq, int refresh_freq, uint16_t pc_start_addr, bool quirks[]);
 
 // Reset the machine.
 void chip8_reset(CHIP8 *chip8);
@@ -111,8 +115,14 @@ void chip8_reset(CHIP8 *chip8);
 // Soft reset the machine (keep ROM and fonts loaded).
 void chip8_soft_reset(CHIP8 *chip8);
 
-// Sets the clock speed of the machine.
-void chip8_set_clock_speed(CHIP8 *chip8, uint16_t clock_speed);
+// Sets the CPU frequency of the machine.
+void chip8_set_cpu_freq(CHIP8 *chip8, int cpu_freq);
+
+// Sets the timer frequency of the machine.
+void chip8_set_timer_freq(CHIP8 *chip8, int timer_freq);
+
+// Sets the refresh frequency of the machine.
+void chip8_set_refresh_freq(CHIP8 *chip8, int refresh_freq);
 
 /* Load hexadecimal font into memory.
 Each hex character is represented by 5 bytes in memory

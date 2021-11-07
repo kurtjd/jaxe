@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "chip8.h"
 
-void chip8_init(CHIP8 *chip8, uint16_t clock_speed, uint16_t pc_start_addr, bool quirks[])
+void chip8_init(CHIP8 *chip8, int cpu_freq, int timer_freq, int refresh_freq, uint16_t pc_start_addr, bool quirks[])
 {
     // Seed for the RND instruction.
     srand(time(NULL));
@@ -12,10 +12,9 @@ void chip8_init(CHIP8 *chip8, uint16_t clock_speed, uint16_t pc_start_addr, bool
         chip8->quirks[i] = quirks[i];
     }
 
-    chip8_set_clock_speed(chip8, clock_speed);
-
-    chip8->timer_max_cum = ONE_SEC / TIMER_FREQ;
-    chip8->refresh_max_cum = ONE_SEC / REFRESH_RATE;
+    chip8_set_cpu_freq(chip8, cpu_freq);
+    chip8_set_timer_freq(chip8, timer_freq);
+    chip8_set_refresh_freq(chip8, refresh_freq);
 
     chip8->pc_start_addr = pc_start_addr;
 
@@ -68,18 +67,46 @@ void chip8_soft_reset(CHIP8 *chip8)
     chip8_load_rom(chip8, tmp_path);
 }
 
-void chip8_set_clock_speed(CHIP8 *chip8, uint16_t clock_speed)
+void chip8_set_cpu_freq(CHIP8 *chip8, int cpu_freq)
 {
-    if (clock_speed >= MAX_CLOCK_SPEED || clock_speed == 0)
+    if (cpu_freq >= MAX_CPU_FREQ || cpu_freq == 0)
     {
-        chip8->clock_speed = CLOCK_SPEED_DEFAULT;
+        chip8->cpu_freq = CPU_FREQ_DEFAULT;
     }
     else
     {
-        chip8->clock_speed = clock_speed;
+        chip8->cpu_freq = cpu_freq;
     }
 
-    chip8->cpu_max_cum = ONE_SEC / chip8->clock_speed;
+    chip8->cpu_max_cum = ONE_SEC / chip8->cpu_freq;
+}
+
+void chip8_set_timer_freq(CHIP8 *chip8, int timer_freq)
+{
+    if (timer_freq >= MAX_TIMER_FREQ || timer_freq == 0)
+    {
+        chip8->timer_freq = TIMER_FREQ_DEFAULT;
+    }
+    else
+    {
+        chip8->timer_freq = timer_freq;
+    }
+
+    chip8->timer_max_cum = ONE_SEC / chip8->timer_freq;
+}
+
+void chip8_set_refresh_freq(CHIP8 *chip8, int refresh_freq)
+{
+    if (refresh_freq >= MAX_REFRESH_FREQ || refresh_freq == 0)
+    {
+        chip8->refresh_freq = REFRESH_FREQ_DEFAULT;
+    }
+    else
+    {
+        chip8->refresh_freq = refresh_freq;
+    }
+
+    chip8->refresh_max_cum = ONE_SEC / chip8->refresh_freq;
 }
 
 void chip8_load_font(CHIP8 *chip8)
@@ -158,7 +185,7 @@ bool chip8_cycle(CHIP8 *chip8)
     bool executed = false;
     chip8_update_elapsed_time(chip8);
 
-    // Slow the CPU down to match given clock speed.
+    // Slow the CPU down to match given CPU frequency.
     chip8->cpu_cum += chip8->total_cycle_time;
     if (chip8->cpu_cum >= chip8->cpu_max_cum)
     {

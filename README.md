@@ -18,7 +18,7 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 * Graphical display
 * Sound
 * Graphical debug mode allowing to step forward and back through program execution
-* Adjustable clock speed, display scale, colors, program start address
+* Adjustable CPU/timer/refresh frequencies, display scale, colors, and program start address
 * Toggle S-CHIP "quirks" for compatibility with a wide variety of ROMs
 * Save and load memory dumps
 * Unit tests for those writing a C emulator
@@ -53,7 +53,9 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 `-d` Enable debug mode  
 `-m` Load dump file instead of ROM  
 `-p` Set program start address (in hex)  
-`-c` Set clock speed (in Hz)  
+`-c` Set CPU frequency (in Hz)  
+`-t` Set timer frequency (in Hz)  
+`-r` Set screen refresh frequency (in Hz)  
 `-s` Set display scale factor  
 `-f` Set pixel ON (foreground) color (in hex)  
 `-b` Set pixel OFF (background) color (in hex)
