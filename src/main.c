@@ -1,9 +1,11 @@
+#ifndef WIN32
+#include <unistd.h>
+#endif
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
-#include <unistd.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_audio.h>
 #include <SDL2/SDL_ttf.h>
@@ -237,6 +239,7 @@ bool handle_args(int argc, char **argv)
 
         sprintf(ROM_path, "%s", argv[argc - 1]);
 
+#ifndef WIN32
         int opt;
         while ((opt = getopt(argc, argv, "012345678xdms:p:c:t:r:f:b:")) != -1)
         {
@@ -319,6 +322,7 @@ bool handle_args(int argc, char **argv)
             }
         }
     }
+#endif
 
     return true;
 }

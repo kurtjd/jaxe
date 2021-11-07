@@ -32,9 +32,14 @@ void chip8_reset(CHIP8 *chip8)
     chip8->DT = 0;
     chip8->ST = 0;
 
-    // Have cycle times default to current time.
+// Have cycle times default to current time.
+#ifdef WIN32
+    chip8->cur_cycle_start = GetTickCount();
+    chip8->prev_cycle_start = GetTickCount();
+#else
     gettimeofday(&chip8->cur_cycle_start, NULL);
     gettimeofday(&chip8->prev_cycle_start, NULL);
+#endif
 
     chip8->cpu_cum = 0;
     chip8->sound_cum = 0;
@@ -675,6 +680,11 @@ void chip8_handle_timers(CHIP8 *chip8)
 
 void chip8_update_elapsed_time(CHIP8 *chip8)
 {
+#ifdef WIN32
+    chip8->prev_cycle_start = chip8->cur_cycle_start;
+    chip8->cur_cycle_start = GetTickCount();
+    chip8->total_cycle_tim = chip8->cur_cycle_start - chip8->prev_cycle_start;
+#else
     chip8->prev_cycle_start.tv_sec = chip8->cur_cycle_start.tv_sec;
     chip8->prev_cycle_start.tv_usec = chip8->cur_cycle_start.tv_usec;
 
@@ -686,6 +696,7 @@ void chip8_update_elapsed_time(CHIP8 *chip8)
     chip8->total_cycle_time *= 1000000;
     chip8->total_cycle_time += chip8->cur_cycle_start.tv_usec;
     chip8->total_cycle_time -= chip8->prev_cycle_start.tv_usec;
+#endif
 }
 
 void chip8_reset_keypad(CHIP8 *chip8)

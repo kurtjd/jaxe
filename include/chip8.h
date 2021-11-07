@@ -1,11 +1,15 @@
 #ifndef CHIP8_H
 #define CHIP8_H
 
+#ifdef WIN32
+#include "windows.h"
+#define ONE_SEC 1000
+#else
+#include <sys/time.h>
+#define ONE_SEC 1000000
+#endif
 #include <stdbool.h>
 #include <stdint.h>
-#include <sys/time.h>
-
-#define ONE_SEC 1000000
 
 #define DISPLAY_WIDTH 128
 #define DISPLAY_HEIGHT 64
@@ -70,8 +74,14 @@ typedef struct CHIP8
     double refresh_max_cum;
     double refresh_cum;
     double total_cycle_time;
+
+#ifdef WIN32
+    DWORD cur_cycle_start;
+    DWORD prev_cycle_start;
+#else
     struct timeval cur_cycle_start;
     struct timeval prev_cycle_start;
+#endif
 
     // The path and filename of currently loaded ROM.
     char ROM_path[MAX_FILEPATH_LEN];
