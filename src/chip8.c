@@ -3,7 +3,8 @@
 #include <time.h>
 #include "chip8.h"
 
-void chip8_init(CHIP8 *chip8, unsigned cpu_freq, unsigned timer_freq, unsigned refresh_freq, uint16_t pc_start_addr, bool quirks[])
+void chip8_init(CHIP8 *chip8, unsigned cpu_freq, unsigned timer_freq,
+                unsigned refresh_freq, uint16_t pc_start_addr, bool quirks[])
 {
     // Seed for the RND instruction.
     srand(time(NULL));
@@ -168,9 +169,7 @@ bool chip8_load_rom(CHIP8 *chip8, char *filename)
     if (rom)
     {
         size_t fr = fread(chip8->RAM + chip8->pc_start_addr,
-                          MAX_RAM - chip8->pc_start_addr,
-                          1,
-                          rom);
+                          MAX_RAM - chip8->pc_start_addr, 1, rom);
         (void)fr; // Just to suppress fread unused return value warning.
 
         fclose(rom);
@@ -618,7 +617,8 @@ void chip8_execute(CHIP8 *chip8)
         case 0x75:
             if (!chip8_handle_user_flags(chip8, x + 1, true))
             {
-                fprintf(stderr, "Unable to save user flags to %s\n", chip8->UF_path);
+                fprintf(stderr, "Unable to save user flags to %s\n",
+                        chip8->UF_path);
             }
 
             break;
@@ -628,7 +628,8 @@ void chip8_execute(CHIP8 *chip8)
         case 0x85:
             if (!chip8_handle_user_flags(chip8, x + 1, false))
             {
-                fprintf(stderr, "Unable to load user flags from %s\n", chip8->UF_path);
+                fprintf(stderr, "Unable to load user flags from %s\n",
+                        chip8->UF_path);
             }
 
             break;
@@ -690,8 +691,12 @@ void chip8_update_elapsed_time(CHIP8 *chip8)
 
     gettimeofday(&chip8->cur_cycle_start, NULL);
 
-    chip8->total_cycle_time = ((chip8->cur_cycle_start.tv_sec - chip8->prev_cycle_start.tv_sec) * 1000000);
-    chip8->total_cycle_time += (chip8->cur_cycle_start.tv_usec - chip8->prev_cycle_start.tv_usec);
+    // Calculate total cycle time in microseconds.
+    chip8->total_cycle_time = chip8->cur_cycle_start.tv_sec;
+    chip8->total_cycle_time -= chip8->prev_cycle_start.tv_sec;
+    chip8->total_cycle_time *= 1000000;
+    chip8->total_cycle_time += chip8->cur_cycle_start.tv_usec;
+    chip8->total_cycle_time -= chip8->prev_cycle_start.tv_usec;
 }
 
 void chip8_reset_keypad(CHIP8 *chip8)
@@ -816,7 +821,8 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
                         {
                             if (!collide_row)
                             {
-                                if (n <= 16 || (((i % 2 == 0) && n == 32) || !prev_byte_collide))
+                                if (n <= 16 || (((i % 2 == 0) && n == 32) ||
+                                                !prev_byte_collide))
                                 {
                                     chip8->V[0x0F]++;
                                     collide_row = true;
@@ -874,7 +880,9 @@ void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels)
     {
         for (int x = x_start; x < x_end; x++)
         {
-            disp_buf[y + (ydir * num_pixels)][x + (xdir * num_pixels)] = chip8->display[y][x];
+            int buf_y = y + (ydir * num_pixels);
+            int buf_x = x + (xdir * num_pixels);
+            disp_buf[buf_y][buf_x] = chip8->display[y][x];
         }
     }
 
@@ -918,6 +926,7 @@ bool chip8_dump(CHIP8 *chip8)
 
         fclose(dmp);
 
+        printf("Saved memory dump to %s\n", chip8->DMP_path);
         return true;
     }
 

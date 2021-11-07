@@ -14,10 +14,11 @@
 #define AMPLITUDE 28000
 #define SAMPLE_RATE 44100
 
+#define DBG_STACK_MAX 1000
 #define DBG_PANEL_WIDTH 200
 #define DBG_PANEL_HEIGHT 320
 #define DBG_FONT_FILE "../fonts/dbgfont.ttf"
-#define DBG_STACK_MAX 1000
+#define DBG_FONT_SIZE 12
 
 #define DISPLAY_SCALE_DEFAULT 5
 #define ON_COLOR_DEFAULT 0xFFFFFF
@@ -130,7 +131,7 @@ void clean_exit(int status)
     exit(status);
 }
 
-// SDL Audio Callback.
+// SDL Audio Callback (Thanks Stack Overflow).
 void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
 {
     Sint16 *buffer = (Sint16 *)raw_buffer;
@@ -140,17 +141,19 @@ void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
     for (int i = 0; i < length; i++, sample_nr++)
     {
         double time = (double)sample_nr / (double)SAMPLE_RATE;
+
         // render 441 HZ sine wave
         buffer[i] = (Sint16)(AMPLITUDE * sin(2.0f * M_PI * 441.0f * time));
     }
 }
 
-// Initialize audio.
+// Initialize audio (Thanks Stack Overflow).
 void audio_init()
 {
     int sample_nr = 0;
 
     SDL_AudioSpec want;
+
     // number of samples per second
     want.freq = SAMPLE_RATE;
 
@@ -174,13 +177,14 @@ void audio_init()
     {
         fprintf(stderr, "Could not open audio: %s.\n", SDL_GetError());
     }
+
     if (want.format != have.format)
     {
         fprintf(stderr, "Could not get desired audio spec.\n");
     }
 }
 
-// Initializes SDL video and audio.
+// Initializes SDL.
 bool init_SDL()
 {
     /* Initialize SDL */
@@ -284,7 +288,8 @@ bool init_emulator()
     all necessary data. */
     if (!load_dmp)
     {
-        chip8_init(&chip8, cpu_freq, timer_freq, refresh_freq, pc_start_addr, quirks);
+        chip8_init(&chip8, cpu_freq, timer_freq, refresh_freq, pc_start_addr,
+                   quirks);
         chip8_load_font(&chip8);
 
         /* Load ROM into memory. */
@@ -325,12 +330,13 @@ SDL_Window *create_window()
         // Initialize fonts since debug mode relies on them.
         if (TTF_Init() == -1)
         {
-            fprintf(stderr, "Could not initialize SDL_ttf: %s\n", SDL_GetError());
+            fprintf(stderr, "Could not initialize SDL_ttf: %s\n",
+                    SDL_GetError());
             return NULL;
         }
 
-        dbg_font = TTF_OpenFont(DBG_FONT_FILE, 12);
-        if (dbg_font == NULL)
+        dbg_font = TTF_OpenFont(DBG_FONT_FILE, DBG_FONT_SIZE);
+        if (!dbg_font)
         {
             fprintf(stderr, "Could not load font: %s\n", SDL_GetError());
         }
@@ -341,7 +347,7 @@ SDL_Window *create_window()
                                               window_width,
                                               window_height,
                                               SDL_WINDOW_SHOWN);
-    if (new_window == NULL)
+    if (!new_window)
     {
         fprintf(stderr, "Could not create SDL window: %s\n", SDL_GetError());
         return NULL;
@@ -370,15 +376,9 @@ void draw_display()
                 {
                     int sdl_x = (x * display_scale) + j;
                     int sdl_y = (y * display_scale) + i;
+                    long color = chip8.display[y][x] ? on_color : off_color;
 
-                    if (chip8.display[y][x])
-                    {
-                        set_pixel(sdl_x, sdl_y, on_color);
-                    }
-                    else
-                    {
-                        set_pixel(sdl_x, sdl_y, off_color);
-                    }
+                    set_pixel(sdl_x, sdl_y, color);
                 }
             }
         }
@@ -429,7 +429,8 @@ void draw_debug()
     font_color.b = 0;
     font_dest_rect.x = 41;
     font_dest_rect.y = 30;
-    sprintf(dbg_str, "Next: %02X%02X", chip8.RAM[chip8.PC], chip8.RAM[chip8.PC + 1]);
+    sprintf(dbg_str, "Next: %02X%02X", chip8.RAM[chip8.PC],
+            chip8.RAM[chip8.PC + 1]);
     txt = TTF_RenderText_Solid(dbg_font, dbg_str, font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
@@ -473,9 +474,10 @@ void draw_debug()
     font_dest_rect.x = 18;
     font_dest_rect.y = 120;
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < (NUM_REGISTERS / 2); i++)
     {
-        sprintf(dbg_str, "V%X: %02X V%X: %02X", i, chip8.V[i], i + 8, chip8.V[i + 8]);
+        sprintf(dbg_str, "V%X: %02X V%X: %02X", i, chip8.V[i], i + 8,
+                chip8.V[i + 8]);
         txt = TTF_RenderText_Solid(dbg_font, dbg_str, font_color);
 
         SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
@@ -578,63 +580,74 @@ bool handle_input(SDL_Event *e)
 {
     while (SDL_PollEvent(e))
     {
-        if (e->type == SDL_QUIT)
-        {
-            return false;
-        }
+        SDL_Keycode keyc;
+        unsigned char hexkey;
 
-        if (e->type == SDL_KEYUP)
+        switch (e->type)
         {
-            unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
-            SDL_Keycode keyc = e->key.keysym.sym;
+        case SDL_QUIT:
+            return false;
+            break;
+
+        case SDL_KEYUP:
+            hexkey = SDLK_to_hex(e->key.keysym.sym);
+            keyc = e->key.keysym.sym;
 
             if (hexkey != BAD_KEY)
             {
                 chip8.keypad[hexkey] = KEY_RELEASED;
+                return true;
             }
-            else if (keyc == SDLK_SPACE)
+
+            switch (keyc)
             {
+            case SDLK_SPACE:
                 paused = !paused;
-            }
-            else if (keyc == SDLK_UP && debug_mode)
-            {
-                dbg_step = true;
-            }
-            else if (keyc == SDLK_DOWN && debug_mode)
-            {
-                dbg_stack_pop();
-            }
-            else if (keyc == SDLK_RIGHT)
-            {
-                chip8_set_cpu_freq(&chip8, chip8.cpu_freq + 100);
-            }
-            else if (keyc == SDLK_LEFT)
-            {
-                chip8_set_cpu_freq(&chip8, chip8.cpu_freq - 100);
-            }
-            else if (keyc == SDLK_RETURN)
-            {
-                if (chip8_dump(&chip8))
+                break;
+
+            case SDLK_UP:
+                dbg_step = true && debug_mode;
+                break;
+
+            case SDLK_DOWN:
+                if (debug_mode)
                 {
-                    printf("Took a dump in %s\n", chip8.DMP_path);
+                    dbg_stack_pop();
                 }
-            }
-            else if (keyc == SDLK_ESCAPE)
-            {
-                chip8_soft_reset(&chip8);
-            }
-            else if (keyc == SDLK_BACKSPACE)
-            {
+
+                break;
+
+            case SDLK_RIGHT:
+                chip8_set_cpu_freq(&chip8, chip8.cpu_freq + 100);
+                break;
+
+            case SDLK_LEFT:
+                chip8_set_cpu_freq(&chip8, chip8.cpu_freq - 100);
+                break;
+
+            case SDLK_RETURN:
+                chip8_dump(&chip8);
+                break;
+
+            case SDLK_BACKSPACE:
                 cycle_color_theme();
+                break;
+
+            case SDLK_ESCAPE:
+                chip8_soft_reset(&chip8);
+                break;
             }
-        }
-        else if (e->type == SDL_KEYDOWN)
-        {
-            unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
+
+            break;
+
+        case SDL_KEYDOWN:
+            hexkey = SDLK_to_hex(e->key.keysym.sym);
             if (hexkey != BAD_KEY)
             {
                 chip8.keypad[hexkey] = KEY_DOWN;
             }
+
+            break;
         }
     }
 

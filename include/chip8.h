@@ -71,18 +71,6 @@ typedef struct CHIP8
     struct timeval cur_cycle_start;
     struct timeval prev_cycle_start;
 
-    // Used to signal to main to update the display.
-    bool display_updated;
-
-    // Used to signal to main to produce sound.
-    bool beep;
-
-    // Used to signal to main to exit the program.
-    bool exit;
-
-    // Used to toggle between HI-RES and standard LO-RES modes.
-    bool hires;
-
     // The path and filename of currently loaded ROM.
     char ROM_path[MAX_FILENAME];
 
@@ -105,10 +93,23 @@ typedef struct CHIP8
         -8: Collision with Bottom of Screen
     */
     bool quirks[NUM_QUIRKS];
+
+    // Used to signal to main to update the display.
+    bool display_updated;
+
+    // Used to signal to main to produce sound.
+    bool beep;
+
+    // Used to signal to main to exit the program.
+    bool exit;
+
+    // Used to toggle between HI-RES and standard LO-RES modes.
+    bool hires;
 } CHIP8;
 
 // Set some things to useful default values.
-void chip8_init(CHIP8 *chip8, unsigned cpu_freq, unsigned timer_freq, unsigned refresh_freq, uint16_t pc_start_addr, bool quirks[]);
+void chip8_init(CHIP8 *chip8, unsigned cpu_freq, unsigned timer_freq,
+                unsigned refresh_freq, uint16_t pc_start_addr, bool quirks[]);
 
 // Reset the machine.
 void chip8_reset(CHIP8 *chip8);
