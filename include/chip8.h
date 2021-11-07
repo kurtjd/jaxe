@@ -15,7 +15,7 @@
 
 #define MAX_RAM 4096
 #define MAX_FILENAME 256
-#define MAX_CPU_FREQ 10000
+#define MAX_CPU_FREQ 1000000
 #define MAX_TIMER_FREQ 10000
 #define MAX_REFRESH_FREQ 10000
 
@@ -57,9 +57,9 @@ typedef struct CHIP8
     uint16_t pc_start_addr;
 
     // These are used for handling CPU and timer speed.
-    unsigned cpu_freq;
-    unsigned timer_freq;
-    unsigned refresh_freq;
+    unsigned long cpu_freq;
+    unsigned long timer_freq;
+    unsigned long refresh_freq;
     double timer_max_cum;
     double cpu_max_cum;
     double cpu_cum;
@@ -108,8 +108,9 @@ typedef struct CHIP8
 } CHIP8;
 
 // Set some things to useful default values.
-void chip8_init(CHIP8 *chip8, unsigned cpu_freq, unsigned timer_freq,
-                unsigned refresh_freq, uint16_t pc_start_addr, bool quirks[]);
+void chip8_init(CHIP8 *chip8, unsigned long cpu_freq, unsigned long timer_freq,
+                unsigned long refresh_freq, uint16_t pc_start_addr,
+                bool quirks[]);
 
 // Reset the machine.
 void chip8_reset(CHIP8 *chip8);
@@ -118,13 +119,13 @@ void chip8_reset(CHIP8 *chip8);
 void chip8_soft_reset(CHIP8 *chip8);
 
 // Sets the CPU frequency of the machine.
-void chip8_set_cpu_freq(CHIP8 *chip8, unsigned cpu_freq);
+void chip8_set_cpu_freq(CHIP8 *chip8, unsigned long cpu_freq);
 
 // Sets the timer frequency of the machine.
-void chip8_set_timer_freq(CHIP8 *chip8, unsigned timer_freq);
+void chip8_set_timer_freq(CHIP8 *chip8, unsigned long timer_freq);
 
 // Sets the refresh frequency of the machine.
-void chip8_set_refresh_freq(CHIP8 *chip8, unsigned refresh_freq);
+void chip8_set_refresh_freq(CHIP8 *chip8, unsigned long refresh_freq);
 
 // Load hexadecimal font into memory.
 void chip8_load_font(CHIP8 *chip8);

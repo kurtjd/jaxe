@@ -29,9 +29,9 @@
 CHIP8 chip8;
 char ROM_path[MAX_FILENAME];
 uint16_t pc_start_addr = PC_START_ADDR_DEFAULT;
-unsigned cpu_freq = CPU_FREQ_DEFAULT;
-unsigned timer_freq = TIMER_FREQ_DEFAULT;
-unsigned refresh_freq = REFRESH_FREQ_DEFAULT;
+unsigned long cpu_freq = CPU_FREQ_DEFAULT;
+unsigned long timer_freq = TIMER_FREQ_DEFAULT;
+unsigned long refresh_freq = REFRESH_FREQ_DEFAULT;
 bool quirks[NUM_QUIRKS] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
 bool load_dmp = false;
 
