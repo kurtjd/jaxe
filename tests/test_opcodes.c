@@ -39,11 +39,13 @@ void test_00Cn()
 void test_00E0()
 {
     chip8_load_instr(&chip8, 0x00E0);
+
     chip8.display[0][0] = true;
     chip8.display[DISPLAY_WIDTH / 2][DISPLAY_WIDTH / 2] = true;
     chip8.display[DISPLAY_HEIGHT - 1][0] = true;
     chip8.display[0][DISPLAY_WIDTH - 1] = true;
     chip8.display[DISPLAY_HEIGHT - 1][DISPLAY_WIDTH - 1] = true;
+
     chip8_execute(&chip8);
 
     for (int i = 0; i < DISPLAY_HEIGHT; i++)
@@ -294,6 +296,7 @@ void test_8xy3()
 void test_8xy4()
 {
     chip8_load_instr(&chip8, 0x8694);
+
     chip8.V[6] = 0x05;
     chip8.V[9] = 0x05;
     chip8_execute(&chip8);
@@ -315,12 +318,14 @@ void test_8xy4()
     chip8_execute(&chip8);
     assert(chip8.V[6] == 0xFF);
     assert(chip8.V[0x0F] == 0x00);
+
     chip8_reset(&chip8);
 }
 
 void test_8xy5()
 {
     chip8_load_instr(&chip8, 0x8695);
+
     chip8.V[6] = 0x0A;
     chip8.V[9] = 0x03;
     chip8_execute(&chip8);
@@ -343,6 +348,7 @@ void test_8xy5()
     chip8_execute(&chip8);
     assert(chip8.V[6] == 0x00);
     assert(chip8.V[0x0F] == 0x01);
+
     chip8_reset(&chip8);
 }
 
@@ -350,6 +356,7 @@ void test_8xy6()
 {
     // Check least-significant bit 1
     chip8_load_instr(&chip8, 0x8696);
+
     chip8.V[6] = 0x69;
     chip8_execute(&chip8);
     assert(chip8.V[6] == 0x34);
@@ -510,6 +517,10 @@ void test_Cxkk()
 
 void test_Dxyn()
 {
+    /* This instruction has so many behaviors depending on what resolution
+    you're in and which quirks are enabled that it's a pain to test.
+    I'll get around to it... */
+
     // Normal sprite in lores mode.
     chip8_load_instr(&chip8, 0xD693);
 
@@ -779,10 +790,10 @@ void test_Fx75_Fx85()
 
 int main()
 {
-    bool q[NUM_QUIRKS] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+    bool quirks[NUM_QUIRKS] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
 
     chip8_init(&chip8, CPU_FREQ_DEFAULT, TIMER_FREQ_DEFAULT,
-               REFRESH_FREQ_DEFAULT, PC_START_ADDR_DEFAULT, q);
+               REFRESH_FREQ_DEFAULT, PC_START_ADDR_DEFAULT, quirks);
 
     /* All tests follow similar pattern:
             * Load instruction into RAM
