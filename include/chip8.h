@@ -22,6 +22,7 @@
 #define PC_START_ADDR_DEFAULT 0x200
 #define CLOCK_SPEED_DEFAULT 1000
 #define REFRESH_RATE 60
+#define TIMER_FREQ 60
 
 #define KEY_UP 0
 #define KEY_DOWN 1
@@ -131,7 +132,7 @@ bool chip8_cycle(CHIP8 *chip8);
 // Fetches, decodes, and executes the next instruction.
 void chip8_execute(CHIP8 *chip8);
 
-// Decrements delay and sound timers at a frequency of 60Hz.
+// Decrements delay and sound timers at specified frequency.
 void chip8_handle_timers(CHIP8 *chip8);
 
 // Updates the total cycle time since last call.

@@ -27,10 +27,15 @@ long color_themes[] = {
     0x0000FF, 0x000000  // Space
 };
 
+char ROM_path[MAX_FILENAME];
+CHIP8 chip8;
+
 // Control how pixels are displayed.
+SDL_Window *window = NULL;
+SDL_Surface *surface = NULL;
 int DISPLAY_SCALE = 5;
-long ON_COLOR;
-long OFF_COLOR;
+long ON_COLOR = 0xFFFFFF;
+long OFF_COLOR = 0x000000;
 int color_theme_pntr = 0;
 TTF_Font *DBG_FONT = NULL;
 
@@ -45,7 +50,66 @@ It is used to be able to step back the emulator. */
 CHIP8 dbg_stack[DBG_STACK_MAX];
 int dbg_stack_pntr = 0;
 
-// Black magic SDL sound stuff.
+// Emulator options
+unsigned int PC_START_ADDR = PC_START_ADDR_DEFAULT;
+int CLOCK_SPEED = CLOCK_SPEED_DEFAULT;
+bool quirks[] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+bool load_dmp = false;
+
+void dbg_stack_push()
+{
+    dbg_stack_pntr++;
+
+    if (dbg_stack_pntr >= DBG_STACK_MAX)
+    {
+        dbg_stack_pntr = 0;
+    }
+
+    dbg_stack[dbg_stack_pntr] = chip8;
+}
+
+void dbg_stack_pop()
+{
+    dbg_stack_pntr--;
+
+    if (dbg_stack_pntr < 0)
+    {
+        dbg_stack_pntr = DBG_STACK_MAX - 1;
+    }
+
+    chip8 = dbg_stack[dbg_stack_pntr];
+    dbg_step = true;
+    dbg_step_back = true;
+}
+
+// Frees all resources and exits.
+void clean_exit(int status)
+{
+    if (DEBUG_MODE && DBG_FONT)
+    {
+        TTF_CloseFont(DBG_FONT);
+        DBG_FONT = NULL;
+    }
+
+    if (surface)
+    {
+        SDL_FreeSurface(surface);
+        surface = NULL;
+    }
+
+    if (window)
+    {
+        SDL_DestroyWindow(window);
+        window = NULL;
+    }
+
+    SDL_CloseAudio();
+    SDL_Quit();
+
+    exit(status);
+}
+
+// SDL Audio Callback.
 void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
 {
     Sint16 *buffer = (Sint16 *)raw_buffer;
@@ -60,15 +124,225 @@ void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
     }
 }
 
+// Initialize audio.
+void audio_init()
+{
+    int sample_nr = 0;
+
+    SDL_AudioSpec want;
+    // number of samples per second
+    want.freq = SAMPLE_RATE;
+
+    // sample type (here: signed short i.e. 16 bit)
+    want.format = AUDIO_S16SYS;
+
+    // only one channel
+    want.channels = 1;
+
+    // buffer-size
+    want.samples = 2048;
+
+    // function SDL calls periodically to refill the buffer
+    want.callback = audio_callback;
+
+    // counter, keeping track of current sample number
+    want.userdata = &sample_nr;
+
+    SDL_AudioSpec have;
+    if (SDL_OpenAudio(&want, &have) != 0)
+    {
+        fprintf(stderr, "Could not open audio: %s.\n", SDL_GetError());
+    }
+    if (want.format != have.format)
+    {
+        fprintf(stderr, "Could not get desired audio spec.\n");
+    }
+}
+
+// Initializes SDL video and audio.
+bool init_SDL()
+{
+    /* Initialize SDL */
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
+    {
+        fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
+        return false;
+    }
+
+    audio_init();
+
+    return true;
+}
+
+// Checks and processes command-line arguments.
+bool handle_args(int argc, char **argv)
+{
+    if (argc < 2)
+    {
+        printf("Usage: ./jace [options] <path-to-ROM>\n");
+        return false;
+    }
+    else if (argc > 2)
+    {
+        sprintf(ROM_path, "%s", argv[argc - 1]);
+
+        /* Quirks:
+           -0: RAM Initialization
+           -1: 8xy6/8xyE
+           -2: Fx55/Fx65
+           -3: Bnnn
+           -4: Big Sprite LORES
+           -5: 00FE/00FF
+           -6: Sprite Wrapping
+           -7: Collision Enumeration
+           -8: Collision with Bottom of Screen   
+        */
+        int opt;
+        while ((opt = getopt(argc, argv, "012345678xdms:p:c:f:b:")) != -1)
+        {
+            switch (opt)
+            {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+                quirks[opt - '0'] = false;
+                break;
+
+            case 'x':
+                for (size_t i = 0; i < sizeof(quirks); i++)
+                {
+                    quirks[i] = false;
+                }
+
+                break;
+
+            case 'd':
+                DEBUG_MODE = true;
+                paused = true;
+                break;
+
+            case 'm':
+                load_dmp = true;
+                break;
+
+            case 's':
+                DISPLAY_SCALE = atoi(optarg);
+                break;
+
+            case 'p':
+                PC_START_ADDR = strtol(optarg, NULL, 16);
+                break;
+
+            case 'c':
+                CLOCK_SPEED = atoi(optarg);
+                break;
+
+            case 'f':
+                color_themes[0] = strtol(optarg, NULL, 16);
+                ON_COLOR = color_themes[0];
+                break;
+
+            case 'b':
+                color_themes[1] = strtol(optarg, NULL, 16);
+                OFF_COLOR = color_themes[1];
+                break;
+            }
+        }
+    }
+
+    return true;
+}
+
+// Set up the emulator to being running.
+bool init_emulator()
+{
+    /* If a dump file is given, skip initialization since dump contains
+    all necessary data. */
+    if (!load_dmp)
+    {
+        chip8_init(&chip8, CLOCK_SPEED, PC_START_ADDR, quirks);
+        chip8_load_font(&chip8);
+
+        /* Load ROM into memory. */
+        if (!chip8_load_rom(&chip8, ROM_path))
+        {
+            fprintf(stderr, "Unable to open ROM: %s\n", ROM_path);
+            return false;
+        }
+    }
+    else if (!chip8_load_dump(&chip8, ROM_path))
+    {
+        fprintf(stderr, "Unable to open dump: %s\n", ROM_path);
+        return false;
+    }
+
+    // Initialize the dbg stack with instances of the initial emulator state.
+    for (int i = 0; i < DBG_STACK_MAX; i++)
+    {
+        dbg_stack[i] = chip8;
+    }
+
+    return true;
+}
+
+// Create the SDL window.
+SDL_Window *create_window()
+{
+    int window_width = MAX_WIDTH * DISPLAY_SCALE;
+    int window_height = MAX_HEIGHT * DISPLAY_SCALE;
+
+    if (DEBUG_MODE)
+    {
+        // Change window size depending on if DEBUG_MODE is active or not.
+        window_width += DBG_PANEL_WIDTH;
+        if ((DISPLAY_SCALE * MAX_HEIGHT) < DBG_PANEL_HEIGHT)
+        {
+            window_height = DBG_PANEL_HEIGHT;
+        }
+
+        // Initialize fonts since debug mode relies on them.
+        if (TTF_Init() == -1)
+        {
+            fprintf(stderr, "Could not initialize SDL_ttf: %s\n", SDL_GetError());
+            return NULL;
+        }
+
+        DBG_FONT = TTF_OpenFont(DBG_FONT_FILE, 12);
+        if (DBG_FONT == NULL)
+        {
+            fprintf(stderr, "Could not load font: %s\n", SDL_GetError());
+        }
+    }
+    SDL_Window *new_window = SDL_CreateWindow("JACE",
+                                              SDL_WINDOWPOS_CENTERED,
+                                              SDL_WINDOWPOS_CENTERED,
+                                              window_width,
+                                              window_height,
+                                              SDL_WINDOW_SHOWN);
+    if (new_window == NULL)
+    {
+        fprintf(stderr, "Could not create SDL window: %s\n", SDL_GetError());
+        return NULL;
+    }
+
+    return new_window;
+}
+
 // Sets a pixel of the SDL surface to a certain color.
-void set_pixel(SDL_Surface *surface, int x, int y, long color)
+void set_pixel(int x, int y, long color)
 {
     Uint32 *pixels = (Uint32 *)surface->pixels;
     pixels[(y * surface->w) + x] = color;
 }
 
 // Makes the physical screen match the emulator display.
-void draw_display(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
+void draw_display()
 {
     for (int y = 0; y < MAX_HEIGHT; y++)
     {
@@ -81,13 +355,13 @@ void draw_display(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
                     int sdl_x = (x * DISPLAY_SCALE) + j;
                     int sdl_y = (y * DISPLAY_SCALE) + i;
 
-                    if (chip8->display[y][x])
+                    if (chip8.display[y][x])
                     {
-                        set_pixel(surface, sdl_x, sdl_y, ON_COLOR);
+                        set_pixel(sdl_x, sdl_y, ON_COLOR);
                     }
                     else
                     {
-                        set_pixel(surface, sdl_x, sdl_y, OFF_COLOR);
+                        set_pixel(sdl_x, sdl_y, OFF_COLOR);
                     }
                 }
             }
@@ -99,7 +373,7 @@ void draw_display(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
 
 /* Display the debug panel.
 This function is nasty and slow as hell, I am not proud of it. */
-void draw_debug(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
+void draw_debug()
 {
     // Create a gray rectangle surface as the side panel for debug.
     SDL_Surface *dbg_panel = SDL_CreateRGBSurface(0,
@@ -139,7 +413,7 @@ void draw_debug(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
     font_color.b = 0;
     font_dest_rect.x = 41;
     font_dest_rect.y = 30;
-    sprintf(dbg_str, "Next: %02X%02X", chip8->RAM[chip8->PC], chip8->RAM[chip8->PC + 1]);
+    sprintf(dbg_str, "Next: %02X%02X", chip8.RAM[chip8.PC], chip8.RAM[chip8.PC + 1]);
     txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
@@ -152,7 +426,7 @@ void draw_debug(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
     // PC
     font_dest_rect.x = 57;
     font_dest_rect.y = 56;
-    sprintf(dbg_str, "PC: %03X", chip8->PC);
+    sprintf(dbg_str, "PC: %03X", chip8.PC);
     txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
@@ -160,7 +434,7 @@ void draw_debug(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
     // SP, I
     font_dest_rect.x = 13;
     font_dest_rect.y = 76;
-    sprintf(dbg_str, "SP: %03X I: %03X", chip8->SP, chip8->I);
+    sprintf(dbg_str, "SP: %03X I: %03X", chip8.SP, chip8.I);
     txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
@@ -171,7 +445,7 @@ void draw_debug(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
     font_color.b = 128;
     font_dest_rect.x = 17;
     font_dest_rect.y = 97;
-    sprintf(dbg_str, "DT: %02X ST: %02X", chip8->DT, chip8->ST);
+    sprintf(dbg_str, "DT: %02X ST: %02X", chip8.DT, chip8.ST);
     txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
     SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
     SDL_FreeSurface(txt);
@@ -185,7 +459,7 @@ void draw_debug(SDL_Window *window, SDL_Surface *surface, CHIP8 *chip8)
 
     for (int i = 0; i < 8; i++)
     {
-        sprintf(dbg_str, "V%X: %02X V%X: %02X", i, chip8->V[i], i + 8, chip8->V[i + 8]);
+        sprintf(dbg_str, "V%X: %02X V%X: %02X", i, chip8.V[i], i + 8, chip8.V[i + 8]);
         txt = TTF_RenderText_Solid(DBG_FONT, dbg_str, font_color);
 
         SDL_BlitSurface(txt, NULL, dbg_panel, &font_dest_rect);
@@ -284,7 +558,7 @@ unsigned char SDLK_to_hex(SDL_KeyCode key)
 }
 
 // Checks for key presses/releases and a quit event.
-bool handle_input(SDL_Event *e, CHIP8 *chip8)
+bool handle_input(SDL_Event *e)
 {
     while (SDL_PollEvent(e))
     {
@@ -300,7 +574,7 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
 
             if (hexkey != BAD_KEY)
             {
-                chip8->keypad[hexkey] = KEY_RELEASED;
+                chip8.keypad[hexkey] = KEY_RELEASED;
             }
             else if (keyc == SDLK_SPACE)
             {
@@ -312,37 +586,30 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
             }
             else if (keyc == SDLK_DOWN && DEBUG_MODE)
             {
-                dbg_stack_pntr--;
-                if (dbg_stack_pntr < 0)
-                {
-                    dbg_stack_pntr = DBG_STACK_MAX - 1;
-                }
-                *chip8 = dbg_stack[dbg_stack_pntr];
-                dbg_step = true;
-                dbg_step_back = true;
+                dbg_stack_pop();
             }
             else if (keyc == SDLK_RIGHT)
             {
-                chip8_set_clock_speed(chip8, chip8->clock_speed + 100);
+                chip8_set_clock_speed(&chip8, chip8.clock_speed + 100);
             }
             else if (keyc == SDLK_LEFT)
             {
-                chip8_set_clock_speed(chip8, chip8->clock_speed - 100);
+                chip8_set_clock_speed(&chip8, chip8.clock_speed - 100);
             }
             else if (keyc == SDLK_RETURN)
             {
-                if (chip8_dump(chip8))
+                if (chip8_dump(&chip8))
                 {
-                    printf("Took a dump in %s\n", chip8->DMP_path);
+                    printf("Took a dump in %s\n", chip8.DMP_path);
                 }
                 else
                 {
-                    fprintf(stderr, "Unable to take a dump in %s\n", chip8->DMP_path);
+                    fprintf(stderr, "Unable to take a dump in %s\n", chip8.DMP_path);
                 }
             }
             else if (keyc == SDLK_ESCAPE)
             {
-                chip8_soft_reset(chip8);
+                chip8_soft_reset(&chip8);
             }
             else if (keyc == SDLK_BACKSPACE)
             {
@@ -361,7 +628,7 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
             unsigned char hexkey = SDLK_to_hex(e->key.keysym.sym);
             if (hexkey != BAD_KEY)
             {
-                chip8->keypad[hexkey] = KEY_DOWN;
+                chip8.keypad[hexkey] = KEY_DOWN;
             }
         }
     }
@@ -371,235 +638,58 @@ bool handle_input(SDL_Event *e, CHIP8 *chip8)
 
 int main(int argc, char **argv)
 {
-    // Emulator options
-    unsigned int PC_START_ADDR = PC_START_ADDR_DEFAULT;
-    int CLOCK_SPEED = CLOCK_SPEED_DEFAULT;
-    bool quirks[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
-    bool load_dmp = false;
-
-    /* Check command-line arguments. */
-    if (argc < 2)
+    if (!handle_args(argc, argv))
     {
-        printf("Usage: ./jace [options] <path-to-ROM>\n");
-        return 1;
-    }
-    else if (argc > 2)
-    {
-        /* Quirks:
-           -0: RAM Initialization
-           -1: 8xy6/8xyE
-           -2: Fx55/Fx65
-           -3: Bnnn
-           -4: Big Sprite LORES
-           -5: 00FE/00FF
-           -6: Sprite Wrapping
-           -7: Collision Enumeration
-           -8: Collision with Bottom of Screen   
-        */
-        int opt;
-        while ((opt = getopt(argc, argv, "012345678xdms:p:c:f:b:")) != -1)
-        {
-            switch (opt)
-            {
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-                quirks[opt - '0'] = false;
-                break;
-            case 'x':
-                for (size_t i = 0; i < sizeof(quirks); i++)
-                {
-                    quirks[i] = false;
-                }
-
-                break;
-            case 'd':
-                DEBUG_MODE = true;
-                paused = true;
-                break;
-            case 'm':
-                load_dmp = true;
-                break;
-            case 's':
-                DISPLAY_SCALE = atoi(optarg);
-                break;
-            case 'p':
-                PC_START_ADDR = strtol(optarg, NULL, 16);
-                break;
-            case 'c':
-                CLOCK_SPEED = atoi(optarg);
-                break;
-            case 'f':
-                color_themes[0] = strtol(optarg, NULL, 16);
-                break;
-            case 'b':
-                color_themes[1] = strtol(optarg, NULL, 16);
-                break;
-            }
-        }
+        clean_exit(1);
     }
 
     /* Initialize the CHIP8 emulator. */
-    CHIP8 chip8;
-
-    /* If a dump file is given, skip initialization since dump contains
-    all necessary data. */
-    if (!load_dmp)
+    if (!init_emulator(&chip8))
     {
-        chip8_init(&chip8, CLOCK_SPEED, PC_START_ADDR, quirks);
-        chip8_load_font(&chip8);
-
-        /* Load ROM into memory. */
-        if (!chip8_load_rom(&chip8, argv[argc - 1]))
-        {
-            fprintf(stderr, "Unable to open ROM: %s\n", argv[argc - 1]);
-            return 1;
-        }
-    }
-    else if (!chip8_load_dump(&chip8, argv[argc - 1]))
-    {
-        fprintf(stderr, "Unable to open dump: %s\n", argv[argc - 1]);
-        return 1;
-    }
-
-    // Initialize the dbg stack with instances of the initial emulator state.
-    for (int i = 0; i < DBG_STACK_MAX; i++)
-    {
-        dbg_stack[i] = chip8;
+        clean_exit(1);
     }
 
     /* Initialize SDL */
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
+    if (!init_SDL())
     {
-        fprintf(stderr, "Could not initialize SDL.\n");
-        return 1;
+        clean_exit(1);
     }
 
-    int window_width = MAX_WIDTH * DISPLAY_SCALE;
-    int window_height = MAX_HEIGHT * DISPLAY_SCALE;
-    ON_COLOR = color_themes[0];
-    OFF_COLOR = color_themes[1];
-    if (DEBUG_MODE)
+    window = create_window();
+    if (!window)
     {
-        // Change window size depending on if DEBUG_MODE is active or not.
-        window_width += DBG_PANEL_WIDTH;
-        if ((DISPLAY_SCALE * MAX_HEIGHT) < DBG_PANEL_HEIGHT)
-        {
-            window_height = DBG_PANEL_HEIGHT;
-        }
-
-        // Initialize fonts since debug mode relies on them.
-        if (TTF_Init() == -1)
-        {
-            fprintf(stderr, "Could not initialize SDL_ttf.\n");
-            return 1;
-        }
-
-        DBG_FONT = TTF_OpenFont(DBG_FONT_FILE, 12);
-        if (DBG_FONT == NULL)
-        {
-            fprintf(stderr, "Could not load font.\n");
-        }
-    }
-    SDL_Window *window = SDL_CreateWindow("JACE",
-                                          SDL_WINDOWPOS_CENTERED,
-                                          SDL_WINDOWPOS_CENTERED,
-                                          window_width,
-                                          window_height,
-                                          SDL_WINDOW_SHOWN);
-    if (window == NULL)
-    {
-        fprintf(stderr, "Could not create SDL window.\n");
-        return 1;
+        clean_exit(1);
     }
 
-    SDL_Surface *surface = SDL_GetWindowSurface(window);
-
-    /******* Black Magic SDL Sound *********/
-    int sample_nr = 0;
-
-    SDL_AudioSpec want;
-    // number of samples per second
-    want.freq = SAMPLE_RATE;
-
-    // sample type (here: signed short i.e. 16 bit)
-    want.format = AUDIO_S16SYS;
-
-    // only one channel
-    want.channels = 1;
-
-    // buffer-size
-    want.samples = 2048;
-
-    // function SDL calls periodically to refill the buffer
-    want.callback = audio_callback;
-
-    // counter, keeping track of current sample number
-    want.userdata = &sample_nr;
-
-    SDL_AudioSpec have;
-    if (SDL_OpenAudio(&want, &have) != 0)
+    surface = SDL_GetWindowSurface(window);
+    if (!surface)
     {
-        fprintf(stderr, "Could not open audio.\n");
-    }
-    if (want.format != have.format)
-    {
-        fprintf(stderr, "Could not get desired audio spec.\n");
-    }
-    /******************************/
-
-    if (DEBUG_MODE)
-    {
-        draw_debug(window, surface, &chip8);
+        fprintf(stderr, "Could not create SDL surface: %s\n", SDL_GetError());
+        clean_exit(1);
     }
 
     /* Main Loop */
     SDL_Event e;
-    while (!chip8.exit && handle_input(&e, &chip8))
+    while (!chip8.exit && handle_input(&e))
     {
-        if (paused)
+        if ((!paused || dbg_step) && !dbg_step_back)
         {
-            if (!dbg_step)
+            /* Push the state of the emulator into debug stack if the CPU
+            actually executed an instruction and wasn't sleeping. */
+            if (chip8_cycle(&chip8))
             {
-                continue;
-            }
-            else
-            {
-                dbg_step = false;
+                dbg_stack_push();
             }
         }
 
-        /* Push the state of the emulator into stack if the cycle actually
-        executed an instruction and wasn't sleeping. */
-        if (!dbg_step_back && chip8_cycle(&chip8))
-        {
-            dbg_stack_pntr++;
-            if (dbg_stack_pntr >= DBG_STACK_MAX)
-            {
-                dbg_stack_pntr = 0;
-            }
-            dbg_stack[dbg_stack_pntr] = chip8;
-        }
-        else
-        {
-            dbg_step_back = false;
-        }
-
-        // Prevents wasting time drawing every frame when unnecessary.
         if (chip8.display_updated)
         {
-            draw_display(window, surface, &chip8);
+            draw_display();
         }
 
         if (DEBUG_MODE)
         {
-            draw_debug(window, surface, &chip8);
+            draw_debug();
         }
 
         if (chip8.beep)
@@ -610,17 +700,13 @@ int main(int argc, char **argv)
         {
             SDL_PauseAudio(1);
         }
+
+        dbg_step = false;
+        dbg_step_back = false;
     }
 
     /* Free Resources */
-    if (DEBUG_MODE)
-    {
-        TTF_CloseFont(DBG_FONT);
-    }
-    SDL_FreeSurface(surface);
-    SDL_DestroyWindow(window);
-    SDL_CloseAudio();
-    SDL_Quit();
+    clean_exit(0);
 
     return 0;
 }
