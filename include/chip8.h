@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <sys/time.h>
 
+#define ONE_SEC 1000000
+
 #define DISPLAY_WIDTH 128
 #define DISPLAY_HEIGHT 64
 
@@ -25,10 +27,13 @@
 #define REFRESH_FREQ_DEFAULT 60
 #define TIMER_FREQ_DEFAULT 60
 
-#define ONE_SEC 1000000
-#define KEY_UP 0
-#define KEY_DOWN 1
-#define KEY_RELEASED 2
+// The states each key of the keypad can be in.
+typedef enum
+{
+    KEY_UP,
+    KEY_DOWN,
+    KEY_RELEASED
+} CHIP8K;
 
 typedef struct CHIP8
 {
@@ -48,7 +53,7 @@ typedef struct CHIP8
     bool display[DISPLAY_HEIGHT][DISPLAY_WIDTH];
 
     // Represents if a key is down, up, or released.
-    unsigned keypad[NUM_KEYS];
+    CHIP8K keypad[NUM_KEYS];
 
     // Where the emulator begins reading instructions.
     uint16_t pc_start_addr;
