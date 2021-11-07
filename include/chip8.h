@@ -71,11 +71,11 @@ typedef struct CHIP8
     // The path and filename of currently loaded ROM.
     char ROM_path[MAX_FILEPATH_LEN];
 
-    // The path and filename of associated user flags file.
-    char UF_path[MAX_FILEPATH_LEN];
+    // The path and filename of associated user flags file (ROM_path.uf).
+    char UF_path[MAX_FILEPATH_LEN + 3];
 
-    // The path and filename of associated dump file.
-    char DMP_path[MAX_FILEPATH_LEN];
+    // The path and filename of associated dump file (ROM_path.dmp).
+    char DMP_path[MAX_FILEPATH_LEN + 4];
 
     // Flags for the various quirky behavior of S-CHIP
     /* Quirks:

@@ -21,6 +21,7 @@
 #define DBG_FONT_SIZE 12
 
 #define DISPLAY_SCALE_DEFAULT 5
+#define DISPLAY_SCALE_MAX 20
 #define ON_COLOR_DEFAULT 0xFFFFFF
 #define OFF_COLOR_DEFAULT 0x000000
 #define NUM_COLOR_THEMES (int)(sizeof(color_themes) / sizeof(color_themes[0]))
@@ -227,6 +228,13 @@ bool handle_args(int argc, char **argv)
     }
     else if (argc >= 2)
     {
+        if (strlen(argv[argc - 1]) >= MAX_FILEPATH_LEN)
+        {
+            fprintf(stderr, "ROM path must be less than %d characters.\n",
+                    MAX_FILEPATH_LEN);
+            clean_exit(1);
+        }
+
         sprintf(ROM_path, "%s", argv[argc - 1]);
 
         int opt;
@@ -234,6 +242,7 @@ bool handle_args(int argc, char **argv)
         {
             switch (opt)
             {
+            // Toggle specific S-CHIP "quirks"
             case '0':
             case '1':
             case '2':
@@ -246,6 +255,7 @@ bool handle_args(int argc, char **argv)
                 quirks[opt - '0'] = false;
                 break;
 
+            // Toggle compatibility mode
             case 'x':
                 for (size_t i = 0; i < sizeof(quirks); i++)
                 {
@@ -254,40 +264,54 @@ bool handle_args(int argc, char **argv)
 
                 break;
 
+            // Toggle debug mode
             case 'd':
                 debug_mode = true;
                 paused = true;
                 break;
 
+            // Specify to emulator to load dump file as opposed to ROM
             case 'm':
                 load_dmp = true;
                 break;
 
+            // Set display scale
             case 's':
                 display_scale = atoi(optarg);
+                if (display_scale > DISPLAY_SCALE_MAX)
+                {
+                    display_scale = DISPLAY_SCALE_MAX;
+                }
+
                 break;
 
+            // Set the address emulator begins executing at
             case 'p':
                 pc_start_addr = strtol(optarg, NULL, 16);
                 break;
 
+            // Set CPU frequency
             case 'c':
                 cpu_freq = atoi(optarg);
                 break;
 
+            // Set timer frequency
             case 't':
                 timer_freq = atoi(optarg);
                 break;
 
+            // Set screen refresh frequency
             case 'r':
                 refresh_freq = atoi(optarg);
                 break;
 
+            // Set pixel ON (foreground) color
             case 'f':
                 color_themes[0] = strtol(optarg, NULL, 16);
                 on_color = color_themes[0];
                 break;
 
+            // Set pixel OFF (background) color
             case 'b':
                 color_themes[1] = strtol(optarg, NULL, 16);
                 off_color = color_themes[1];
@@ -617,6 +641,7 @@ bool handle_input(SDL_Event *e)
             hexkey = SDLK_to_hex(e->key.keysym.sym);
             keyc = e->key.keysym.sym;
 
+            // Send key press to emulator
             if (hexkey != BAD_KEY)
             {
                 chip8.keypad[hexkey] = KEY_RELEASED;
@@ -625,14 +650,17 @@ bool handle_input(SDL_Event *e)
 
             switch (keyc)
             {
+            // Start or stop emulator
             case SDLK_SPACE:
                 paused = !paused;
                 break;
 
+            // Step forward in program
             case SDLK_UP:
                 dbg_step = true && debug_mode;
                 break;
 
+            // Step backwards in program
             case SDLK_DOWN:
                 if (debug_mode)
                 {
@@ -641,22 +669,27 @@ bool handle_input(SDL_Event *e)
 
                 break;
 
+            // Increase CPU frequency
             case SDLK_RIGHT:
                 chip8_set_cpu_freq(&chip8, chip8.cpu_freq + 100);
                 break;
 
+            // Decrease CPU frequency
             case SDLK_LEFT:
                 chip8_set_cpu_freq(&chip8, chip8.cpu_freq - 100);
                 break;
 
+            // Dump memory to disk
             case SDLK_RETURN:
                 chip8_dump(&chip8);
                 break;
 
+            // Change color theme
             case SDLK_BACKSPACE:
                 cycle_color_theme();
                 break;
 
+            // Reset emulator
             case SDLK_ESCAPE:
                 chip8_soft_reset(&chip8);
                 break;
