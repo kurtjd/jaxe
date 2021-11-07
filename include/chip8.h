@@ -3,40 +3,43 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <time.h>
 #include <sys/time.h>
 
-#define MAX_WIDTH 128
-#define MAX_HEIGHT 64
-#define MAX_KEYS 16
+#define DISPLAY_WIDTH 128
+#define DISPLAY_HEIGHT 64
+
+#define NUM_KEYS 16
+#define NUM_REGISTERS 16
+#define NUM_USER_FLAGS 8
+#define NUM_QUIRKS 9
+
 #define MAX_RAM 4096
-#define MAX_REGISTERS 16
-#define MAX_USER_FLAGS 8
 #define MAX_FILENAME 256
 #define MAX_CPU_FREQ 10000
 #define MAX_TIMER_FREQ 10000
 #define MAX_REFRESH_FREQ 10000
 
-#define ONE_SEC 1000000
 #define FONT_START_ADDR 0x0
 #define BIG_FONT_START_ADDR (FONT_START_ADDR + 80)
 #define SP_START_ADDR (BIG_FONT_START_ADDR + 160)
+
 #define PC_START_ADDR_DEFAULT 0x200
 #define CPU_FREQ_DEFAULT 1000
 #define REFRESH_FREQ_DEFAULT 60
 #define TIMER_FREQ_DEFAULT 60
 
+#define ONE_SEC 1000000
 #define KEY_UP 0
 #define KEY_DOWN 1
 #define KEY_RELEASED 2
 
 typedef struct CHIP8
 {
-    // Represents 4096 bytes (4KB) of addressable memory.
+    // Represents random-access memory.
     uint8_t RAM[MAX_RAM];
 
-    // Represents 16 general-purpose 8-bit registers (V0-VF).
-    uint8_t V[MAX_REGISTERS];
+    // Represents general-purpose 8-bit registers.
+    uint8_t V[NUM_REGISTERS];
 
     // Program counter, stack pointer, and index 16-bit registers.
     uint16_t PC, SP, I;
@@ -44,21 +47,19 @@ typedef struct CHIP8
     // Delay timer and sound timer 8-bit registers.
     uint8_t DT, ST;
 
-    /* A monochrome display of 64x32 pixels.
-    A pixel can be either only on or off, no color. */
-    bool display[MAX_HEIGHT][MAX_WIDTH];
+    // A monochrome display. A pixel can be either only on or off, no color.
+    bool display[DISPLAY_HEIGHT][DISPLAY_WIDTH];
 
-    // Represents keys 0-F and if they are down, up, or released.
-    uint8_t keypad[MAX_KEYS];
+    // Represents if a key is down, up, or released.
+    unsigned keypad[NUM_KEYS];
 
-    /* Where the emulator begins processing. Some programs,
-    such as those written for the ETI-600, begin at different addresses. */
+    // Where the emulator begins reading instructions.
     uint16_t pc_start_addr;
 
     // These are used for handling CPU and timer speed.
-    int cpu_freq;
-    int timer_freq;
-    int refresh_freq;
+    unsigned cpu_freq;
+    unsigned timer_freq;
+    unsigned refresh_freq;
     double timer_max_cum;
     double cpu_max_cum;
     double cpu_cum;
@@ -70,10 +71,10 @@ typedef struct CHIP8
     struct timeval cur_cycle_start;
     struct timeval prev_cycle_start;
 
-    // Used to signal to main when to update the display.
+    // Used to signal to main to update the display.
     bool display_updated;
 
-    // Used to signal to main when to produce sound.
+    // Used to signal to main to produce sound.
     bool beep;
 
     // Used to signal to main to exit the program.
@@ -103,11 +104,11 @@ typedef struct CHIP8
         -7: Collision Enumeration
         -8: Collision with Bottom of Screen
     */
-    bool quirks[9];
+    bool quirks[NUM_QUIRKS];
 } CHIP8;
 
 // Set some things to useful default values.
-void chip8_init(CHIP8 *chip8, int cpu_freq, int timer_freq, int refresh_freq, uint16_t pc_start_addr, bool quirks[]);
+void chip8_init(CHIP8 *chip8, unsigned cpu_freq, unsigned timer_freq, unsigned refresh_freq, uint16_t pc_start_addr, bool quirks[]);
 
 // Reset the machine.
 void chip8_reset(CHIP8 *chip8);
@@ -116,22 +117,18 @@ void chip8_reset(CHIP8 *chip8);
 void chip8_soft_reset(CHIP8 *chip8);
 
 // Sets the CPU frequency of the machine.
-void chip8_set_cpu_freq(CHIP8 *chip8, int cpu_freq);
+void chip8_set_cpu_freq(CHIP8 *chip8, unsigned cpu_freq);
 
 // Sets the timer frequency of the machine.
-void chip8_set_timer_freq(CHIP8 *chip8, int timer_freq);
+void chip8_set_timer_freq(CHIP8 *chip8, unsigned timer_freq);
 
 // Sets the refresh frequency of the machine.
-void chip8_set_refresh_freq(CHIP8 *chip8, int refresh_freq);
+void chip8_set_refresh_freq(CHIP8 *chip8, unsigned refresh_freq);
 
-/* Load hexadecimal font into memory.
-Each hex character is represented by 5 bytes in memory
-with each bit representing a pixel. */
+// Load hexadecimal font into memory.
 void chip8_load_font(CHIP8 *chip8);
 
-/* Loads a given ROM into memory starting at address PC_START_ADDR.
->=PC_START_ADDR is where user data is stored.
-Everything before that is system. */
+// Loads a given ROM into memory.
 bool chip8_load_rom(CHIP8 *chip8, char *filename);
 
 /* Performs a full cycle of the emulator including executing an instruction and
@@ -163,13 +160,13 @@ void chip8_reset_RAM(CHIP8 *chip8);
 // Clears all registers.
 void chip8_reset_registers(CHIP8 *chip8);
 
-// Loads an instruction into PC_START_ADDR.
+// Loads an instruction into memory.
 void chip8_load_instr(CHIP8 *chip8, uint16_t instr);
 
-// Draws n bytes starting at address I onto the display at coordinates (Vx, Vy).
+// Performs a draw operation.
 void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n);
 
-// Scrolls the display in specified direction by num pixels.
+// Scrolls the display in specified direction by num_pixels.
 void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels);
 
 // Waits for a key to be released then stores that key in Vx.
@@ -180,12 +177,6 @@ bool chip8_dump(CHIP8 *chip8);
 
 // Read dump file into memory.
 bool chip8_load_dump(CHIP8 *chip8, char *filename);
-
-// Saves user flags from registers to disk.
-bool chip8_save_user_flags(CHIP8 *chip8, int num_flags);
-
-// Loads user flags from disk into registers.
-bool chip8_load_user_flags(CHIP8 *chip8, int num_flags);
 
 // Saves/loads user flags to/from disk.
 bool chip8_handle_user_flags(CHIP8 *chip8, int num_flags, bool save);

@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "chip8.h"
 
-void chip8_init(CHIP8 *chip8, int cpu_freq, int timer_freq, int refresh_freq, uint16_t pc_start_addr, bool quirks[])
+void chip8_init(CHIP8 *chip8, unsigned cpu_freq, unsigned timer_freq, unsigned refresh_freq, uint16_t pc_start_addr, bool quirks[])
 {
     // Seed for the RND instruction.
     srand(time(NULL));
 
-    for (int i = 0; i < 9; i++)
+    for (int i = 0; i < NUM_QUIRKS; i++)
     {
         chip8->quirks[i] = quirks[i];
     }
@@ -67,9 +68,9 @@ void chip8_soft_reset(CHIP8 *chip8)
     chip8_load_rom(chip8, tmp_path);
 }
 
-void chip8_set_cpu_freq(CHIP8 *chip8, int cpu_freq)
+void chip8_set_cpu_freq(CHIP8 *chip8, unsigned cpu_freq)
 {
-    if (cpu_freq >= MAX_CPU_FREQ || cpu_freq == 0)
+    if (cpu_freq >= MAX_CPU_FREQ || !cpu_freq)
     {
         chip8->cpu_freq = CPU_FREQ_DEFAULT;
     }
@@ -81,9 +82,9 @@ void chip8_set_cpu_freq(CHIP8 *chip8, int cpu_freq)
     chip8->cpu_max_cum = ONE_SEC / chip8->cpu_freq;
 }
 
-void chip8_set_timer_freq(CHIP8 *chip8, int timer_freq)
+void chip8_set_timer_freq(CHIP8 *chip8, unsigned timer_freq)
 {
-    if (timer_freq >= MAX_TIMER_FREQ || timer_freq == 0)
+    if (timer_freq >= MAX_TIMER_FREQ || !timer_freq)
     {
         chip8->timer_freq = TIMER_FREQ_DEFAULT;
     }
@@ -95,9 +96,9 @@ void chip8_set_timer_freq(CHIP8 *chip8, int timer_freq)
     chip8->timer_max_cum = ONE_SEC / chip8->timer_freq;
 }
 
-void chip8_set_refresh_freq(CHIP8 *chip8, int refresh_freq)
+void chip8_set_refresh_freq(CHIP8 *chip8, unsigned refresh_freq)
 {
-    if (refresh_freq >= MAX_REFRESH_FREQ || refresh_freq == 0)
+    if (refresh_freq >= MAX_REFRESH_FREQ || !refresh_freq)
     {
         chip8->refresh_freq = REFRESH_FREQ_DEFAULT;
     }
@@ -111,6 +112,10 @@ void chip8_set_refresh_freq(CHIP8 *chip8, int refresh_freq)
 
 void chip8_load_font(CHIP8 *chip8)
 {
+    /* Characters are represented in memory as 5 bytes
+    (while big characters are 10 bytes). Each byte represents a row and each
+    bit represents a pixel. */
+
     uint8_t font_data[] = {
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
         0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -177,6 +182,7 @@ bool chip8_load_rom(CHIP8 *chip8, char *filename)
         return true;
     }
 
+    fprintf(stderr, "Unable to open ROM file %s\n", filename);
     return false;
 }
 
@@ -235,7 +241,7 @@ void chip8_execute(CHIP8 *chip8)
         switch (b2)
         {
         /* HALT (0000)
-           Halt the program. Only used by Octo programs. */
+           Halt the emulator. */
         case 0x00:
             chip8->PC -= 2;
             break;
@@ -637,6 +643,7 @@ void chip8_execute(CHIP8 *chip8)
 
 void chip8_handle_timers(CHIP8 *chip8)
 {
+    // Delay
     if (chip8->DT > 0)
     {
         chip8->delay_cum += chip8->total_cycle_time;
@@ -647,6 +654,8 @@ void chip8_handle_timers(CHIP8 *chip8)
             chip8->delay_cum = 0;
         }
     }
+
+    // Sound
     if (chip8->ST > 0)
     {
         // On original COSMAC VIP, sound is only produced when ST >= 2
@@ -664,7 +673,7 @@ void chip8_handle_timers(CHIP8 *chip8)
         chip8->beep = false;
     }
 
-    // Limit the display refresh rate.
+    // Screen Refresh
     chip8->display_updated = false;
     chip8->refresh_cum += chip8->total_cycle_time;
     if (chip8->refresh_cum >= chip8->refresh_max_cum)
@@ -678,14 +687,16 @@ void chip8_update_elapsed_time(CHIP8 *chip8)
 {
     chip8->prev_cycle_start.tv_sec = chip8->cur_cycle_start.tv_sec;
     chip8->prev_cycle_start.tv_usec = chip8->cur_cycle_start.tv_usec;
+
     gettimeofday(&chip8->cur_cycle_start, NULL);
+
     chip8->total_cycle_time = ((chip8->cur_cycle_start.tv_sec - chip8->prev_cycle_start.tv_sec) * 1000000);
     chip8->total_cycle_time += (chip8->cur_cycle_start.tv_usec - chip8->prev_cycle_start.tv_usec);
 }
 
 void chip8_reset_keypad(CHIP8 *chip8)
 {
-    for (int k = 0; k < MAX_KEYS; k++)
+    for (int k = 0; k < NUM_KEYS; k++)
     {
         chip8->keypad[k] = KEY_UP;
     }
@@ -693,7 +704,7 @@ void chip8_reset_keypad(CHIP8 *chip8)
 
 void chip8_reset_released_keys(CHIP8 *chip8)
 {
-    for (int k = 0; k < MAX_KEYS; k++)
+    for (int k = 0; k < NUM_KEYS; k++)
     {
         if (chip8->keypad[k] == KEY_RELEASED)
         {
@@ -704,15 +715,13 @@ void chip8_reset_released_keys(CHIP8 *chip8)
 
 void chip8_reset_display(CHIP8 *chip8)
 {
-    for (int y = 0; y < MAX_HEIGHT; y++)
+    for (int y = 0; y < DISPLAY_HEIGHT; y++)
     {
-        for (int x = 0; x < MAX_WIDTH; x++)
+        for (int x = 0; x < DISPLAY_WIDTH; x++)
         {
             chip8->display[y][x] = false;
         }
     }
-
-    //chip8->display_updated = true;
 }
 
 void chip8_reset_RAM(CHIP8 *chip8)
@@ -725,7 +734,7 @@ void chip8_reset_RAM(CHIP8 *chip8)
 
 void chip8_reset_registers(CHIP8 *chip8)
 {
-    for (int i = 0; i < MAX_REGISTERS; i++)
+    for (int i = 0; i < NUM_REGISTERS; i++)
     {
         chip8->V[i] = 0x00;
     }
@@ -753,7 +762,7 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
     if (chip8->hires && chip8->quirks[8])
     {
         int rows = (n == 32) ? 16 : n;
-        chip8->V[0x0F] += ((y + rows) - (MAX_HEIGHT - 1));
+        chip8->V[0x0F] += ((y + rows) - (DISPLAY_HEIGHT - 1));
     }
 
     bool prev_byte_collide = false;
@@ -783,12 +792,12 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
                     // Allow out-of-bound sprite to wrap-around in legacy mode.
                     if (!chip8->quirks[6])
                     {
-                        disp_x %= MAX_WIDTH;
-                        disp_y %= MAX_HEIGHT;
+                        disp_x %= DISPLAY_WIDTH;
+                        disp_y %= DISPLAY_HEIGHT;
                     }
                     else
                     {
-                        if (disp_x >= MAX_WIDTH || disp_y >= MAX_HEIGHT)
+                        if (disp_x >= DISPLAY_WIDTH || disp_y >= DISPLAY_HEIGHT)
                         {
                             break;
                         }
@@ -825,20 +834,18 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
 
         prev_byte_collide = collide_row;
     }
-
-    //chip8->display_updated = true;
 }
 
 void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels)
 {
     int x_start = 0;
-    int x_end = MAX_WIDTH;
+    int x_end = DISPLAY_WIDTH;
     int y_start = 0;
-    int y_end = MAX_HEIGHT;
+    int y_end = DISPLAY_HEIGHT;
 
     if (xdir == 1)
     {
-        x_end = MAX_WIDTH - num_pixels;
+        x_end = DISPLAY_WIDTH - num_pixels;
     }
     else if (xdir == -1)
     {
@@ -846,7 +853,7 @@ void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels)
     }
     if (ydir == 1)
     {
-        y_end = MAX_HEIGHT - num_pixels;
+        y_end = DISPLAY_HEIGHT - num_pixels;
     }
     else if (ydir == -1)
     {
@@ -854,10 +861,10 @@ void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels)
     }
 
     // Create updated display buffer.
-    uint8_t disp_buf[MAX_HEIGHT][MAX_WIDTH];
-    for (int i = 0; i < MAX_HEIGHT; i++)
+    uint8_t disp_buf[DISPLAY_HEIGHT][DISPLAY_WIDTH];
+    for (int i = 0; i < DISPLAY_HEIGHT; i++)
     {
-        for (int j = 0; j < MAX_WIDTH; j++)
+        for (int j = 0; j < DISPLAY_WIDTH; j++)
         {
             disp_buf[i][j] = false;
         }
@@ -872,9 +879,9 @@ void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels)
     }
 
     // Copy updated display buffer into actual display.
-    for (int y = 0; y < MAX_HEIGHT; y++)
+    for (int y = 0; y < DISPLAY_HEIGHT; y++)
     {
-        for (int x = 0; x < MAX_WIDTH; x++)
+        for (int x = 0; x < DISPLAY_WIDTH; x++)
         {
             chip8->display[y][x] = disp_buf[y][x];
         }
@@ -885,7 +892,7 @@ void chip8_wait_key(CHIP8 *chip8, uint8_t x)
 {
     bool key_released = false;
 
-    for (int i = 0; i < MAX_KEYS; i++)
+    for (int i = 0; i < NUM_KEYS; i++)
     {
         if (chip8->keypad[i] == KEY_RELEASED)
         {
@@ -914,6 +921,7 @@ bool chip8_dump(CHIP8 *chip8)
         return true;
     }
 
+    fprintf(stderr, "Unable to write to dump file %s\n", chip8->DMP_path);
     return false;
 }
 
@@ -930,12 +938,13 @@ bool chip8_load_dump(CHIP8 *chip8, char *filename)
         return true;
     }
 
+    fprintf(stderr, "Unable to open dump file %s\n", filename);
     return false;
 }
 
 bool chip8_handle_user_flags(CHIP8 *chip8, int num_flags, bool save)
 {
-    if (num_flags <= MAX_USER_FLAGS)
+    if (num_flags <= NUM_USER_FLAGS)
     {
         char mode[] = "xb";
         mode[0] = save ? 'w' : 'r';

@@ -28,10 +28,10 @@
 CHIP8 chip8;
 char ROM_path[MAX_FILENAME];
 uint16_t pc_start_addr = PC_START_ADDR_DEFAULT;
-int cpu_freq = CPU_FREQ_DEFAULT;
-int timer_freq = TIMER_FREQ_DEFAULT;
-int refresh_freq = REFRESH_FREQ_DEFAULT;
-bool quirks[] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+unsigned cpu_freq = CPU_FREQ_DEFAULT;
+unsigned timer_freq = TIMER_FREQ_DEFAULT;
+unsigned refresh_freq = REFRESH_FREQ_DEFAULT;
+bool quirks[NUM_QUIRKS] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
 bool load_dmp = false;
 
 // Color/Display
@@ -200,24 +200,13 @@ bool handle_args(int argc, char **argv)
 {
     if (argc < 2)
     {
-        printf("Usage: ./jace [options] <path-to-ROM>\n");
+        fprintf(stderr, "Usage: ./jace [options] <path-to-ROM>\n");
         return false;
     }
     else if (argc > 2)
     {
         sprintf(ROM_path, "%s", argv[argc - 1]);
 
-        /* Quirks:
-           -0: RAM Initialization
-           -1: 8xy6/8xyE
-           -2: Fx55/Fx65
-           -3: Bnnn
-           -4: Big Sprite LORES
-           -5: 00FE/00FF
-           -6: Sprite Wrapping
-           -7: Collision Enumeration
-           -8: Collision with Bottom of Screen   
-        */
         int opt;
         while ((opt = getopt(argc, argv, "012345678xdms:p:c:t:r:f:b:")) != -1)
         {
@@ -301,13 +290,11 @@ bool init_emulator()
         /* Load ROM into memory. */
         if (!chip8_load_rom(&chip8, ROM_path))
         {
-            fprintf(stderr, "Unable to open ROM: %s\n", ROM_path);
             return false;
         }
     }
     else if (!chip8_load_dump(&chip8, ROM_path))
     {
-        fprintf(stderr, "Unable to open dump: %s\n", ROM_path);
         return false;
     }
 
@@ -323,14 +310,14 @@ bool init_emulator()
 // Create the SDL window.
 SDL_Window *create_window()
 {
-    int window_width = MAX_WIDTH * display_scale;
-    int window_height = MAX_HEIGHT * display_scale;
+    int window_width = DISPLAY_WIDTH * display_scale;
+    int window_height = DISPLAY_HEIGHT * display_scale;
 
     if (debug_mode)
     {
         // Change window size depending on if debug_mode is active or not.
         window_width += DBG_PANEL_WIDTH;
-        if ((display_scale * MAX_HEIGHT) < DBG_PANEL_HEIGHT)
+        if ((display_scale * DISPLAY_HEIGHT) < DBG_PANEL_HEIGHT)
         {
             window_height = DBG_PANEL_HEIGHT;
         }
@@ -373,9 +360,9 @@ void set_pixel(int x, int y, long color)
 // Makes the physical screen match the emulator display.
 void draw_display()
 {
-    for (int y = 0; y < MAX_HEIGHT; y++)
+    for (int y = 0; y < DISPLAY_HEIGHT; y++)
     {
-        for (int x = 0; x < MAX_WIDTH; x++)
+        for (int x = 0; x < DISPLAY_WIDTH; x++)
         {
             for (int i = 0; i < display_scale; i++)
             {
@@ -412,7 +399,7 @@ void draw_debug()
     SDL_FillRect(dbg_panel, NULL, SDL_MapRGB(dbg_panel->format, 200, 200, 200));
 
     SDL_Rect dest_rect;
-    dest_rect.x = (MAX_WIDTH * display_scale) + 1;
+    dest_rect.x = (DISPLAY_WIDTH * display_scale) + 1;
     dest_rect.y = 0;
     dest_rect.w = DBG_PANEL_WIDTH - 1;
     dest_rect.h = DBG_PANEL_HEIGHT;
@@ -630,10 +617,6 @@ bool handle_input(SDL_Event *e)
                 if (chip8_dump(&chip8))
                 {
                     printf("Took a dump in %s\n", chip8.DMP_path);
-                }
-                else
-                {
-                    fprintf(stderr, "Unable to take a dump in %s\n", chip8.DMP_path);
                 }
             }
             else if (keyc == SDLK_ESCAPE)
