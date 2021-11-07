@@ -131,6 +131,24 @@ void clean_exit(int status)
     exit(status);
 }
 
+// Gets the name of the loaded ROM
+void get_ROM_name(char *rom_name)
+{
+    // Find the string after the last occurrence of /
+    char tmp_path[MAX_FILENAME];
+    sprintf(tmp_path, "%s", ROM_path);
+
+    char *token = strtok(tmp_path, "/");
+    while (token != NULL)
+    {
+        sprintf(rom_name, "%s", token);
+        token = strtok(NULL, "/");
+    }
+
+    // Find the string before the first occurrence of . and that's the name!
+    strtok(rom_name, ".");
+}
+
 // SDL Audio Callback (Thanks Stack Overflow).
 void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
 {
@@ -207,7 +225,7 @@ bool handle_args(int argc, char **argv)
         fprintf(stderr, "Usage: ./jace [options] <path-to-ROM>\n");
         return false;
     }
-    else if (argc > 2)
+    else if (argc >= 2)
     {
         sprintf(ROM_path, "%s", argv[argc - 1]);
 
@@ -341,7 +359,13 @@ SDL_Window *create_window()
             fprintf(stderr, "Could not load font: %s\n", SDL_GetError());
         }
     }
-    SDL_Window *new_window = SDL_CreateWindow("JACE",
+
+    char rom_name[MAX_FILENAME];
+    char title[MAX_FILENAME + 10];
+    get_ROM_name(rom_name);
+    sprintf(title, "JACE - %s", rom_name);
+
+    SDL_Window *new_window = SDL_CreateWindow(title,
                                               SDL_WINDOWPOS_CENTERED,
                                               SDL_WINDOWPOS_CENTERED,
                                               window_width,
