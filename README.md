@@ -27,6 +27,7 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 ## TODO
 * Add XO-CHIP Support
 * Improve Windows Support (command-line arguments and sound issue)
+* Improve Build Procedures
 
 ## Requirements
 * SDL2
@@ -49,15 +50,15 @@ Unknown at this time. Currently the code uses the POSIX getopt() function to han
 
 ## Run
 ### Linux
-`./jace [options] <path-to-rom>`  
+`./jace [options] <path-to-rom/dump-file>`  
 `./test` (for unit tests)
 
 ### Windows
 If built with MinGW, command line options are available:  
-`jace.exe [options] <path-to-rom>`
+`jace.exe [options] <path-to-rom/dump-file>`
 
 Otherwise:  
-`jace.exe <path-to-rom>`
+`jace.exe <path-to-rom/dump-file>`
 
 `test.exe` (for unit tests)
 
