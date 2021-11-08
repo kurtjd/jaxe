@@ -17,7 +17,7 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 * Accurate delay and sound timers
 * Graphical display
 * Sound
-* Integrated graphical debug mode allowing to step forward and back through program execution
+* Integrated graphical debugger allowing user to step forward and back through program execution
 * Adjustable CPU/timer/refresh frequencies, display scale, colors, and program start address
 * Toggle S-CHIP "quirks" for compatibility with a wide variety of ROMs
 * Save and load memory dumps
@@ -49,10 +49,11 @@ With time it seems the S-CHIP became more popular and many programs were written
 It should also be noted that JACE stores its fonts in memory starting at address **0x0000** followed immediately by large fonts and finally  immediately by the stack. Therefore the stack pointer initially points to address **0x00F0**.
 
 ## TODO
-* Add XO-CHIP Support
-* Improve Sound
-* Improve Windows Support (command-line arguments and sound issue)
-* Improve Build Procedures
+* Add XO-CHIP support
+* Improve sound
+* Improve Windows support (command-line arguments and sound issue)
+* Improve build procedures
+* Add more color themes
 
 ## Requirements
 * SDL2
