@@ -25,28 +25,41 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 * Emulator decoupled from any particular graphics/media library allowing for easy embedding into other C programs
 
 ## TODO
-* Add more test cases
-* Test Windows support
-* Continue to refactor and optimize code
-* Continue to tweak README and add documentation
+* Add XO-CHIP Support
+* Improve Windows Support (command-line arguments and sound issue)
 
 ## Requirements
 * SDL2
 * SDL2_ttf (for debug mode)
+* CMake (for automatic build)
 
-## Build JACE
+## Build Procedures
+### Linux/Windows (MinGW)
 `mkdir build && cd build`  
 `cmake -B. --config Release --target jace ..`  
 `make jace`
 
-## Build Test (Debug Must Be Set)
+### Windows (non-MinGW)
+Unknown at this time. Currently the code uses the POSIX getopt() function to handle command-line arguments. To build without MinGW, remove `#define ALLOW_GETOPTS` from the top of *main.c* which will unfortunately remove command-line arguments until I handle them in a portable way.
+
+### Unit Tests (Debug Must Be Set)
 `mkdir build && cd build`  
 `cmake -B. --config Debug --target test ..`  
 `make test`
 
 ## Run
+### Linux
 `./jace [options] <path-to-rom>`  
 `./test` (for unit tests)
+
+### Windows
+If built with MinGW, command line options are available:  
+`jace.exe [options] <path-to-rom>`
+
+Otherwise:  
+`jace.exe <path-to-rom>`
+
+`test.exe` (for unit tests)
 
 ## Options
 `-x` Enable compatibility mode (disables all S-CHIP quirks but keeps HI-RES and new instructions)  
@@ -74,25 +87,25 @@ Also includes flags for disabling specific S-CHIP "quirks" (which are all enable
 
 
 ## Controls
-**Keyboard (This maps to the key layouts below)**:  
+### Keyboard (This maps to the key layouts below)
 `1` `2` `3` `4`  
 `Q` `W` `E` `R`  
 `A` `S` `D` `F`  
 `Z` `X` `C` `V`
 
-**COSMAC VIP Keypad**:  
+### COSMAC VIP Keypad
 `1` `2` `3` `C`  
 `4` `5` `6` `D`  
 `7` `8` `9` `E`  
 `A` `0` `B` `F`
 
-**HP48 Keypad**:  
+### HP48 Keypad
 `7` `8` `9` `/`  
 `4` `5` `6` `*`  
 `1` `2` `3` `-`  
 `0` `.` `_` `+`
 
-**Other Controls**:  
+### Other Controls
 |Key|Action|
 |---|------|
 |`SPACE`|Pause/Unpause|
