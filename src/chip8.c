@@ -34,8 +34,9 @@ void chip8_reset(CHIP8 *chip8)
 
 // Have cycle times default to current time.
 #ifdef WIN32
-    chip8->cur_cycle_start = GetTickCount();
-    chip8->prev_cycle_start = GetTickCount();
+    QueryPerformanceFrequency(&chip8->real_cpu_freq);
+    QueryPerformanceCounter(&chip8->cur_cycle_start);
+    QueryPerformanceCounter(&chip8->prev_cycle_start);
 #else
     gettimeofday(&chip8->cur_cycle_start, NULL);
     gettimeofday(&chip8->prev_cycle_start, NULL);
@@ -682,8 +683,19 @@ void chip8_update_elapsed_time(CHIP8 *chip8)
 {
 #ifdef WIN32
     chip8->prev_cycle_start = chip8->cur_cycle_start;
-    chip8->cur_cycle_start = GetTickCount();
-    chip8->total_cycle_tim = chip8->cur_cycle_start - chip8->prev_cycle_start;
+
+    QueryPerformanceCounter(&chip8->cur_cycle_start);
+
+    chip8->win_cycle_time.QuadPart = chip8->cur_cycle_start.QuadPart - chip8->prev_cycle_start.QuadPart;
+    chip8->win_cycle_time.QuadPart *= 1000000;
+    chip8->win_cycle_time.QuadPart /= chip8->real_cpu_freq.QuadPart;
+
+    chip8->total_cycle_time = chip8->win_cycle_time.QuadPart;
+
+    if (chip8->total_cycle_time == 0)
+    {
+        chip8->total_cycle_time = 1;
+    }
 #else
     chip8->prev_cycle_start.tv_sec = chip8->cur_cycle_start.tv_sec;
     chip8->prev_cycle_start.tv_usec = chip8->cur_cycle_start.tv_usec;

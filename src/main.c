@@ -1,4 +1,5 @@
-#ifndef WIN32
+#define ALLOW_GETOPTS
+#ifdef ALLOW_GETOPTS
 #include <unistd.h>
 #endif
 #include <stdio.h>
@@ -137,15 +138,21 @@ void clean_exit(int status)
 // Gets the name of the loaded ROM
 void get_ROM_name(char *rom_name)
 {
-    // Find the string after the last occurrence of /
+#ifdef WIN32
+    char delim[] = "\\";
+#else
+    char delim[] = "/";
+#endif
+
+    // Find the string after the last occurrence of / or \ (depending on OS)
     char tmp_path[MAX_FILEPATH_LEN];
     sprintf(tmp_path, "%s", ROM_path);
 
-    char *token = strtok(tmp_path, "/");
+    char *token = strtok(tmp_path, delim);
     while (token != NULL)
     {
         sprintf(rom_name, "%s", token);
-        token = strtok(NULL, "/");
+        token = strtok(NULL, delim);
     }
 
     // Find the string before the first occurrence of . and that's the name!
@@ -239,7 +246,7 @@ bool handle_args(int argc, char **argv)
 
         sprintf(ROM_path, "%s", argv[argc - 1]);
 
-#ifndef WIN32
+#ifdef ALLOW_GETOPTS
         int opt;
         while ((opt = getopt(argc, argv, "012345678xdms:p:c:t:r:f:b:")) != -1)
         {
@@ -321,8 +328,8 @@ bool handle_args(int argc, char **argv)
                 break;
             }
         }
-    }
 #endif
+    }
 
     return true;
 }

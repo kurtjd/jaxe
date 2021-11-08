@@ -2,14 +2,14 @@
 #define CHIP8_H
 
 #ifdef WIN32
-#include "windows.h"
-#define ONE_SEC 1000
+#include <windows.h>
 #else
 #include <sys/time.h>
-#define ONE_SEC 1000000
 #endif
 #include <stdbool.h>
 #include <stdint.h>
+
+#define ONE_SEC 1000000
 
 #define DISPLAY_WIDTH 128
 #define DISPLAY_HEIGHT 64
@@ -66,18 +66,20 @@ typedef struct CHIP8
     unsigned long cpu_freq;
     unsigned long timer_freq;
     unsigned long refresh_freq;
-    double timer_max_cum;
-    double cpu_max_cum;
-    double cpu_cum;
-    double sound_cum;
-    double delay_cum;
-    double refresh_max_cum;
-    double refresh_cum;
-    double total_cycle_time;
+    long timer_max_cum;
+    long cpu_max_cum;
+    long cpu_cum;
+    long sound_cum;
+    long delay_cum;
+    long refresh_max_cum;
+    long refresh_cum;
+    long total_cycle_time;
 
 #ifdef WIN32
-    DWORD cur_cycle_start;
-    DWORD prev_cycle_start;
+    LARGE_INTEGER win_cycle_time;
+    LARGE_INTEGER cur_cycle_start;
+    LARGE_INTEGER prev_cycle_start;
+    LARGE_INTEGER real_cpu_freq;
 #else
     struct timeval cur_cycle_start;
     struct timeval prev_cycle_start;
