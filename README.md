@@ -17,15 +17,40 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 * Accurate delay and sound timers
 * Graphical display
 * Sound
-* Graphical debug mode allowing to step forward and back through program execution
+* Integrated graphical debug mode allowing to step forward and back through program execution
 * Adjustable CPU/timer/refresh frequencies, display scale, colors, and program start address
 * Toggle S-CHIP "quirks" for compatibility with a wide variety of ROMs
 * Save and load memory dumps
 * Unit tests for those writing a C emulator
 * Emulator decoupled from any particular graphics/media library allowing for easy embedding into other C programs
 
+## Technical Info
+The original CHIP-8 virtual machine was designed with the following specs:
+* 35 opcodes
+* 4kb RAM
+* 16 8-bit general purpose registers
+* 16-bit program counter, stack pointer, and index registers
+* 8-bit delay and sound timer registers
+* 64x32 monochrome display
+* 16-key keypad (0-F)
+* Program memory starting at address 0x200
+
+Due to the way CHIP-8 was designed, the "flicker" that happens when sprites are drawn is normal. Games developed for it also rarely made any attempt to cap their frame rate due to the slow hardware of the time hence the need to artificially slow the CPU down on modern emulators.
+
+In the early 90s, Andreas Gustafsson created a port for the HP48 calculator which was eventually superseded by S-CHIP 1.0/1.1 created by Erik Bryntse. The S-CHIP added several features as well as accidentally (or intentionally?) modifying the behavior of several original opcodes:
+
+* 9 new opcodes
+* 128x64 HI-RES display
+* Persistent storage
+* Modified Bnnn, Fx55, Fx65, Dxyn, 8xy6, and 8xyE instructions
+
+With time it seems the S-CHIP became more popular and many programs were written to work with its various quirks. Thus, JACE defaults to original S-CHIP design however many of its quirks can be toggled for improved compatibility using the flags in the Options section below.
+
+It should also be noted that JACE stores its fonts in memory starting at address **0x0000** followed immediately by large fonts and finally  immediately by the stack. Therefore the stack pointer initially points to address **0x00F0**.
+
 ## TODO
 * Add XO-CHIP Support
+* Improve Sound
 * Improve Windows Support (command-line arguments and sound issue)
 * Improve Build Procedures
 
@@ -138,6 +163,8 @@ JACE is licensed under the MIT license so you are free to do almost whatever you
 ## References
 * [Cowgod's Chip-8 Technical Reference v1.0](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)
 * [Matthew Mikolay's Instruction Set](https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Instruction-Set)
+* [HP48-Superchip Investigations](https://github.com/Chromatophore/HP48-Superchip)
+* [CHIP-8 extensions and compatibility](https://chip-8.github.io/extensions/)
 * [John Earnest's Octo](https://github.com/JohnEarnest/Octo)
 
 ## Acknowledgements
