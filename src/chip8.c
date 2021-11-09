@@ -297,11 +297,19 @@ void chip8_execute(CHIP8 *chip8)
             break;
 
         default:
+            switch (y)
+            {
             /* SCRD (00Cn) (S-CHIP Only):
                Scroll the display down by n pixels. */
-            if (y == 0xC)
-            {
+            case 0xC:
                 chip8_scroll(chip8, 0, 1, n);
+                break;
+
+            /* SCRU (00Dn) (S-CHIP Only):
+               Scroll the display up by n pixels. */
+            case 0xD:
+                chip8_scroll(chip8, 0, -1, n);
+                break;
             }
 
             break;

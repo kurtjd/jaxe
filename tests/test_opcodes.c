@@ -36,6 +36,26 @@ void test_00Cn()
     chip8_reset(&chip8);
 }
 
+void test_00Dn()
+{
+    chip8_load_instr(&chip8, 0x00D5);
+
+    chip8.display[6][9] = true;
+    chip8.display[0][9] = true;
+
+    assert(chip8.display[6][9]);
+    assert(!chip8.display[1][9]);
+    assert(chip8.display[0][9]);
+
+    chip8_execute(&chip8);
+
+    assert(!chip8.display[6][9]);
+    assert(chip8.display[1][9]);
+    assert(!chip8.display[0][9]);
+
+    chip8_reset(&chip8);
+}
+
 void test_00E0()
 {
     chip8_load_instr(&chip8, 0x00E0);
@@ -872,6 +892,7 @@ int main()
             * Reset the machine */
     test_0000();
     test_00Cn();
+    test_00Dn();
     test_00FE();
     test_00E0();
     test_00EE();
