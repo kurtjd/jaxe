@@ -19,7 +19,7 @@
 #define NUM_USER_FLAGS 16
 #define NUM_QUIRKS 9
 
-#define MAX_RAM 4096
+#define MAX_RAM 65536
 #define MAX_FILEPATH_LEN 256
 
 #define FONT_START_ADDR 0x0
