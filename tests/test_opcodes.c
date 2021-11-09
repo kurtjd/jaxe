@@ -217,6 +217,75 @@ void test_5xy0()
     chip8_reset(&chip8);
 }
 
+void test_5xy2()
+{
+    chip8_load_instr(&chip8, 0x5692);
+    chip8.I = 0x300;
+
+    chip8.V[6] = 1;
+    chip8.V[7] = 2;
+    chip8.V[8] = 3;
+    chip8.V[9] = 4;
+    chip8_execute(&chip8);
+
+    for (int i = 0; i < 4; i++)
+    {
+        assert(chip8.RAM[chip8.I + i] == (i + 1));
+    }
+    chip8_reset(&chip8);
+
+    chip8_load_instr(&chip8, 0x5962);
+    chip8.I = 0x300;
+
+    chip8.V[6] = 1;
+    chip8.V[7] = 2;
+    chip8.V[8] = 3;
+    chip8.V[9] = 4;
+    chip8_execute(&chip8);
+
+    for (int i = 0; i < 4; i++)
+    {
+        assert(chip8.RAM[chip8.I + i] == (4 - i));
+    }
+
+    chip8_reset(&chip8);
+}
+
+void test_5xy3()
+{
+    chip8_load_instr(&chip8, 0x5693);
+    chip8.I = 0x300;
+
+    chip8.RAM[chip8.I + 0] = 1;
+    chip8.RAM[chip8.I + 1] = 2;
+    chip8.RAM[chip8.I + 2] = 3;
+    chip8.RAM[chip8.I + 3] = 4;
+    chip8_execute(&chip8);
+
+    for (int i = 0; i < 4; i++)
+    {
+        assert(chip8.V[6 + i] == (i + 1));
+    }
+    chip8_reset_RAM(&chip8);
+    chip8_reset(&chip8);
+
+    chip8_load_instr(&chip8, 0x5963);
+    chip8.I = 0x300;
+
+    chip8.RAM[chip8.I + 0] = 1;
+    chip8.RAM[chip8.I + 1] = 2;
+    chip8.RAM[chip8.I + 2] = 3;
+    chip8.RAM[chip8.I + 3] = 4;
+    chip8_execute(&chip8);
+
+    for (int i = 0; i < 4; i++)
+    {
+        assert(chip8.V[6 + i] == (4 - i));
+    }
+
+    chip8_reset(&chip8);
+}
+
 void test_6xkk()
 {
     chip8_load_instr(&chip8, 0x6069);
@@ -816,6 +885,8 @@ int main()
     test_3xkk();
     test_4xkk();
     test_5xy0();
+    test_5xy2();
+    test_5xy3();
     test_6xkk();
     test_7xkk();
     test_8xy0();

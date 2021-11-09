@@ -344,12 +344,58 @@ void chip8_execute(CHIP8 *chip8)
 
         break;
 
-    /* SE Vx, Vy (5xy0)
-       Skip next instruction if Vx = Vy. */
     case 0x05:
-        if (chip8->V[x] == chip8->V[y])
+        switch (n)
         {
-            chip8->PC += 2;
+        /* SE Vx, Vy (5xy0)
+           Skip next instruction if Vx = Vy. */
+        case 0x0:
+            if (chip8->V[x] == chip8->V[y])
+            {
+                chip8->PC += 2;
+            }
+
+            break;
+
+        /* LD [I], Vx - Vy (5xy2) (XO-CHIP Only)
+           Store registers Vx through Vy in memory starting at location I. */
+        case 0x2:
+            if (y >= x)
+            {
+                for (int r = 0; r <= (y - x); r++)
+                {
+                    chip8->RAM[chip8->I + r] = chip8->V[x + r];
+                }
+            }
+            else
+            {
+                for (int r = 0; r <= (x - y); r++)
+                {
+                    chip8->RAM[chip8->I + r] = chip8->V[x - r];
+                }
+            }
+
+            break;
+
+        /* LD Vx - Vy, [I] (5xy3) (XO-CHIP Only)
+           Read registers Vx through Vy from memory starting at location I. */
+        case 0x3:
+            if (y >= x)
+            {
+                for (int r = 0; r <= (y - x); r++)
+                {
+                    chip8->V[x + r] = chip8->RAM[chip8->I + r];
+                }
+            }
+            else
+            {
+                for (int r = 0; r <= (x - y); r++)
+                {
+                    chip8->V[x - r] = chip8->RAM[chip8->I + r];
+                }
+            }
+
+            break;
         }
 
         break;
