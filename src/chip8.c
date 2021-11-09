@@ -337,7 +337,7 @@ void chip8_execute(CHIP8 *chip8)
     case 0x03:
         if (chip8->V[x] == kk)
         {
-            chip8->PC += 2;
+            chip8_skip_instr(chip8);
         }
 
         break;
@@ -347,7 +347,7 @@ void chip8_execute(CHIP8 *chip8)
     case 0x04:
         if (chip8->V[x] != kk)
         {
-            chip8->PC += 2;
+            chip8_skip_instr(chip8);
         }
 
         break;
@@ -360,7 +360,7 @@ void chip8_execute(CHIP8 *chip8)
         case 0x0:
             if (chip8->V[x] == chip8->V[y])
             {
-                chip8->PC += 2;
+                chip8_skip_instr(chip8);
             }
 
             break;
@@ -511,7 +511,7 @@ void chip8_execute(CHIP8 *chip8)
     case 0x09:
         if (chip8->V[x] != chip8->V[y])
         {
-            chip8->PC += 2;
+            chip8_skip_instr(chip8);
         }
 
         break;
@@ -554,7 +554,7 @@ void chip8_execute(CHIP8 *chip8)
         case 0x9E:
             if (chip8->keypad[chip8->V[x]] == KEY_DOWN)
             {
-                chip8->PC += 2;
+                chip8_skip_instr(chip8);
             }
 
             break;
@@ -564,7 +564,7 @@ void chip8_execute(CHIP8 *chip8)
         case 0xA1:
             if (chip8->keypad[chip8->V[x]] == KEY_UP)
             {
-                chip8->PC += 2;
+                chip8_skip_instr(chip8);
             }
 
             break;
@@ -575,6 +575,13 @@ void chip8_execute(CHIP8 *chip8)
     case 0x0F:
         switch (b2)
         {
+        /* LD I, 0xNNNN (XO-CHIP Only)
+           Set I = 16-bit address (stored in next two bytes) */
+        case 0x00:
+            chip8->I = ((chip8->RAM[chip8->PC]) << 8) | (chip8->RAM[chip8->PC + 1]);
+            chip8->PC += 2;
+            break;
+
         /* LD Vx, DT (Fx07)
            Set Vx = delay timer value. */
         case 0x07:
@@ -1049,4 +1056,16 @@ bool chip8_handle_user_flags(CHIP8 *chip8, int num_flags, bool save)
     }
 
     return false;
+}
+
+void chip8_skip_instr(CHIP8 *chip8)
+{
+    if (chip8->RAM[chip8->PC] == 0xF0 && chip8->RAM[chip8->PC + 1] == 0x00)
+    {
+        chip8->PC += 4;
+    }
+    else
+    {
+        chip8->PC += 2;
+    }
 }

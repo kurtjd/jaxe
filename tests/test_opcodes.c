@@ -687,6 +687,19 @@ void test_ExA1()
     chip8_reset(&chip8);
 }
 
+void test_F000()
+{
+    chip8_load_instr(&chip8, 0xF000);
+
+    chip8.RAM[chip8.pc_start_addr + 2] = 0x42;
+    chip8.RAM[chip8.pc_start_addr + 3] = 0x69;
+    chip8_execute(&chip8);
+    assert(chip8.I == 0x4269);
+    assert(chip8.PC == chip8.pc_start_addr + 4);
+
+    chip8_reset(&chip8);
+}
+
 void test_Fx07()
 {
     chip8_load_instr(&chip8, 0xF007);
@@ -926,6 +939,7 @@ int main()
     test_Dxyn();
     test_Ex9E();
     test_ExA1();
+    test_F000();
     test_Fx07();
     test_Fx0A();
     test_Fx15();

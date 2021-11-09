@@ -197,4 +197,7 @@ bool chip8_load_dump(CHIP8 *chip8, char *filename);
 // Saves/loads user flags to/from disk.
 bool chip8_handle_user_flags(CHIP8 *chip8, int num_flags, bool save);
 
+// Skips the next instrtuction.
+void chip8_skip_instr(CHIP8 *chip8);
+
 #endif
