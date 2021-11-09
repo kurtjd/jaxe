@@ -16,7 +16,7 @@
 
 #define NUM_KEYS 16
 #define NUM_REGISTERS 16
-#define NUM_USER_FLAGS 8
+#define NUM_USER_FLAGS 16
 #define NUM_QUIRKS 9
 
 #define MAX_RAM 4096
