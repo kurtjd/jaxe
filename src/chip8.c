@@ -880,7 +880,15 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n, CHIP8BP bitplane)
         rows = n;
     }
 
+    // Allow out-of-bound sprite to wrap-around.
+    if (!chip8->quirks[6])
+    {
+        y %= DISPLAY_HEIGHT;
+        x %= DISPLAY_WIDTH;
+    }
+
     bool prev_byte_collide = false;
+
     for (int i = 0; i < n; i++)
     {
         bool collide_row = false;
@@ -903,19 +911,9 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n, CHIP8BP bitplane)
                 {
                     int disp_x = (x * scale) + (x_start * scale) + k;
                     int disp_y = (y * scale) + (y_start * scale) + h;
-
-                    // Allow out-of-bound sprite to wrap-around in legacy mode.
-                    if (!chip8->quirks[6])
+                    if (disp_x >= DISPLAY_WIDTH || disp_y >= DISPLAY_HEIGHT)
                     {
-                        disp_x %= DISPLAY_WIDTH;
-                        disp_y %= DISPLAY_HEIGHT;
-                    }
-                    else
-                    {
-                        if (disp_x >= DISPLAY_WIDTH || disp_y >= DISPLAY_HEIGHT)
-                        {
-                            break;
-                        }
+                        break;
                     }
 
                     bool pixel_on = false;
