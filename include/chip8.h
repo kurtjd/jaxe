@@ -19,18 +19,24 @@
 #define NUM_USER_FLAGS 16
 #define NUM_QUIRKS 9
 #define NUM_BITPLANES 3
+#define NUM_FONT_BYTES 80
+#define NUM_BIG_FONT_BYTES 160
 
 #define MAX_RAM 65536
 #define MAX_FILEPATH_LEN 256
+#define STACK_SIZE 16
+#define AUDIO_BUF_SIZE 16
 
 #define FONT_START_ADDR 0x0
-#define BIG_FONT_START_ADDR (FONT_START_ADDR + 80)
-#define SP_START_ADDR (BIG_FONT_START_ADDR + 160)
+#define BIG_FONT_START_ADDR (FONT_START_ADDR + NUM_FONT_BYTES)
+#define SP_START_ADDR (BIG_FONT_START_ADDR + NUM_BIG_FONT_BYTES)
+#define AUDIO_BUF_ADDR (SP_START_ADDR + STACK_SIZE)
 
 #define PC_START_ADDR_DEFAULT 0x200
 #define CPU_FREQ_DEFAULT 1000
 #define REFRESH_FREQ_DEFAULT 60
 #define TIMER_FREQ_DEFAULT 60
+#define PITCH_DEFAULT 64
 
 // The states each key of the keypad can be in.
 typedef enum
@@ -62,6 +68,9 @@ typedef struct CHIP8
 
     // Delay timer and sound timer 8-bit registers.
     uint8_t DT, ST;
+
+    // 8-bit register which controls audio pitch (XO-CHIP Only).
+    uint8_t pitch;
 
     // A monochrome display. A pixel can be either only on or off, no color.
     bool display[DISPLAY_HEIGHT][DISPLAY_WIDTH];
@@ -215,5 +224,8 @@ bool chip8_handle_user_flags(CHIP8 *chip8, int num_flags, bool save);
 
 // Skips the next instrtuction.
 void chip8_skip_instr(CHIP8 *chip8);
+
+// Returns a sound frequency based on the current pitch.
+double chip8_get_sound_freq(CHIP8 *chip8);
 
 #endif

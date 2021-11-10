@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 #include "chip8.h"
 
 void chip8_init(CHIP8 *chip8, unsigned long cpu_freq, unsigned long timer_freq,
@@ -32,6 +33,7 @@ void chip8_reset(CHIP8 *chip8)
     chip8->I = 0x00;
     chip8->DT = 0;
     chip8->ST = 0;
+    chip8->pitch = PITCH_DEFAULT;
 
 // Have cycle times default to current time.
 #ifdef WIN32
@@ -580,7 +582,8 @@ void chip8_execute(CHIP8 *chip8)
         /* LD I, nnnn (XO-CHIP Only)
            Set I = 16-bit address (stored in next two bytes). */
         case 0x00:
-            chip8->I = ((chip8->RAM[chip8->PC]) << 8) | (chip8->RAM[chip8->PC + 1]);
+            chip8->I = (chip8->RAM[chip8->PC]) << 8;
+            chip8->I |= (chip8->RAM[chip8->PC + 1]);
             chip8->PC += 2;
             break;
 
@@ -593,6 +596,16 @@ void chip8_execute(CHIP8 *chip8)
             }
 
             chip8->bitplane = x;
+            break;
+
+        /* AUDIO (XO-CHIP Only)
+           Store bytes starting at I in the audio pattern buffer. */
+        case 0x02:
+            for (int i = 0; i < AUDIO_BUF_SIZE; i++)
+            {
+                chip8->RAM[AUDIO_BUF_ADDR + i] = chip8->RAM[chip8->I + i];
+            }
+
             break;
 
         /* LD Vx, DT (Fx07)
@@ -637,7 +650,6 @@ void chip8_execute(CHIP8 *chip8)
            Set I = location of 10-byte sprite for digit Vx. */
         case 0x30:
             chip8->I = BIG_FONT_START_ADDR + (chip8->V[x] * 0x0A);
-
             break;
 
         /* LD B, Vx (Fx33)
@@ -647,6 +659,12 @@ void chip8_execute(CHIP8 *chip8)
             chip8->RAM[chip8->I] = (chip8->V[x] / 100) % 10;
             chip8->RAM[chip8->I + 1] = (chip8->V[x] / 10) % 10;
             chip8->RAM[chip8->I + 2] = chip8->V[x] % 10;
+            break;
+
+        /* PITCH Vx (Fx3A) (XO-CHIP Only)
+           Set audio pitch to Vx. */
+        case 0x3A:
+            chip8->pitch = chip8->V[x];
             break;
 
         /* LD [I], Vx (Fx55)
@@ -1147,4 +1165,10 @@ void chip8_skip_instr(CHIP8 *chip8)
     {
         chip8->PC += 2;
     }
+}
+
+double chip8_get_sound_freq(CHIP8 *chip8)
+{
+    // Formula to convert pitch to frequency.
+    return 4000 * pow(2, (chip8->pitch - 64) / 48);
 }

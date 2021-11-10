@@ -700,9 +700,10 @@ void test_F000()
     chip8_reset(&chip8);
 }
 
-void test_Fn01()
+void test_Fx01()
 {
     chip8_load_instr(&chip8, 0xF001);
+
     chip8_execute(&chip8);
     assert(chip8.bitplane == 0);
     chip8.PC = chip8.pc_start_addr;
@@ -725,6 +726,25 @@ void test_Fn01()
     chip8_load_instr(&chip8, 0xF401);
     chip8_execute(&chip8);
     assert(chip8.bitplane == 3);
+
+    chip8_reset(&chip8);
+}
+
+void test_F002()
+{
+    chip8_load_instr(&chip8, 0xF002);
+
+    chip8.I = 300;
+    for (int i = 0; i < AUDIO_BUF_SIZE; i++)
+    {
+        chip8.RAM[chip8.I + i] = i;
+    }
+
+    chip8_execute(&chip8);
+    for (int i = 0; i < AUDIO_BUF_SIZE; i++)
+    {
+        assert(chip8.RAM[AUDIO_BUF_ADDR + i] == i);
+    }
 
     chip8_reset(&chip8);
 }
@@ -842,6 +862,17 @@ void test_Fx33()
     assert(chip8.RAM[chip8.I] == 0);
     assert(chip8.RAM[chip8.I + 1] == 0);
     assert(chip8.RAM[chip8.I + 2] == 0);
+
+    chip8_reset(&chip8);
+}
+
+void test_Fx3A()
+{
+    chip8_load_instr(&chip8, 0xF03A);
+
+    chip8.V[0] = 247;
+    chip8_execute(&chip8);
+    assert(chip8.pitch == 247);
 
     chip8_reset(&chip8);
 }
@@ -969,7 +1000,8 @@ int main()
     test_Ex9E();
     test_ExA1();
     test_F000();
-    test_Fn01();
+    test_Fx01();
+    test_F002();
     test_Fx07();
     test_Fx0A();
     test_Fx15();
@@ -978,6 +1010,7 @@ int main()
     test_Fx29();
     test_Fx30();
     test_Fx33();
+    test_Fx3A();
     test_Fx55();
     test_Fx65();
     test_Fx75_Fx85();

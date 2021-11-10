@@ -24,3 +24,4 @@ add_executable("test"
 
 target_include_directories("test" PUBLIC include)
 target_compile_options("test" PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries("test" -lm)
