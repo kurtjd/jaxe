@@ -181,7 +181,7 @@ JACE is licensed under the MIT license so you are free to do almost whatever you
 * [Matthew Mikolay's Instruction Set](https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Instruction-Set)
 * [HP48-Superchip Investigations](https://github.com/Chromatophore/HP48-Superchip)
 * [CHIP-8 extensions and compatibility](https://chip-8.github.io/extensions/)
-* [John Earnest's Octo](https://github.com/JohnEarnest/Octo)
+* [XO-CHIP Specification](https://johnearnest.github.io/Octo/docs/XO-ChipSpecification.html)
 
 ## Acknowledgements
 * [Kongtext Font by codeman38](https://www.1001fonts.com/kongtext-font.html)
