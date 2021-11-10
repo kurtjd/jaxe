@@ -20,6 +20,7 @@ void chip8_init(CHIP8 *chip8, unsigned long cpu_freq, unsigned long timer_freq,
     chip8_set_refresh_freq(chip8, refresh_freq);
 
     chip8->pc_start_addr = pc_start_addr;
+    chip8->bitplane = BP1;
 
     chip8_reset(chip8);
 }
@@ -63,7 +64,7 @@ void chip8_reset(CHIP8 *chip8)
 
     chip8_reset_registers(chip8);
     chip8_reset_keypad(chip8);
-    chip8_reset_display(chip8);
+    chip8_reset_display(chip8, BPBOTH);
 }
 
 void chip8_soft_reset(CHIP8 *chip8)
@@ -243,7 +244,7 @@ void chip8_execute(CHIP8 *chip8)
         /* CLS (00E0)
            Clear the display. */
         case 0xE0:
-            chip8_reset_display(chip8);
+            chip8_reset_display(chip8, chip8->bitplane);
             break;
 
         /* RET (00EE):
@@ -257,13 +258,13 @@ void chip8_execute(CHIP8 *chip8)
         /* SCRR (00FB) (S-CHIP Only):
            Scroll the display right by 4 pixels. */
         case 0xFB:
-            chip8_scroll(chip8, 1, 0, 4);
+            chip8_scroll(chip8, 1, 0, 4, chip8->bitplane);
             break;
 
         /* SCRL (00FC) (S-CHIP Only):
            Scroll the display left by 4 pixels. */
         case 0xFC:
-            chip8_scroll(chip8, -1, 0, 4);
+            chip8_scroll(chip8, -1, 0, 4, chip8->bitplane);
             break;
 
         /* EXIT (00FD) (S-CHIP Only):
@@ -279,7 +280,7 @@ void chip8_execute(CHIP8 *chip8)
 
             if (!chip8->quirks[5])
             {
-                chip8_reset_display(chip8);
+                chip8_reset_display(chip8, chip8->bitplane);
             }
 
             break;
@@ -291,7 +292,7 @@ void chip8_execute(CHIP8 *chip8)
 
             if (!chip8->quirks[5])
             {
-                chip8_reset_display(chip8);
+                chip8_reset_display(chip8, chip8->bitplane);
             }
 
             break;
@@ -302,13 +303,13 @@ void chip8_execute(CHIP8 *chip8)
             /* SCRD (00Cn) (S-CHIP Only):
                Scroll the display down by n pixels. */
             case 0xC:
-                chip8_scroll(chip8, 0, 1, n);
+                chip8_scroll(chip8, 0, 1, n, chip8->bitplane);
                 break;
 
             /* SCRU (00Dn) (S-CHIP Only):
                Scroll the display up by n pixels. */
             case 0xD:
-                chip8_scroll(chip8, 0, -1, n);
+                chip8_scroll(chip8, 0, -1, n, chip8->bitplane);
                 break;
             }
 
@@ -543,7 +544,7 @@ void chip8_execute(CHIP8 *chip8)
        set VF = num rows collision. If n=0: Display 16x16 sprite starting at
        memory location I at (Vx, Vy), set VF = num rows collision. */
     case 0x0D:
-        chip8_draw(chip8, chip8->V[x], chip8->V[y], n);
+        chip8_draw(chip8, chip8->V[x], chip8->V[y], n, chip8->bitplane);
         break;
 
     case 0x0E:
@@ -575,11 +576,22 @@ void chip8_execute(CHIP8 *chip8)
     case 0x0F:
         switch (b2)
         {
-        /* LD I, 0xNNNN (XO-CHIP Only)
-           Set I = 16-bit address (stored in next two bytes) */
+        /* LD I, nnnn (XO-CHIP Only)
+           Set I = 16-bit address (stored in next two bytes). */
         case 0x00:
             chip8->I = ((chip8->RAM[chip8->PC]) << 8) | (chip8->RAM[chip8->PC + 1]);
             chip8->PC += 2;
+            break;
+
+        /* PLANE n (XO-CHIP Only)
+           Set the bitplane where 0 <= n <= 3. */
+        case 0x01:
+            if (x > NUM_BITPLANES)
+            {
+                x = NUM_BITPLANES;
+            }
+
+            chip8->bitplane = x;
             break;
 
         /* LD Vx, DT (Fx07)
@@ -791,13 +803,25 @@ void chip8_reset_released_keys(CHIP8 *chip8)
     }
 }
 
-void chip8_reset_display(CHIP8 *chip8)
+void chip8_reset_display(CHIP8 *chip8, CHIP8BP bitplane)
 {
+    if (bitplane == BPNONE)
+    {
+        return;
+    }
+
     for (int y = 0; y < DISPLAY_HEIGHT; y++)
     {
         for (int x = 0; x < DISPLAY_WIDTH; x++)
         {
-            chip8->display[y][x] = false;
+            if (bitplane == BP1 || bitplane == BPBOTH)
+            {
+                chip8->display[y][x] = false;
+            }
+            if (bitplane == BP2 || bitplane == BPBOTH)
+            {
+                chip8->display2[y][x] = false;
+            }
         }
     }
 }
@@ -824,9 +848,15 @@ void chip8_load_instr(CHIP8 *chip8, uint16_t instr)
     chip8->RAM[chip8->pc_start_addr + 1] = instr & 0x00FF;
 }
 
-void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
+void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n, CHIP8BP bitplane)
 {
+    if (bitplane == BPNONE)
+    {
+        return;
+    }
+
     chip8->V[0x0F] = 0;
+    int rows;
 
     /* n==0 only has signifigance in S-CHIP mode,
     otherwise nothing should be drawn. */
@@ -839,8 +869,12 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
 
     if (chip8->hires && chip8->quirks[8])
     {
-        int rows = (n == 32) ? 16 : n;
+        rows = (n == 32) ? 16 : n;
         chip8->V[0x0F] += ((y + rows) - (DISPLAY_HEIGHT - 1));
+    }
+    else
+    {
+        rows = n;
     }
 
     bool prev_byte_collide = false;
@@ -881,14 +915,40 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
                         }
                     }
 
-                    // Get the pixel the loop is on and the corresponding bit.
-                    bool pixel_on = chip8->display[disp_y][disp_x];
-                    bool bit = (chip8->RAM[chip8->I + i] >> (7 - j)) & 0x01;
+                    bool pixel_on = false;
+                    bool bit = false;
+                    bool collide = false;
 
-                    /* XOR the sprite onto display. 
-                    If a pixel is erased, set the VF register to 1. */
-                    chip8->display[disp_y][disp_x] = (pixel_on ^ bit);
-                    if (pixel_on && bit)
+                    /* Get the pixel the loop is on and the corresponding bit
+                    and XOR them onto display. If a pixel is erased, set the VF
+                    register to 1. */
+                    if (bitplane == BP1 || bitplane == BPBOTH)
+                    {
+                        pixel_on = chip8->display[disp_y][disp_x];
+                        bit = (chip8->RAM[chip8->I + i] >> (7 - j)) & 0x01;
+                        collide = pixel_on && bit;
+                        chip8->display[disp_y][disp_x] = (pixel_on ^ bit);
+                    }
+                    if (bitplane == BP2)
+                    {
+                        pixel_on = chip8->display2[disp_y][disp_x];
+                        bit = (chip8->RAM[chip8->I + i] >> (7 - j)) & 0x01;
+                        collide = pixel_on && bit;
+                        chip8->display2[disp_y][disp_x] = (pixel_on ^ bit);
+                    }
+                    if (bitplane == BPBOTH)
+                    {
+                        pixel_on = chip8->display2[disp_y][disp_x];
+                        bit = (chip8->RAM[chip8->I + rows + i] >> (7 - j)) & 0x01;
+                        chip8->display2[disp_y][disp_x] = (pixel_on ^ bit);
+
+                        if (!collide)
+                        {
+                            collide = pixel_on && bit;
+                        }
+                    }
+
+                    if (collide)
                     {
                         if (chip8->hires && chip8->quirks[7])
                         {
@@ -915,8 +975,13 @@ void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n)
     }
 }
 
-void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels)
+void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels, CHIP8BP bitplane)
 {
+    if (bitplane == BPNONE)
+    {
+        return;
+    }
+
     int x_start = 0;
     int x_end = DISPLAY_WIDTH;
     int y_start = 0;
@@ -939,13 +1004,15 @@ void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels)
         y_start = num_pixels;
     }
 
-    // Create updated display buffer.
+    // Create updated display buffers.
     uint8_t disp_buf[DISPLAY_HEIGHT][DISPLAY_WIDTH];
+    uint8_t disp_buf2[DISPLAY_HEIGHT][DISPLAY_WIDTH];
     for (int i = 0; i < DISPLAY_HEIGHT; i++)
     {
         for (int j = 0; j < DISPLAY_WIDTH; j++)
         {
             disp_buf[i][j] = false;
+            disp_buf2[i][j] = false;
         }
     }
 
@@ -955,7 +1022,9 @@ void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels)
         {
             int buf_y = y + (ydir * num_pixels);
             int buf_x = x + (xdir * num_pixels);
+
             disp_buf[buf_y][buf_x] = chip8->display[y][x];
+            disp_buf2[buf_y][buf_x] = chip8->display2[y][x];
         }
     }
 
@@ -964,7 +1033,14 @@ void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels)
     {
         for (int x = 0; x < DISPLAY_WIDTH; x++)
         {
-            chip8->display[y][x] = disp_buf[y][x];
+            if (bitplane == BP1 || bitplane == BPBOTH)
+            {
+                chip8->display[y][x] = disp_buf[y][x];
+            }
+            if (bitplane == BP2 || bitplane == BPBOTH)
+            {
+                chip8->display2[y][x] = disp_buf2[y][x];
+            }
         }
     }
 }
@@ -1060,6 +1136,8 @@ bool chip8_handle_user_flags(CHIP8 *chip8, int num_flags, bool save)
 
 void chip8_skip_instr(CHIP8 *chip8)
 {
+    /* XO-CHIP contains a single 4-byte instruction so we have to skip 4 bytes
+    if we encounter it instead of the usual 2. */
     if (chip8->RAM[chip8->PC] == 0xF0 && chip8->RAM[chip8->PC + 1] == 0x00)
     {
         chip8->PC += 4;

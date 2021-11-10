@@ -18,6 +18,7 @@
 #define NUM_REGISTERS 16
 #define NUM_USER_FLAGS 16
 #define NUM_QUIRKS 9
+#define NUM_BITPLANES 3
 
 #define MAX_RAM 65536
 #define MAX_FILEPATH_LEN 256
@@ -39,6 +40,15 @@ typedef enum
     KEY_RELEASED
 } CHIP8K;
 
+// The selected bitplane draw/display operations are performed upon.
+typedef enum
+{
+    BPNONE,
+    BP1,
+    BP2,
+    BPBOTH
+} CHIP8BP;
+
 typedef struct CHIP8
 {
     // Represents random-access memory.
@@ -55,6 +65,12 @@ typedef struct CHIP8
 
     // A monochrome display. A pixel can be either only on or off, no color.
     bool display[DISPLAY_HEIGHT][DISPLAY_WIDTH];
+
+    // A second display for XO-CHIP support.
+    bool display2[DISPLAY_HEIGHT][DISPLAY_WIDTH];
+
+    // Represents the bitmask of both displays.
+    CHIP8BP bitplane;
 
     // Represents if a key is down, up, or released.
     CHIP8K keypad[NUM_KEYS];
@@ -168,7 +184,7 @@ void chip8_reset_keypad(CHIP8 *chip8);
 void chip8_reset_released_keys(CHIP8 *chip8);
 
 // Clears the display by setting all pixels to off.
-void chip8_reset_display(CHIP8 *chip8);
+void chip8_reset_display(CHIP8 *chip8, CHIP8BP bitplane);
 
 // Clears the RAM.
 void chip8_reset_RAM(CHIP8 *chip8);
@@ -180,10 +196,10 @@ void chip8_reset_registers(CHIP8 *chip8);
 void chip8_load_instr(CHIP8 *chip8, uint16_t instr);
 
 // Performs a draw operation.
-void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n);
+void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n, CHIP8BP bitplane);
 
 // Scrolls the display in specified direction by num_pixels.
-void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels);
+void chip8_scroll(CHIP8 *chip8, int xdir, int ydir, int num_pixels, CHIP8BP bitplane);
 
 // Waits for a key to be released then stores that key in Vx.
 void chip8_wait_key(CHIP8 *chip8, uint8_t x);

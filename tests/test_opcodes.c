@@ -700,6 +700,35 @@ void test_F000()
     chip8_reset(&chip8);
 }
 
+void test_Fn01()
+{
+    chip8_load_instr(&chip8, 0xF001);
+    chip8_execute(&chip8);
+    assert(chip8.bitplane == 0);
+    chip8.PC = chip8.pc_start_addr;
+
+    chip8_load_instr(&chip8, 0xF101);
+    chip8_execute(&chip8);
+    assert(chip8.bitplane == 1);
+    chip8.PC = chip8.pc_start_addr;
+
+    chip8_load_instr(&chip8, 0xF201);
+    chip8_execute(&chip8);
+    assert(chip8.bitplane == 2);
+    chip8.PC = chip8.pc_start_addr;
+
+    chip8_load_instr(&chip8, 0xF301);
+    chip8_execute(&chip8);
+    assert(chip8.bitplane == 3);
+    chip8.PC = chip8.pc_start_addr;
+
+    chip8_load_instr(&chip8, 0xF401);
+    chip8_execute(&chip8);
+    assert(chip8.bitplane == 3);
+
+    chip8_reset(&chip8);
+}
+
 void test_Fx07()
 {
     chip8_load_instr(&chip8, 0xF007);
@@ -940,6 +969,7 @@ int main()
     test_Ex9E();
     test_ExA1();
     test_F000();
+    test_Fn01();
     test_Fx07();
     test_Fx0A();
     test_Fx15();

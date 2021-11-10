@@ -55,6 +55,8 @@ SDL_Surface *surface = NULL;
 int display_scale = DISPLAY_SCALE_DEFAULT;
 long on_color = ON_COLOR_DEFAULT;
 long off_color = OFF_COLOR_DEFAULT;
+long bp2_color = 0x555555;
+long xor_color = 0xAAAAAA;
 TTF_Font *dbg_font = NULL;
 
 // Debugger
@@ -435,7 +437,24 @@ void draw_display()
                 {
                     int sdl_x = (x * display_scale) + j;
                     int sdl_y = (y * display_scale) + i;
-                    long color = chip8.display[y][x] ? on_color : off_color;
+                    long color;
+
+                    if (!chip8.display[y][x] && !chip8.display2[y][x])
+                    {
+                        color = off_color;
+                    }
+                    else if (chip8.display[y][x] && !chip8.display2[y][x])
+                    {
+                        color = on_color;
+                    }
+                    else if (!chip8.display[y][x] && chip8.display2[y][x])
+                    {
+                        color = bp2_color;
+                    }
+                    else if (chip8.display[y][x] && chip8.display2[y][x])
+                    {
+                        color = xor_color;
+                    }
 
                     set_pixel(sdl_x, sdl_y, color);
                 }
