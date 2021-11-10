@@ -109,7 +109,7 @@ Otherwise:
 `-b` Set background color (in hex)  
 `-f` Set plane1 color (in hex)  
 `-k` Set plane2 color (in hex)  
-`-m` Set overlap color (in hex)
+`-n` Set overlap color (in hex)
 
 Also includes flags for disabling specific S-CHIP "quirks" (which are all enabled by default):
 
