@@ -51,6 +51,7 @@ void chip8_reset(CHIP8 *chip8)
     chip8->beep = false;
     chip8->exit = false;
     chip8->hires = false;
+    chip8->bitplane = BP1;
 
     chip8->ROM_path[0] = '\0';
     chip8->UF_path[0] = '\0';
@@ -850,6 +851,8 @@ void chip8_load_instr(CHIP8 *chip8, uint16_t instr)
 
 void chip8_draw(CHIP8 *chip8, uint8_t x, uint8_t y, uint8_t n, CHIP8BP bitplane)
 {
+    // This function is ugly and could probably use some refactoring...
+
     if (bitplane == BPNONE)
     {
         return;

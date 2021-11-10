@@ -25,8 +25,10 @@
 
 #define DISPLAY_SCALE_DEFAULT 5
 #define DISPLAY_SCALE_MAX 20
-#define ON_COLOR_DEFAULT 0xFFFFFF
-#define OFF_COLOR_DEFAULT 0x000000
+#define BG_COLOR_DEFAULT 0x000000
+#define P1_COLOR_DEFAULT 0xFFFFFF
+#define P2_COLOR_DEFAULT 0xAAAAAA
+#define OVERLAP_COLOR_DEFAULT 0x555555
 #define NUM_COLOR_THEMES (int)(sizeof(color_themes) / sizeof(color_themes[0]))
 
 // Emulator
@@ -42,21 +44,22 @@ bool load_dmp = false;
 // Color/Display
 // TODO: Add more themes!
 long color_themes[] = {
-    ON_COLOR_DEFAULT, OFF_COLOR_DEFAULT, // User defined
-    0xFFFFFF, 0x000000,                  // Black and white
-    0x000000, 0xFFFFFF,                  // Inverted black and white
-    0xFF0000, 0x000000,                  // Blood
-    0x00FF00, 0x000000,                  // Hacker
-    0x0000FF, 0x000000                   // Space
+    BG_COLOR_DEFAULT, P1_COLOR_DEFAULT, P2_COLOR_DEFAULT, OVERLAP_COLOR_DEFAULT,
+    0x000000, 0xFFFFFF, 0x000000, 0x000000, // Black and white
+    0xFFFFFF, 0x000000, 0x000000, 0x000000, // Inverted black and white
+    0x000000, 0xFF0000, 0x000000, 0x000000, // Blood
+    0x000000, 0x00FF00, 0x000000, 0x000000, // Hacker
+    0x000000, 0x0000FF, 0x000000, 0x000000, // Space
+    0xF0907C, 0x962912, 0xF46900, 0xFAA400  // Crazy Orange
 };
 int color_theme_pntr = 0;
 SDL_Window *window = NULL;
 SDL_Surface *surface = NULL;
 int display_scale = DISPLAY_SCALE_DEFAULT;
-long on_color = ON_COLOR_DEFAULT;
-long off_color = OFF_COLOR_DEFAULT;
-long bp2_color = 0x555555;
-long xor_color = 0xAAAAAA;
+long bg_color = BG_COLOR_DEFAULT;
+long p1_color = P1_COLOR_DEFAULT;
+long p2_color = P2_COLOR_DEFAULT;
+long overlap_color = OVERLAP_COLOR_DEFAULT;
 TTF_Font *dbg_font = NULL;
 
 // Debugger
@@ -100,14 +103,16 @@ void dbg_stack_pop()
 // Cycles between color themes.
 void cycle_color_theme()
 {
-    color_theme_pntr += 2;
+    color_theme_pntr += 4;
     if (color_theme_pntr >= NUM_COLOR_THEMES)
     {
         color_theme_pntr = 0;
     }
 
-    on_color = color_themes[color_theme_pntr];
-    off_color = color_themes[color_theme_pntr + 1];
+    bg_color = color_themes[color_theme_pntr];
+    p1_color = color_themes[color_theme_pntr + 1];
+    p2_color = color_themes[color_theme_pntr + 2];
+    overlap_color = color_themes[color_theme_pntr + 3];
 }
 
 // Frees all resources and exits.
@@ -250,7 +255,7 @@ bool handle_args(int argc, char **argv)
 
 #ifdef ALLOW_GETOPTS
         int opt;
-        while ((opt = getopt(argc, argv, "012345678xdms:p:c:t:r:f:b:")) != -1)
+        while ((opt = getopt(argc, argv, "012345678xdms:p:c:t:r:f:b:n:k:")) != -1)
         {
             switch (opt)
             {
@@ -317,16 +322,28 @@ bool handle_args(int argc, char **argv)
                 refresh_freq = atoi(optarg);
                 break;
 
-            // Set pixel ON (foreground) color
-            case 'f':
+            // Set background color
+            case 'b':
                 color_themes[0] = strtol(optarg, NULL, 16);
-                on_color = color_themes[0];
+                bg_color = color_themes[0];
                 break;
 
-            // Set pixel OFF (background) color
-            case 'b':
+            // Set plane 1 color
+            case 'f':
                 color_themes[1] = strtol(optarg, NULL, 16);
-                off_color = color_themes[1];
+                p1_color = color_themes[1];
+                break;
+
+            // Set plane 2 color
+            case 'k':
+                color_themes[2] = strtol(optarg, NULL, 16);
+                p2_color = color_themes[2];
+                break;
+
+            // Set overlap color
+            case 'n':
+                color_themes[3] = strtol(optarg, NULL, 16);
+                overlap_color = color_themes[3];
                 break;
             }
         }
@@ -441,19 +458,19 @@ void draw_display()
 
                     if (!chip8.display[y][x] && !chip8.display2[y][x])
                     {
-                        color = off_color;
+                        color = bg_color;
                     }
                     else if (chip8.display[y][x] && !chip8.display2[y][x])
                     {
-                        color = on_color;
+                        color = p1_color;
                     }
                     else if (!chip8.display[y][x] && chip8.display2[y][x])
                     {
-                        color = bp2_color;
+                        color = p2_color;
                     }
                     else if (chip8.display[y][x] && chip8.display2[y][x])
                     {
-                        color = xor_color;
+                        color = overlap_color;
                     }
 
                     set_pixel(sdl_x, sdl_y, color);

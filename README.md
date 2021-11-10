@@ -12,11 +12,10 @@ CHIP-8 was a virtual machine/programming language developed by Joseph Weisbecker
 Today, it is a popular target to be emulated because of its simplicity and charm.
 
 ## Features
-* Fully implemented instruction set (including S-CHIP and XO-CHIP)
+* Fully implemented instruction set (including S-CHIP and XO-CHIP (minus extended sound))
 * HI-RES (128x64) mode to support S-CHIP programs
 * Dual display buffers to support XO-CHIP programs 
 * Accurate delay and sound timers
-* Graphical display
 * Sound
 * Integrated graphical debugger allowing user to step forward and back through program execution
 * Adjustable CPU/timer/refresh frequencies, display scale, colors, and program start address
@@ -107,8 +106,10 @@ Otherwise:
 `-t` Set timer frequency (in Hz, value of 0 means uncapped)  
 `-r` Set screen refresh frequency (in Hz, value of 0 means uncapped)  
 `-s` Set display scale factor  
-`-f` Set pixel ON (foreground) color (in hex)  
-`-b` Set pixel OFF (background) color (in hex)
+`-b` Set background color (in hex)  
+`-f` Set plane1 color (in hex)  
+`-k` Set plane2 color (in hex)  
+`-m` Set overlap color (in hex)
 
 Also includes flags for disabling specific S-CHIP "quirks" (which are all enabled by default):
 
