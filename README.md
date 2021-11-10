@@ -58,7 +58,7 @@ However, recently John Earnest designed the XO-CHIP extension allowing CHIP-8 pr
 * Improved sound support
 * Modified Fx75 and Fx85 instructions to allow for 16 user flags instead of typical 8
 
-JACE currently supports all these features (except sound) when ran in compatibility mode with the `-x` flag.
+JACE currently supports all of these extensions (except sound, which is a work in progress).
 
 It should also be noted that JACE stores its fonts in memory starting at address **0x0000** followed immediately by large fonts and finally immediately by the stack. Therefore the stack pointer initially points to address **0x00F0**.
 
