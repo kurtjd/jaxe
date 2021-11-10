@@ -12,8 +12,9 @@ CHIP-8 was a virtual machine/programming language developed by Joseph Weisbecker
 Today, it is a popular target to be emulated because of its simplicity and charm.
 
 ## Features
-* Fully implemented instruction set (including S-CHIP)
-* HI-RES (128x64) mode
+* Fully implemented instruction set (including S-CHIP and XO-CHIP)
+* HI-RES (128x64) mode to support S-CHIP programs
+* Dual display buffers to support XO-CHIP programs 
 * Accurate delay and sound timers
 * Graphical display
 * Sound
@@ -46,10 +47,19 @@ In the early 90s, Andreas Gustafsson created a port for the HP48 calculator whic
 
 With time it seems the S-CHIP became more popular and many programs were written to work with its various quirks. Thus, JACE defaults to original S-CHIP design however many of its quirks can be toggled for improved compatibility using the flags in the Options section below.
 
-It should also be noted that JACE stores its fonts in memory starting at address **0x0000** followed immediately by large fonts and finally  immediately by the stack. Therefore the stack pointer initially points to address **0x00F0**.
+However, recently John Earnest designed the XO-CHIP extension allowing CHIP-8 programs to take advantage of modern hardware to an extent. This extension adds several more instructions and features including:
+
+* 7 new opcodes
+* 16-bit addressing for a total of ~64kb RAM
+* Second display buffer allowing for 4 colors instead of the typical 2
+* Improved sound support
+* Modified Fx75 and Fx85 instructions to allow for 16 user flags instead of typical 8
+
+JACE currently supports all these features (except sound) when ran in compatibility mode with the `-x` flag.
+
+It should also be noted that JACE stores its fonts in memory starting at address **0x0000** followed immediately by large fonts and finally immediately by the stack. Therefore the stack pointer initially points to address **0x00F0**.
 
 ## TODO
-* Add XO-CHIP support
 * Improve sound
 * Improve Windows support (command-line arguments and sound issue)
 * Improve build procedures
