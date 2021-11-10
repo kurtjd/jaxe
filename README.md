@@ -7,6 +7,10 @@
 |-------------|----|
 |<img src = "/screenshots/Rainbow_CH8.gif?raw=true">|<img src = "/screenshots/DVN8_CH8.gif?raw=true">|
 
+|Super Neat Boy|Chicken Scratch|
+|--------------|---------------|
+|<img src = "/screenshots/SuperNeatBoy_CH8.gif?raw=true">|<img src = "/screenshots/Chicken_Scratch_CH8.gif?raw=true">|
+
 CHIP-8 was a virtual machine/programming language developed by Joseph Weisbecker for the COSMAC VIP in the 1970s. It was designed with 35 opcodes and resembles assembly language, but was made for the easier development of video games on the VIP.
 
 Today, it is a popular target to be emulated because of its simplicity and charm.
