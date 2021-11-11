@@ -68,18 +68,7 @@ void chip8_reset(CHIP8 *chip8)
     chip8_reset_registers(chip8);
     chip8_reset_keypad(chip8);
     chip8_reset_display(chip8, BPBOTH);
-
-    for (int i = AUDIO_BUF_ADDR; i < AUDIO_BUF_ADDR + AUDIO_BUF_SIZE; i++)
-    {
-        if (i < (AUDIO_BUF_ADDR + 8))
-        {
-            chip8->RAM[i] = 255;
-        }
-        else
-        {
-            chip8->RAM[i] = 0;
-        }
-    }
+    chip8_reset_audio(chip8);
 }
 
 void chip8_soft_reset(CHIP8 *chip8)
@@ -869,6 +858,21 @@ void chip8_reset_registers(CHIP8 *chip8)
     for (int i = 0; i < NUM_REGISTERS; i++)
     {
         chip8->V[i] = 0x00;
+    }
+}
+
+void chip8_reset_audio(CHIP8 *chip8)
+{
+    for (int i = AUDIO_BUF_ADDR; i < AUDIO_BUF_ADDR + AUDIO_BUF_SIZE; i++)
+    {
+        if (i < (AUDIO_BUF_ADDR + 8))
+        {
+            chip8->RAM[i] = 0x00;
+        }
+        else
+        {
+            chip8->RAM[i] = 0xFF;
+        }
     }
 }
 

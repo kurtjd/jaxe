@@ -201,6 +201,9 @@ void chip8_reset_RAM(CHIP8 *chip8);
 // Clears all registers.
 void chip8_reset_registers(CHIP8 *chip8);
 
+// Reset audio buffer to default sound.
+void chip8_reset_audio(CHIP8 *chip8);
+
 // Loads an instruction into memory.
 void chip8_load_instr(CHIP8 *chip8, uint16_t instr);
 

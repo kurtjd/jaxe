@@ -690,6 +690,35 @@ unsigned char SDLK_to_hex(SDL_KeyCode key)
     }
 }
 
+// Handles sound.
+void handle_sound()
+{
+    if (!play_sound && chip8.beep)
+    {
+        play_sound = true;
+        start_sound();
+    }
+    else if (play_sound && !chip8.beep)
+    {
+        play_sound = false;
+        stop_sound();
+    }
+}
+
+// Handles drawing the display.
+void handle_display()
+{
+    if (chip8.display_updated)
+    {
+        draw_display();
+    }
+
+    if (debug_mode)
+    {
+        draw_debug();
+    }
+}
+
 // Checks for key presses/releases and a quit event.
 bool handle_input(SDL_Event *e)
 {
@@ -821,27 +850,8 @@ int main(int argc, char **argv)
             }
         }
 
-        // Handle sound
-        if (!play_sound && chip8.beep)
-        {
-            play_sound = true;
-            start_sound();
-        }
-        else if (play_sound && !chip8.beep)
-        {
-            play_sound = false;
-            stop_sound();
-        }
-
-        if (chip8.display_updated)
-        {
-            draw_display();
-        }
-
-        if (debug_mode)
-        {
-            draw_debug();
-        }
+        handle_sound();
+        handle_display();
 
         dbg_step = false;
         dbg_step_back = false;
