@@ -68,6 +68,18 @@ void chip8_reset(CHIP8 *chip8)
     chip8_reset_registers(chip8);
     chip8_reset_keypad(chip8);
     chip8_reset_display(chip8, BPBOTH);
+
+    for (int i = AUDIO_BUF_ADDR; i < AUDIO_BUF_ADDR + AUDIO_BUF_SIZE; i++)
+    {
+        if (i < (AUDIO_BUF_ADDR + 8))
+        {
+            chip8->RAM[i] = 255;
+        }
+        else
+        {
+            chip8->RAM[i] = 0;
+        }
+    }
 }
 
 void chip8_soft_reset(CHIP8 *chip8)
@@ -746,8 +758,7 @@ void chip8_handle_timers(CHIP8 *chip8)
     // Sound
     if (chip8->ST > 0)
     {
-        // On original COSMAC VIP, sound is only produced when ST >= 2
-        chip8->beep = chip8->ST >= 2;
+        chip8->beep = true;
         chip8->sound_cum += chip8->total_cycle_time;
 
         if (!chip8->timer_freq || chip8->sound_cum >= chip8->timer_max_cum)

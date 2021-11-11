@@ -16,11 +16,11 @@ CHIP-8 was a virtual machine/programming language developed by Joseph Weisbecker
 Today, it is a popular target to be emulated because of its simplicity and charm.
 
 ## Features
-* Fully implemented instruction set (including S-CHIP and XO-CHIP (minus extended sound))
+* Fully implemented instruction set (including S-CHIP and XO-CHIP)
 * HI-RES (128x64) mode to support S-CHIP programs
 * Dual display buffers to support XO-CHIP programs 
 * Accurate delay and sound timers
-* Sound
+* Extended sound (though can sometimes be a bit noisy)
 * Integrated graphical debugger allowing user to step forward and back through program execution
 * Adjustable CPU/timer/refresh frequencies, display scale, colors, and program start address
 * Toggle S-CHIP "quirks" for compatibility with a wide variety of ROMs
@@ -58,13 +58,13 @@ However, recently John Earnest designed the XO-CHIP extension allowing CHIP-8 pr
 * Improved sound support
 * Modified Fx75 and Fx85 instructions to allow for 16 user flags instead of typical 8
 
-JACE currently supports all of these extensions (except sound, which is a work in progress).
+JACE currently supports all of these extensions.
 
 It should also be noted that JACE stores its fonts in memory starting at address **0x0000** followed immediately by large fonts and finally immediately by the stack. Therefore the stack pointer initially points to address **0x00F0**.
 
 ## TODO
-* Improve sound
-* Improve Windows support (command-line arguments and sound issue)
+* Continue to improve sound
+* Continue to immprove Windows support
 * Improve build procedures
 * Add more color themes
 
@@ -185,4 +185,3 @@ JACE is licensed under the MIT license so you are free to do almost whatever you
 
 ## Acknowledgements
 * [Kongtext Font by codeman38](https://www.1001fonts.com/kongtext-font.html)
-* [J. Th.'s Sound Code](https://stackoverflow.com/a/45002609)

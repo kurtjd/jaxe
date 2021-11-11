@@ -225,7 +225,8 @@ bool chip8_handle_user_flags(CHIP8 *chip8, int num_flags, bool save);
 // Skips the next instrtuction.
 void chip8_skip_instr(CHIP8 *chip8);
 
-// Returns a sound frequency based on the current pitch.
+/* Returns a sound frequency based on the current pitch using the formula:
+4000 * 2^((pitch - 64) / 48) */
 double chip8_get_sound_freq(CHIP8 *chip8);
 
 #endif

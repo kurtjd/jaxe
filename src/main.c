@@ -31,6 +31,9 @@
 #define OVERLAP_COLOR_DEFAULT 0x555555
 #define NUM_COLOR_THEMES (int)(sizeof(color_themes) / sizeof(color_themes[0]))
 
+// Sound
+int snd_buf_pntr = 0;
+
 // Emulator
 CHIP8 chip8;
 char ROM_path[MAX_FILEPATH_LEN];
@@ -38,6 +41,7 @@ uint16_t pc_start_addr = PC_START_ADDR_DEFAULT;
 unsigned long cpu_freq = CPU_FREQ_DEFAULT;
 unsigned long timer_freq = TIMER_FREQ_DEFAULT;
 unsigned long refresh_freq = REFRESH_FREQ_DEFAULT;
+bool play_sound = false;
 bool quirks[NUM_QUIRKS] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
 bool load_dmp = false;
 
@@ -168,46 +172,53 @@ void get_ROM_name(char *rom_name)
     strtok(rom_name, ".");
 }
 
-// SDL Audio Callback (Thanks Stack Overflow).
-void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
+// Creates a square sound wave based off the MSB of the emulator's sound buffer.
+void squarewave_callback(void *snddata, Uint8 *buffer, int bytes)
 {
-    Sint16 *buffer = (Sint16 *)raw_buffer;
-    int length = bytes / 2; // 2 bytes per sample for AUDIO_S16SYS
-    int sample_nr = (*(int *)user_data);
+    (void)snddata;
 
-    for (int i = 0; i < length; i++, sample_nr++)
+    for (int i = 0; i < bytes; i++)
     {
-        double time = (double)sample_nr / (double)SAMPLE_RATE;
+        // Get the byte of the emulator's buffer that the next sample is in.
+        buffer[i] = chip8.RAM[AUDIO_BUF_ADDR + (snd_buf_pntr / 8)];
 
-        // render 441 HZ sine wave
-        buffer[i] = (Sint16)(AMPLITUDE * sin(2.0f * M_PI * 441.0f * time));
+        // Get the actual sample bit.
+        buffer[i] <<= (snd_buf_pntr % 8);
+        buffer[i] &= 0x80;
+
+        // Finally set the buffer to max volume if sample is 1.
+        buffer[i] *= 0xFF;
+
+        /* Keep track of where we are in the emulator's sound buffer and
+        wrap back around if necessary. */
+        snd_buf_pntr++;
+        if (snd_buf_pntr >= (AUDIO_BUF_SIZE * 8))
+        {
+            snd_buf_pntr = 0;
+        }
     }
 }
 
-// Initialize audio (Thanks Stack Overflow).
-void audio_init()
+// Start playing a sound.
+void start_sound()
 {
-    int sample_nr = 0;
+    snd_buf_pntr = 0;
 
     SDL_AudioSpec want;
 
-    // number of samples per second
-    want.freq = SAMPLE_RATE;
+    // Returns 4000 * 2^((pitch - 64) / 48)
+    want.freq = chip8_get_sound_freq(&chip8);
 
-    // sample type (here: signed short i.e. 16 bit)
-    want.format = AUDIO_S16SYS;
+    // We only need 1 bit so might as well select smallest format
+    want.format = AUDIO_U8;
 
-    // only one channel
+    // No need for stereo so use mono
     want.channels = 1;
 
-    // buffer-size
-    want.samples = 2048;
+    // Not exactly sure why a lower number works better but 2 is lowest possible
+    want.samples = 2;
 
-    // function SDL calls periodically to refill the buffer
-    want.callback = audio_callback;
-
-    // counter, keeping track of current sample number
-    want.userdata = &sample_nr;
+    want.callback = squarewave_callback;
 
     SDL_AudioSpec have;
     if (SDL_OpenAudio(&want, &have) != 0)
@@ -219,6 +230,15 @@ void audio_init()
     {
         fprintf(stderr, "Could not get desired audio spec.\n");
     }
+
+    SDL_PauseAudio(0);
+}
+
+// Stop playing sound.
+void stop_sound()
+{
+    SDL_PauseAudio(1);
+    SDL_CloseAudio();
 }
 
 // Initializes SDL.
@@ -230,8 +250,6 @@ bool init_SDL()
         fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
         return false;
     }
-
-    audio_init();
 
     return true;
 }
@@ -803,6 +821,18 @@ int main(int argc, char **argv)
             }
         }
 
+        // Handle sound
+        if (!play_sound && chip8.beep)
+        {
+            play_sound = true;
+            start_sound();
+        }
+        else if (play_sound && !chip8.beep)
+        {
+            play_sound = false;
+            stop_sound();
+        }
+
         if (chip8.display_updated)
         {
             draw_display();
@@ -812,8 +842,6 @@ int main(int argc, char **argv)
         {
             draw_debug();
         }
-
-        SDL_PauseAudio(!chip8.beep);
 
         dbg_step = false;
         dbg_step_back = false;
