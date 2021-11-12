@@ -1,4 +1,4 @@
-# JAXE (Just Another XO-CHIP/S-CHIP/CHIP-8 Emulator)
+# JAXE (Just Another XO-CHIP/CHIP-8 Emulator)
 |Brix|Space Invaders (In Debug Mode)|
 |----|------------------------------|
 |<img src = "/screenshots/Brix_CH8.gif?raw=true">|<img src = "/screenshots/Invaders_CH8.gif?raw=true">|
