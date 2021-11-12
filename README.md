@@ -1,4 +1,4 @@
-# JACE (Just Another CHIP-8 Emulator)
+# JAXE (Just Another XO-CHIP/S-CHIP/CHIP-8 Emulator)
 |Brix|Space Invaders (In Debug Mode)|
 |----|------------------------------|
 |<img src = "/screenshots/Brix_CH8.gif?raw=true">|<img src = "/screenshots/Invaders_CH8.gif?raw=true">|
@@ -48,7 +48,7 @@ In the early 90s, Andreas Gustafsson created a port for the HP48 calculator whic
 * Persistent storage
 * Modified Bnnn, Fx55, Fx65, Dxyn, 8xy6, and 8xyE instructions
 
-With time it seems the S-CHIP became more popular and many programs were written to work with its various quirks. Thus, JACE defaults to original S-CHIP design however many of its quirks can be toggled for improved compatibility using the flags in the Options section below.
+With time it seems the S-CHIP became more popular and many programs were written to work with its various quirks. Thus, JAXE defaults to original S-CHIP design however many of its quirks can be toggled for improved compatibility using the flags in the Options section below.
 
 However, recently John Earnest designed the XO-CHIP extension allowing CHIP-8 programs to take advantage of modern hardware to an extent. This extension adds several more instructions and features including:
 
@@ -58,9 +58,9 @@ However, recently John Earnest designed the XO-CHIP extension allowing CHIP-8 pr
 * Improved sound support
 * Modified Fx75 and Fx85 instructions to allow for 16 user flags instead of typical 8
 
-JACE currently supports all of these extensions.
+JAXE currently supports all of these extensions.
 
-It should also be noted that JACE stores its fonts in memory starting at address **0x0000** followed immediately by large fonts and finally immediately by the stack. Therefore the stack pointer initially points to address **0x00F0**.
+It should also be noted that JAXE stores its fonts in memory starting at address **0x0000** followed immediately by large fonts and finally immediately by the stack. Therefore the stack pointer initially points to address **0x00F0**.
 
 ## TODO
 * Continue to improve sound
@@ -76,8 +76,8 @@ It should also be noted that JACE stores its fonts in memory starting at address
 ## Build Procedures
 ### Linux/Windows (MinGW)
 `mkdir build && cd build`  
-`cmake -B. --config Release --target jace ..`  
-`make jace`
+`cmake -B. --config Release --target jaxe ..`  
+`make jaxe`
 
 ### Windows (non-MinGW)
 Unknown at this time. Currently the code uses the POSIX getopt() function to handle command-line arguments. To build without MinGW, remove `#define ALLOW_GETOPTS` from the top of *main.c* which will unfortunately remove command-line arguments until I handle them in a portable way.
@@ -89,15 +89,15 @@ Unknown at this time. Currently the code uses the POSIX getopt() function to han
 
 ## Run
 ### Linux
-`./jace [options] <path-to-rom/dump-file>`  
+`./jaxe [options] <path-to-rom/dump-file>`  
 `./test` (for unit tests)
 
 ### Windows
 If built with MinGW, command line options are available:  
-`jace.exe [options] <path-to-rom/dump-file>`
+`jaxe.exe [options] <path-to-rom/dump-file>`
 
 Otherwise:  
-`jace.exe <path-to-rom/dump-file>`
+`jaxe.exe <path-to-rom/dump-file>`
 
 `test.exe` (for unit tests)
 
@@ -170,7 +170,7 @@ Also includes flags for disabling specific S-CHIP "quirks" (which are all enable
 Anyone is welcome to contribute! I will try to review pull requests as quickly as possible.
 
 ## License
-JACE is licensed under the MIT license so you are free to do almost whatever you please with this code (see LICENSE file).
+JAXE is licensed under the MIT license so you are free to do almost whatever you please with this code (see LICENSE file).
 
 ## ROMs
 * [CHIP-8 Archive](https://johnearnest.github.io/chip8Archive/)

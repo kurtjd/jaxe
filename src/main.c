@@ -437,7 +437,7 @@ SDL_Window *create_window()
     char rom_name[MAX_FILEPATH_LEN];
     char title[MAX_FILEPATH_LEN + 10];
     get_ROM_name(rom_name);
-    sprintf(title, "JACE - %s", rom_name);
+    sprintf(title, "JAXE - %s", rom_name);
 
     SDL_Window *new_window = SDL_CreateWindow(title,
                                               SDL_WINDOWPOS_CENTERED,
