@@ -6,16 +6,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <math.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_audio.h>
 #include <SDL2/SDL_ttf.h>
 #include "chip8.h"
 
 #define BAD_KEY 0x42
-
-#define AMPLITUDE 28000
-#define SAMPLE_RATE 44100
 
 #define DBG_STACK_MAX 1000
 #define DBG_PANEL_WIDTH 200
