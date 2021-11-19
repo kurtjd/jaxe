@@ -1,3 +1,4 @@
+#undef NDEBUG
 #include <stdio.h>
 #include <stdbool.h>
 #include <assert.h>
@@ -61,7 +62,7 @@ void test_00E0()
     chip8_load_instr(&chip8, 0x00E0);
 
     chip8.display[0][0] = true;
-    chip8.display[DISPLAY_WIDTH / 2][DISPLAY_WIDTH / 2] = true;
+    chip8.display[DISPLAY_HEIGHT / 2][DISPLAY_WIDTH / 2] = true;
     chip8.display[DISPLAY_HEIGHT - 1][0] = true;
     chip8.display[0][DISPLAY_WIDTH - 1] = true;
     chip8.display[DISPLAY_HEIGHT - 1][DISPLAY_WIDTH - 1] = true;

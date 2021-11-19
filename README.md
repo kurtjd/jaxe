@@ -76,16 +76,11 @@ It should also be noted that JAXE stores its fonts in memory starting at address
 ## Build Procedures
 ### Linux/Windows (MinGW)
 `mkdir build && cd build`  
-`cmake -B. --config Release --target jaxe ..`  
+`cmake -B. --config Release ..`  
 `make jaxe`
 
 ### Windows (non-MinGW)
 Unknown at this time. Currently the code uses the POSIX getopt() function to handle command-line arguments. To build without MinGW, remove `#define ALLOW_GETOPTS` from the top of *main.c* which will unfortunately remove command-line arguments until I handle them in a portable way.
-
-### Unit Tests (Debug Must Be Set)
-`mkdir build && cd build`  
-`cmake -B. --config Debug --target test ..`  
-`make test`
 
 ## Run
 ### Linux

@@ -255,7 +255,7 @@ bool handle_args(int argc, char **argv)
 {
     if (argc < 2)
     {
-        fprintf(stderr, "Usage: ./jace [options] <path-to-ROM>\n");
+        fprintf(stderr, "Usage: ./jaxe [options] <path-to-ROM>\n");
         return false;
     }
     else if (argc >= 2)
