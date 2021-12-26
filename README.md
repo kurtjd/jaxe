@@ -48,7 +48,7 @@ In the early 90s, Andreas Gustafsson created a port for the HP48 calculator whic
 * Persistent storage
 * Modified Bnnn, Fx55, Fx65, Dxyn, 8xy6, and 8xyE instructions
 
-With time it seems the S-CHIP became more popular and many programs were written to work with its various quirks. Thus, JAXE defaults to original S-CHIP design however many of its quirks can be toggled for improved compatibility using the flags in the Options section below.
+With time, it seems the S-CHIP became more popular and many programs were written to work with its various quirks. Thus, JAXE defaults to original S-CHIP design however many of its quirks can be toggled for improved compatibility using the flags in the Options section below.
 
 However, recently John Earnest designed the XO-CHIP extension allowing CHIP-8 programs to take advantage of modern hardware to an extent. This extension adds several more instructions and features including:
 
@@ -64,7 +64,7 @@ It should also be noted that JAXE stores its fonts in memory starting at address
 
 ## TODO
 * Continue to improve sound
-* Continue to immprove Windows support
+* Continue to improve Windows support
 * Improve build procedures
 * Add more color themes
 
@@ -178,5 +178,5 @@ JAXE is licensed under the MIT license so you are free to do almost whatever you
 * [CHIP-8 extensions and compatibility](https://chip-8.github.io/extensions/)
 * [XO-CHIP Specification](https://johnearnest.github.io/Octo/docs/XO-ChipSpecification.html)
 
-## Acknowledgements
+## Acknowledgments
 * [Kongtext Font by codeman38](https://www.1001fonts.com/kongtext-font.html)
