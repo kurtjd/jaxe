@@ -92,8 +92,7 @@ If built with MinGW, command line options are available:
 `jaxe.exe [options] <path-to-rom/dump-file>`
 
 Otherwise:  
-`jaxe.exe <path-to-rom/dump-file>`
-
+`jaxe.exe <path-to-rom/dump-file>`  
 `test.exe` (for unit tests)
 
 ## Options
