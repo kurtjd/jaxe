@@ -193,6 +193,27 @@ retroarch -L jaxe_libretro.so  roms/chip8archive/br8kout.ch8
 
 I hope to add it to buildbot and official distribution shortly
 
+Default key mapping:
+
+* `0` to `B`
+* `1` to `START`
+* `2` to `D-Pad Up`
+* `3` to `SELECT`
+* `4` to `L` (shoulder)
+* `5` to `Y`
+* `6` to `A`
+* `7` to `D-Pad Left`
+* `8` to `D-Pad Down`
+* `9` to `D-Pad Right`
+* `A` to `R` (shoulder)
+* `B` to `L2` (trigger)
+* `C` to `X`
+* `D` to `R2` (trigger)
+* `E` to `L3` (thumb)
+* `F` to `R3` (thumb)
+
+This is preliminary and subject to change.
+
 Differences and notes compared to standalone version:
 
 * Debug mode is missing
