@@ -100,6 +100,7 @@ typedef struct CHIP8
     long refresh_cum;
     long total_cycle_time;
 
+#ifndef __LIBRETRO__
 #ifdef WIN32
     LARGE_INTEGER win_cycle_time;
     LARGE_INTEGER cur_cycle_start;
@@ -108,6 +109,7 @@ typedef struct CHIP8
 #else
     struct timeval cur_cycle_start;
     struct timeval prev_cycle_start;
+#endif
 #endif
 
     // The path and filename of currently loaded ROM.
@@ -172,6 +174,9 @@ void chip8_load_font(CHIP8 *chip8);
 // Loads a given ROM into memory.
 bool chip8_load_rom(CHIP8 *chip8, char *filename);
 
+// Loads a given ROM into memory from a buffer.
+void chip8_load_rom_buffer(CHIP8 *chip8, const void *raw, size_t sz);
+  
 /* Performs a full cycle of the emulator including executing an instruction and
 handling timers. Returns true if instruction was executed
 or false if the CPU was sleeping. */

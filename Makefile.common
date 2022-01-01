@@ -1,0 +1,13 @@
+LIBRETRO_COMM_DIR = $(SOURCE_DIR)/deps/libretro-common
+
+SOURCES_C := \
+	$(SOURCE_DIR)/libretro.c \
+	$(SOURCE_DIR)/chip8.c
+
+SOURCES_CXX := 
+
+INCLUDES := -I$(LIBRETRO_COMM_DIR)/include -I$(SOURCE_DIR)/../include
+
+ifneq (,$(findstring msvc200,$(platform)))
+INCLUDES += -I$(LIBRETRO_COMM_DIR)/include/compat/msvc
+endif
