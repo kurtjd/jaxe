@@ -10,6 +10,10 @@ SOURCES_CXX :=
 include $(CORE_DIR)/Makefile.common
 
 COREFLAGS := -DANDROID -D__LIBRETRO__ -DHAVE_STRINGS_H -DRIGHTSHIFT_IS_SAR $(INCFLAGS)
+GIT_VERSION := " $(shell git rev-parse --short HEAD || echo unknown)"
+ifneq ($(GIT_VERSION)," unknown")
+  COREFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
+endif
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := retro
