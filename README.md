@@ -27,6 +27,7 @@ Today, it is a popular target to be emulated because of its simplicity and charm
 * Save and load memory dumps
 * Unit tests for those writing a C emulator
 * Emulator decoupled from any particular graphics/media library allowing for easy embedding into other C programs
+* Libretro port
 
 ## Technical Info
 The original CHIP-8 virtual machine was designed with the following specs:
@@ -159,6 +160,61 @@ Also includes flags for disabling specific S-CHIP "quirks" (which are all enable
 * This emulator defaults to 0x200 as the start address, however some programs assume other defaults (namely, those written for the ETI-660 which default to 0x600). Try to find out what default address the program assumes and set that with the `-p` option.
 * If a program is running very slowly, try increasing the CPU speed or even uncapping it (by setting the `-c` option to 0). Some ROMs are developed around an uncapped execution frequency and will run much more smoothly.
 * There are many CHIP-8 variants and this emulator does not support all of them. If a ROM still does not work correctly after trying the suggestions above, it may have been written for an unsupported variant and thus will simply not work.
+
+## Libretro port
+
+Libretro port is intended to run under Retroarch on a wide variety of platforms. Compilation:
+
+* Default platform:
+
+```shell
+make -f Makefile.libretro
+```
+
+* Most platforms
+
+```shell
+make -f Makefile.libretro platform=PLATFORM
+```
+
+* Android
+
+```
+cd jni/
+ndk-build
+```
+
+Running from command line:
+
+```shell
+
+retroarch -L jaxe_libretro.so  roms/chip8archive/br8kout.ch8
+```
+
+I hope to add it to buildbot and official distribution shortly
+
+Differences and notes compared to standalone version:
+
+* Debug mode is missing
+* Userflags are saved as SRAM rather than .uf file
+* We use options instead of command line
+* CPU frequency can be set only to predefined values. This is a limitation of options interface
+* Colors can be chosen only from predefined themes. This is a limitation of options interface
+* Setting all quirks to false needs to set all of them manually (there is no equivalent to -x option)
+* To cycle through themes or to change CPU frequencies you need to go to options menu
+* Loading and storing dumps is done through serialization
+* Display scale, pause and exit are handled by frontend
+* Audio is resampled in the core and always outputs at 44100
+
+TODOs:
+
+* Uncapped CPU frequency
+* Option for PC start address
+* Option for timer frequency
+* Option for refresh frequency
+* Choose resampled audio frequency based on available outputs or make it configurable
+* retro_reset function
+
 
 ## Contributing
 Anyone is welcome to contribute! I will try to review pull requests as quickly as possible.
