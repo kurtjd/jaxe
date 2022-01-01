@@ -1,0 +1,3 @@
+[submodule "src/deps/libretro-common"]
+	path = src/deps/libretro-common
+	url = https://github.com/libretro/libretro-common.git

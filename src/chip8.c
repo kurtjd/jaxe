@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <math.h>
 #include "chip8.h"
@@ -36,6 +37,7 @@ void chip8_reset(CHIP8 *chip8)
     chip8->pitch = PITCH_DEFAULT;
 
 // Have cycle times default to current time.
+#ifndef __LIBRETRO__
 #ifdef WIN32
     QueryPerformanceFrequency(&chip8->real_cpu_freq);
     QueryPerformanceCounter(&chip8->cur_cycle_start);
@@ -43,6 +45,7 @@ void chip8_reset(CHIP8 *chip8)
 #else
     gettimeofday(&chip8->cur_cycle_start, NULL);
     gettimeofday(&chip8->prev_cycle_start, NULL);
+#endif
 #endif
 
     chip8->cpu_cum = 0;
@@ -71,6 +74,7 @@ void chip8_reset(CHIP8 *chip8)
     chip8_reset_audio(chip8);
 }
 
+#ifndef __LIBRETRO__
 void chip8_soft_reset(CHIP8 *chip8)
 {
     char tmp_path[MAX_FILEPATH_LEN];
@@ -80,6 +84,7 @@ void chip8_soft_reset(CHIP8 *chip8)
     chip8_load_font(chip8);
     chip8_load_rom(chip8, tmp_path);
 }
+#endif
 
 void chip8_set_cpu_freq(CHIP8 *chip8, unsigned long cpu_freq)
 {
@@ -183,6 +188,16 @@ bool chip8_load_rom(CHIP8 *chip8, char *filename)
 
     fprintf(stderr, "Unable to open ROM file %s\n", filename);
     return false;
+}
+
+void chip8_load_rom_buffer(CHIP8 *chip8, const void *raw, size_t sz) {
+    size_t maxsz = MAX_RAM - chip8->pc_start_addr;
+    size_t realsz = maxsz < sz ? maxsz : sz;
+    memcpy(chip8->RAM + chip8->pc_start_addr, raw, realsz);
+
+    chip8->ROM_path[0] = '\0';
+    chip8->UF_path[0] = '\0';
+    chip8->DMP_path[0] = '\0';
 }
 
 bool chip8_cycle(CHIP8 *chip8)
@@ -773,7 +788,9 @@ void chip8_handle_timers(CHIP8 *chip8)
 
 void chip8_update_elapsed_time(CHIP8 *chip8)
 {
-#ifdef WIN32
+#ifdef __LIBRETRO__
+    chip8->total_cycle_time = 1000000 / chip8->cpu_freq;
+#elif defined(WIN32)
     chip8->prev_cycle_start = chip8->cur_cycle_start;
 
     QueryPerformanceCounter(&chip8->cur_cycle_start);
@@ -1099,6 +1116,7 @@ void chip8_wait_key(CHIP8 *chip8, uint8_t x)
     }
 }
 
+#ifndef __LIBRETRO__
 bool chip8_dump(CHIP8 *chip8)
 {
     FILE *dmp = fopen(chip8->DMP_path, "wb");
@@ -1167,6 +1185,7 @@ bool chip8_handle_user_flags(CHIP8 *chip8, int num_flags, bool save)
 
     return false;
 }
+#endif
 
 void chip8_skip_instr(CHIP8 *chip8)
 {
