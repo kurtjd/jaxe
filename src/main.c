@@ -628,7 +628,7 @@ void draw_debug()
 }
 
 // Converts an SDL key code to the respective key on the emulator keypad.
-unsigned char SDLK_to_hex(SDL_KeyCode key)
+unsigned char SDLK_to_hex(SDL_Keycode key)
 {
     switch (key)
     {
