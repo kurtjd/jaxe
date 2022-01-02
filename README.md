@@ -197,10 +197,10 @@ Default key mapping:
 
 * `0` to `B`
 * `1` to `START`
-* `2` to `D-Pad Up`
+* `2` to `Y`
 * `3` to `SELECT`
 * `4` to `L` (shoulder)
-* `5` to `Y`
+* `5` to `D-Pad Up`
 * `6` to `A`
 * `7` to `D-Pad Left`
 * `8` to `D-Pad Down`
