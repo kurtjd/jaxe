@@ -234,7 +234,6 @@ TODOs:
 * Option for timer frequency
 * Option for refresh frequency
 * Choose resampled audio frequency based on available outputs or make it configurable
-* retro_reset function
 
 
 ## Contributing
