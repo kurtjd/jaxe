@@ -402,11 +402,22 @@ int get_audio_sample(void)
     return x;
 }
 
-static void audio_sample(int16_t sample) {    
-    // TODO: Use audio_batch_cb
+static void audio_sample(int16_t sample) {
+    int16_t buf[200]; // Should be enough to call batch_cb only once
+    // in most cases
+    int16_t *bufptr = buf;
     while (audio_counter_resample >= ONE_SEC / AUDIO_RESAMPLE_RATE) {
-	audio_cb(sample, sample);
+	*bufptr++ = sample;
+	*bufptr++ = sample;
+	if (bufptr >= buf + sizeof(buf) / sizeof(buf[0])) {
+	    audio_batch_cb(buf, (bufptr - buf) / 2);
+	    bufptr = buf;
+	}
 	audio_counter_resample -= ONE_SEC / AUDIO_RESAMPLE_RATE;
+    }
+
+    if (bufptr != buf) {
+	audio_batch_cb(buf, (bufptr - buf) / 2);
     }
 }
 
