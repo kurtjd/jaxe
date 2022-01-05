@@ -419,7 +419,7 @@ void retro_get_system_info(struct retro_system_info *info)
 #define GIT_VERSION ""
 #endif
     info->library_version = "1.0" GIT_VERSION;
-    info->valid_extensions = "ch8";
+    info->valid_extensions = "ch8|sc8|xo8|hc8";
     info->need_fullpath = false;
 }
 
