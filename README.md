@@ -229,11 +229,15 @@ Differences and notes compared to standalone version:
 
 TODOs:
 
+* Add more color themes (same as standalone)
+* Investigate if better key mapping is possible
+* Allow frontend to peek into "VRAM"
 * Uncapped CPU frequency
 * Option for PC start address
 * Option for timer frequency
 * Option for refresh frequency
 * Choose resampled audio frequency based on available outputs or make it configurable
+* Maybe have retroachievements support?
 
 
 ## Contributing
