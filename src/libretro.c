@@ -294,7 +294,7 @@ void draw_display(void)
 	    {
 		color = p2_color;
 	    }
-	    else if (chip8.display[y][x] && chip8.display2[y][x])
+	    else
 	    {
 		color = overlap_color;
 	    }
