@@ -241,6 +241,7 @@ else ifeq ($(platform), retrofw)
 	fpic := -fPIC
 	SHARED := -shared -Wl,--version-script=$(CORE_DIR)/link.T -Wl,--no-undefined
 	CFLAGS += -ffast-math -march=mips32 -mtune=mips32 -mhard-float
+	LIBS = -lm
 
 # Emscripten
 else ifeq ($(platform), emscripten)
@@ -285,6 +286,7 @@ else ifeq ($(platform), gcw0)
 	
 	DISABLE_ERROR_LOGGING := 1
 	CFLAGS += -march=mips32 -mtune=mips32r2 -mhard-float
+	LIBS = -lm
 	
 # Windows MSVC 2017 all architectures
 else ifneq (,$(findstring windows_msvc2017,$(platform)))
