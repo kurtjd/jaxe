@@ -480,7 +480,16 @@ else ifeq ($(platform), xbox360_msvc2010)
 	CFLAGS   += -D_XBOX -D_XBOX360
 	CXXFLAGS += -D_XBOX -D_XBOX360
 	STATIC_LINKING=1
-
+# MIYOO
+else ifeq ($(platform), miyoo)
+	TARGET := $(TARGET_NAME)_libretro.so
+	fpic := -fPIC
+	SHARED := -shared -Wl,-version-script=link.T
+	CC = /opt/miyoo/usr/bin/arm-linux-gcc
+	AR = /opt/miyoo/usr/bin/arm-linux-ar
+	PLATFORM_DEFINES += -D_GNU_SOURCE
+	CFLAGS += -fomit-frame-pointer -ffast-math -march=armv5te -mtune=arm926ej-s
+	CFLAGS += -fno-common -ftree-vectorize -funswitch-loops
 # Current Windows builds via mingw/gcc
 else
 	TARGET := $(TARGET_NAME)_libretro.dll
