@@ -6,6 +6,8 @@
 #include "libretro.h"
 #include "chip8.h"
 
+#define VALID_EXTENSIONS "ch8|sc8|xo8|hc8"
+
 #ifdef USE_RGB565
 typedef unsigned short pixel_t;
 #if defined(ABGR1555)
@@ -145,8 +147,57 @@ static struct retro_variable variables[] =
     { NULL, NULL },
 };
 
+// TODO: find a better mapping
+static int hexorder[] = {
+    RETRO_DEVICE_ID_JOYPAD_B,
+    RETRO_DEVICE_ID_JOYPAD_START,
+    RETRO_DEVICE_ID_JOYPAD_Y,
+    RETRO_DEVICE_ID_JOYPAD_SELECT,
+    RETRO_DEVICE_ID_JOYPAD_L,
+    RETRO_DEVICE_ID_JOYPAD_UP,
+    RETRO_DEVICE_ID_JOYPAD_A,
+    RETRO_DEVICE_ID_JOYPAD_LEFT,
+    RETRO_DEVICE_ID_JOYPAD_DOWN,
+    RETRO_DEVICE_ID_JOYPAD_RIGHT,
+    RETRO_DEVICE_ID_JOYPAD_R,
+    RETRO_DEVICE_ID_JOYPAD_L2,
+    RETRO_DEVICE_ID_JOYPAD_X,
+    RETRO_DEVICE_ID_JOYPAD_R2,
+    RETRO_DEVICE_ID_JOYPAD_L3,
+    RETRO_DEVICE_ID_JOYPAD_R3
+};
+
+static struct retro_input_descriptor input_desc[] = {
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "7" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y,     "2" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "8" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "9" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B,     "0" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT,"3" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X,     "C" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "5" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "6" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "1" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L,     "5" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R,     "A" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2,    "B" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2,    "D" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3,    "E" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3,    "F" },
+
+    { 0 },
+};
+
 void retro_set_environment(retro_environment_t fn)
 {
+    static const struct retro_system_content_info_override content_overrides[] = {
+	{
+	    VALID_EXTENSIONS, /* extensions */
+	    false,     /* need_fullpath */
+	    true       /* persistent_data */
+	},
+	{ NULL, false, false }
+    };
     environ_cb = fn;
 
     fn(RETRO_ENVIRONMENT_SET_VARIABLES, variables);
@@ -157,6 +208,12 @@ void retro_set_environment(retro_environment_t fn)
 	log_cb = log.log;
     else
 	log_cb = fallback_log;
+
+    /* Request a persistent content data buffer */
+    environ_cb(RETRO_ENVIRONMENT_SET_CONTENT_INFO_OVERRIDE,
+	       (void*)content_overrides);
+
+    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, input_desc);
 }
 
 static void load_theme(void)
@@ -237,7 +294,7 @@ void draw_display(void)
 	    {
 		color = p2_color;
 	    }
-	    else if (chip8.display[y][x] && chip8.display2[y][x])
+	    else
 	    {
 		color = overlap_color;
 	    }
@@ -253,53 +310,15 @@ void retro_set_audio_sample_batch(retro_audio_sample_batch_t fn) { audio_batch_c
 void retro_set_input_poll(retro_input_poll_t fn) { input_poll_cb = fn; }
 void retro_set_input_state(retro_input_state_t fn) { input_state_cb = fn; }
 
-// TODO: find a better mapping
-static int hexorder[] = {
-    RETRO_DEVICE_ID_JOYPAD_B,
-    RETRO_DEVICE_ID_JOYPAD_START,
-    RETRO_DEVICE_ID_JOYPAD_Y,
-    RETRO_DEVICE_ID_JOYPAD_SELECT,
-    RETRO_DEVICE_ID_JOYPAD_L,
-    RETRO_DEVICE_ID_JOYPAD_UP,
-    RETRO_DEVICE_ID_JOYPAD_A,
-    RETRO_DEVICE_ID_JOYPAD_LEFT,
-    RETRO_DEVICE_ID_JOYPAD_DOWN,
-    RETRO_DEVICE_ID_JOYPAD_RIGHT,
-    RETRO_DEVICE_ID_JOYPAD_R,
-    RETRO_DEVICE_ID_JOYPAD_L2,
-    RETRO_DEVICE_ID_JOYPAD_X,
-    RETRO_DEVICE_ID_JOYPAD_R2,
-    RETRO_DEVICE_ID_JOYPAD_L3,
-    RETRO_DEVICE_ID_JOYPAD_R3
-};
-
-struct retro_input_descriptor desc[] = {
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "7" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y,     "2" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "8" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "9" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B,     "0" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT,"3" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X,     "C" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "5" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "6" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "1" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L,     "5" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R,     "A" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2,    "B" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2,    "D" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3,    "E" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3,    "F" },
-
-    { 0 },
-};
-
 void retro_init(void)
 {
 }
 
-bool retro_load_game(const struct retro_game_info *info)
-{
+static void *rom_buf = NULL;
+static const void *rom_data = NULL;
+static size_t rom_size = 0;
+
+static void load_rom(void) {
     cpu_debt = 0;
     audio_counter_chip8 = 0;
     audio_counter_resample = 0;
@@ -309,16 +328,55 @@ bool retro_load_game(const struct retro_game_info *info)
     chip8_init_with_vars();
     chip8_load_font(&chip8);
 
-    chip8_load_rom_buffer(&chip8, info->data, info->size);
+    chip8_load_rom_buffer(&chip8, rom_data, rom_size);
+}
 
-    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
+bool retro_load_game(const struct retro_game_info *info)
+{
+    const struct retro_game_info_ext *info_ext = NULL;
+
+    /* We need persistent ROM buffer for resets.  */
+    rom_buf  = NULL;
+    rom_data = NULL;
+    rom_size = 0;
+   
+    if (environ_cb(RETRO_ENVIRONMENT_GET_GAME_INFO_EXT, &info_ext) &&
+	info_ext && info_ext->persistent_data) {
+	rom_data = (const uint8_t*)info_ext->data;
+	rom_size = info_ext->size;
+    }
+
+    /* If frontend does not support persistent
+     * content data, must create a copy */
+    if (!rom_data) {
+	if (!info)
+	    return false;
+
+	rom_size = info->size;
+	rom_buf  = malloc(rom_size);
+
+	if (!rom_buf) {
+	    log_cb(RETRO_LOG_INFO, "Failed to allocate ROM buffer.\n");
+	    return false;
+	}
+
+	memcpy(rom_buf, info->data, rom_size);
+	rom_data = (const uint8_t*)rom_buf;
+    }
+
+    load_rom();
 
     return true;
 }
 
 void retro_unload_game(void)
 {
-	
+    if (rom_buf)
+	free(rom_buf);
+
+    rom_buf = NULL;
+    rom_data = NULL;
+    rom_size = 0;
 }
 
 int get_audio_sample(void)
@@ -344,11 +402,22 @@ int get_audio_sample(void)
     return x;
 }
 
-static void audio_sample(int16_t sample) {    
-    // TODO: Use audio_batch_cb
+static void audio_sample(int16_t sample) {
+    int16_t buf[200]; // Should be enough to call batch_cb only once
+    // in most cases
+    int16_t *bufptr = buf;
     while (audio_counter_resample >= ONE_SEC / AUDIO_RESAMPLE_RATE) {
-	audio_cb(sample, sample);
+	*bufptr++ = sample;
+	*bufptr++ = sample;
+	if (bufptr >= buf + sizeof(buf) / sizeof(buf[0])) {
+	    audio_batch_cb(buf, (bufptr - buf) / 2);
+	    bufptr = buf;
+	}
 	audio_counter_resample -= ONE_SEC / AUDIO_RESAMPLE_RATE;
+    }
+
+    if (bufptr != buf) {
+	audio_batch_cb(buf, (bufptr - buf) / 2);
     }
 }
 
@@ -419,7 +488,7 @@ void retro_get_system_info(struct retro_system_info *info)
 #define GIT_VERSION ""
 #endif
     info->library_version = "1.0" GIT_VERSION;
-    info->valid_extensions = "ch8";
+    info->valid_extensions = VALID_EXTENSIONS;
     info->need_fullpath = false;
 }
 
@@ -449,7 +518,7 @@ void retro_deinit(void) {  }
 
 void retro_reset(void)
 {
-    // TODO
+    load_rom();
 }
 
 struct serialized_state
@@ -533,6 +602,6 @@ void *retro_get_memory_data(unsigned id)
 /* Stubs */
 unsigned int retro_api_version(void) { return RETRO_API_VERSION; }
 void retro_cheat_reset(void) {  }
-void retro_cheat_set(unsigned index, bool enabled, const char *code) {  }
+void retro_cheat_set(unsigned idx, bool enabled, const char *code) {  }
 bool retro_load_game_special(unsigned game_type, const struct retro_game_info *info, size_t num_info) { return false; }
 void retro_set_controller_port_device(unsigned port, unsigned device) {  }

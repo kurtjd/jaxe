@@ -1,10 +1,12 @@
 #ifndef CHIP8_H
 #define CHIP8_H
 
+#ifndef __LIBRETRO__
 #ifdef WIN32
 #include <windows.h>
 #else
 #include <sys/time.h>
+#endif
 #endif
 #include <stdbool.h>
 #include <stdint.h>

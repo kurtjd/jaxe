@@ -1,6 +1,6 @@
 display_name = "CHIP-8/SuperChip8/XO-CHIP"
 authors = "Kurtis Dinelle"
-supported_extensions = "ch8"
+supported_extensions = "ch8|sc8|xo8|hc8"
 corename = "JAXE"
 manufacturer = "RCA"
 categories = "Emulator"
