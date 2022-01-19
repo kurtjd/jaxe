@@ -542,7 +542,7 @@ bool retro_serialize(void *data, size_t size)
     if (size < sizeof (struct serialized_state))
 	return false;
 
-    struct serialized_state *st = data;
+    struct serialized_state *st = (struct serialized_state *) data;
     memcpy(&st->chip8, &chip8, sizeof(st->chip8));
     st->cpu_debt = cpu_debt;
     st->audio_counter_chip8 = audio_counter_chip8;
@@ -558,7 +558,7 @@ bool retro_unserialize(const void *data, size_t size)
     if (size < sizeof (struct serialized_state))
 	return false;
 
-    const struct serialized_state *st = data;
+    const struct serialized_state *st = (struct serialized_state *) data;
     memcpy(&chip8, &st->chip8, sizeof(chip8));
     cpu_debt = st->cpu_debt;
     audio_counter_chip8 = st->audio_counter_chip8;

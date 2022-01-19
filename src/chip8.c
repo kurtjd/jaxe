@@ -611,7 +611,7 @@ void chip8_execute(CHIP8 *chip8)
                 x = NUM_BITPLANES;
             }
 
-            chip8->bitplane = x;
+            chip8->bitplane = (CHIP8BP) x;
             break;
 
         /* AUDIO (XO-CHIP Only)
