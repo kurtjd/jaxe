@@ -381,10 +381,10 @@ void retro_unload_game(void)
     rom_size = 0;
 }
 
-int get_audio_sample(void)
+int16_t get_audio_sample(void)
 {
     // Get the byte of the emulator's buffer that the next sample is in.
-    int x = chip8.RAM[AUDIO_BUF_ADDR + (snd_buf_pntr / 8)];
+    int16_t x = chip8.RAM[AUDIO_BUF_ADDR + (snd_buf_pntr / 8)];
 
     // Get the actual sample bit.
     x <<= (snd_buf_pntr % 8);
@@ -463,7 +463,7 @@ void retro_run(void)
 	    audio_counter_chip8 += ONE_SEC / chip8.cpu_freq;
 	    while (audio_counter_chip8 > ONE_SEC / audio_freq_chip8) {
 		audio_counter_chip8 -= ONE_SEC / audio_freq_chip8;
-		int sample = get_audio_sample();
+		int16_t sample = get_audio_sample();
 		audio_counter_resample += ONE_SEC / audio_freq_chip8;
 		audio_sample(sample);
 	    }
