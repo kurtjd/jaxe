@@ -179,9 +179,9 @@ bool chip8_load_rom(CHIP8 *chip8, char *filename)
 
         fclose(rom);
 
-        sprintf(chip8->ROM_path, "%s", filename);
-        sprintf(chip8->UF_path, "%s.uf", filename);
-        sprintf(chip8->DMP_path, "%s.dmp", filename);
+        snprintf(chip8->ROM_path, sizeof(chip8->ROM_path) - 1, "%s", filename);
+        snprintf(chip8->UF_path, sizeof(chip8->UF_path) - 1, "%s.uf", filename);
+        snprintf(chip8->DMP_path, sizeof(chip8->DMP_path) - 1, "%s.dmp", filename);
 
         return true;
     }
