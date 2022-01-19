@@ -1204,5 +1204,5 @@ void chip8_skip_instr(CHIP8 *chip8)
 double chip8_get_sound_freq(CHIP8 *chip8)
 {
     // Formula to convert pitch to frequency.
-    return 4000 * pow(2, (chip8->pitch - 64) / 48);
+    return 4000 * pow(2.0, (chip8->pitch - 64.0) / 48.0);
 }
