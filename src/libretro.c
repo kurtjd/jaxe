@@ -92,6 +92,8 @@ static void fallback_log(enum retro_log_level level,
 			 const char *fmt, ...) {
     va_list args;
 
+    (void) level;
+
     va_start(args, fmt);
     vfprintf(stderr, fmt, args);
     va_end(args);
@@ -602,6 +604,18 @@ void *retro_get_memory_data(unsigned id)
 /* Stubs */
 unsigned int retro_api_version(void) { return RETRO_API_VERSION; }
 void retro_cheat_reset(void) {  }
-void retro_cheat_set(unsigned idx, bool enabled, const char *code) {  }
-bool retro_load_game_special(unsigned game_type, const struct retro_game_info *info, size_t num_info) { return false; }
-void retro_set_controller_port_device(unsigned port, unsigned device) {  }
+void retro_cheat_set(unsigned idx, bool enabled, const char *code) {
+    (void) idx;
+    (void) enabled;
+    (void) code;
+}
+bool retro_load_game_special(unsigned game_type, const struct retro_game_info *info, size_t num_info) {
+    (void) game_type;
+    (void) info;
+    (void) num_info;
+    return false;
+}
+void retro_set_controller_port_device(unsigned port, unsigned device) {
+    (void) port;
+    (void) device;
+}
