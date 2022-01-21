@@ -168,6 +168,7 @@ void chip8_load_font(CHIP8 *chip8)
     }
 }
 
+#ifndef __LIBRETRO__
 bool chip8_load_rom(CHIP8 *chip8, char *filename)
 {
     FILE *rom = fopen(filename, "rb");
@@ -189,6 +190,7 @@ bool chip8_load_rom(CHIP8 *chip8, char *filename)
     fprintf(stderr, "Unable to open ROM file %s\n", filename);
     return false;
 }
+#endif
 
 void chip8_load_rom_buffer(CHIP8 *chip8, const void *raw, size_t sz) {
     size_t maxsz = MAX_RAM - chip8->pc_start_addr;

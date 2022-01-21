@@ -8,7 +8,17 @@
 #include <sys/time.h>
 #endif
 #endif
+#if defined(_MSC_VER) && _MSC_VER < 1800
+#ifdef __LIBRETRO__
+#include "libretro.h"
+#else
+#define bool int
+#define true 1
+#define false 0
+#endif
+#else
 #include <stdbool.h>
+#endif
 #include <stdint.h>
 
 #define ONE_SEC 1000000

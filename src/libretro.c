@@ -31,11 +31,11 @@ static retro_audio_sample_t audio_cb;
 static retro_audio_sample_batch_t audio_batch_cb;
 
 static CHIP8 chip8;
-static int cpu_debt = 0;
+static unsigned long cpu_debt = 0;
 #define AUDIO_RESAMPLE_RATE 44100
 static unsigned int audio_counter_chip8 = 0;
 static unsigned int audio_counter_resample = 0;
-static int audio_freq_chip8 = 0;
+static unsigned int audio_freq_chip8 = 0;
 static int snd_buf_pntr = 0;
 static uint8_t sram[NUM_USER_FLAGS];
 
@@ -150,7 +150,7 @@ static struct retro_variable variables[] =
 };
 
 // TODO: find a better mapping
-static int hexorder[] = {
+static unsigned hexorder[] = {
     RETRO_DEVICE_ID_JOYPAD_B,
     RETRO_DEVICE_ID_JOYPAD_START,
     RETRO_DEVICE_ID_JOYPAD_Y,
@@ -238,15 +238,15 @@ static void load_theme(void)
     overlap_color = color_themes[theme_number].overlap;
 }
 
-static int get_cpu_freq_var(int def)
+static unsigned long get_cpu_freq_var(unsigned long def)
 {
     struct retro_variable var;
     var.key = "jaxe_cpu_requency";
     var.value = NULL;
     if (!environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || !var.value)
 	return def;
-    int cpu_freq = strtoul(var.value, 0, 0);
-    if (cpu_freq <= 0)
+    unsigned long cpu_freq = strtoul(var.value, 0, 0);
+    if (cpu_freq == 0)
 	return def;
     return cpu_freq;
 }
@@ -282,7 +282,7 @@ void draw_display(void)
     {
 	for (int x = 0; x < DISPLAY_WIDTH; x++)
 	{
-	    long color;
+	    pixel_t color;
 
 	    if (!chip8.display[y][x] && !chip8.display2[y][x])
 	    {
@@ -433,7 +433,7 @@ void retro_run(void)
     bool updated = false;
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated) {
 	load_theme();
-	int cpu_freq = get_cpu_freq_var(chip8.cpu_freq);
+	unsigned long cpu_freq = get_cpu_freq_var(chip8.cpu_freq);
 	if (cpu_freq != chip8.cpu_freq)
 	    chip8_set_cpu_freq(&chip8, cpu_freq);
     }
@@ -446,7 +446,7 @@ void retro_run(void)
 	else
 	    chip8.keypad[i] = chip8.keypad[i] == KEY_DOWN ? KEY_RELEASED : KEY_UP;
 
-    for (int i = 0; i < (chip8.cpu_freq + cpu_debt) / chip8.refresh_freq && !chip8.exit; i++) {
+    for (unsigned i = 0; i < (chip8.cpu_freq + cpu_debt) / chip8.refresh_freq && !chip8.exit; i++) {
 	chip8_cycle(&chip8);
 	    
 	if (!chip8.beep) {
@@ -529,7 +529,7 @@ struct serialized_state
     unsigned long cpu_debt;
     unsigned int audio_counter_chip8;
     unsigned int audio_counter_resample;
-    int audio_freq_chip8;
+    unsigned int audio_freq_chip8;
     int snd_buf_pntr;
     uint8_t sram[NUM_USER_FLAGS];
 };
