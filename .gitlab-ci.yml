@@ -35,6 +35,10 @@ include:
   - project: 'libretro-infrastructure/ci-templates'
     file: '/windows-i686-msvc05-msys2.yml'
 
+  # DJGPP
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/djgpp-static.yml'
+
   # Linux 64-bit
   - project: 'libretro-infrastructure/ci-templates'
     file: '/linux-x64.yml'
@@ -157,6 +161,12 @@ libretro-build-windows-msvc10-i686:
 libretro-build-windows-msvc05-i686:
   extends:
     - .libretro-windows-i686-msvc05-msys2-make-default
+    - .core-defs
+
+# DJGPP
+libretro-build-djgpp-i586:
+  extends:
+    - .libretro-djgpp-static-retroarch-master
     - .core-defs
 
 # Linux 64-bit
