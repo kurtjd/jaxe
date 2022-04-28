@@ -446,28 +446,43 @@ void retro_run(void)
 	else
 	    chip8.keypad[i] = chip8.keypad[i] == KEY_DOWN ? KEY_RELEASED : KEY_UP;
 
+    uint64_t cycle_step = ONE_SEC / chip8.cpu_freq;
+
     for (unsigned i = 0; i < (chip8.cpu_freq + cpu_debt) / chip8.refresh_freq && !chip8.exit; i++) {
-	chip8_cycle(&chip8);
-	    
+	chip8.total_cycle_time = cycle_step;
+	chip8_execute(&chip8);
+	if (chip8.timer_freq != chip8.refresh_freq)
+	    chip8_handle_timers(&chip8);
+
 	if (!chip8.beep) {
 	    audio_freq_chip8 = 0;
 	    audio_counter_chip8 = 0;
 	    snd_buf_pntr = 0;
-	    audio_counter_resample += ONE_SEC / chip8.cpu_freq;
+	    audio_counter_resample += cycle_step;
 	    audio_sample(0);
 	} else {
+	    uint64_t cycle_audio_step;
 	    if (!audio_freq_chip8) {
 		audio_freq_chip8 = chip8_get_sound_freq(&chip8);
 		snd_buf_pntr = 0;
 	    }
-	    audio_counter_chip8 += ONE_SEC / chip8.cpu_freq;
-	    while (audio_counter_chip8 > ONE_SEC / audio_freq_chip8) {
-		audio_counter_chip8 -= ONE_SEC / audio_freq_chip8;
+	    cycle_audio_step = ONE_SEC / audio_freq_chip8;
+	    audio_counter_chip8 += cycle_step;
+	    while (audio_counter_chip8 > cycle_audio_step) {
+		audio_counter_chip8 -= cycle_audio_step;
 		int16_t sample = get_audio_sample();
-		audio_counter_resample += ONE_SEC / audio_freq_chip8;
+		audio_counter_resample += cycle_audio_step;
 		audio_sample(sample);
 	    }
 	}
+    }
+
+    if (chip8.timer_freq == chip8.refresh_freq) {
+	if (chip8.DT > 0)
+	    chip8.DT--;
+
+	if (chip8.ST > 0)
+	    chip8.ST--;
     }
 
     cpu_debt = (chip8.cpu_freq + cpu_debt) % chip8.refresh_freq;
