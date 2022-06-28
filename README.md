@@ -120,7 +120,7 @@ Also includes flags for disabling specific S-CHIP "quirks" (which are all enable
 `-5` Clear display when 00FE/00FF execute  
 `-6` Allow sprite wrapping  
 `-7` Disable collision enumeration  
-`-8` Disable collision check with bottom of screen
+`-8` Disable collision check with bottom of screen  
 `-9` Enable VF reset on logical OR, AND, XOR
 
 
@@ -257,6 +257,7 @@ JAXE is licensed under the MIT license so you are free to do almost whatever you
 * [HP48-Superchip Investigations](https://github.com/Chromatophore/HP48-Superchip)
 * [CHIP-8 extensions and compatibility](https://chip-8.github.io/extensions/)
 * [XO-CHIP Specification](https://johnearnest.github.io/Octo/docs/XO-ChipSpecification.html)
+* [CHIP-8 Test Suite](https://github.com/Timendus/chip8-test-suite)
 
 ## Acknowledgments
 * [Kongtext Font by codeman38](https://www.1001fonts.com/kongtext-font.html)
