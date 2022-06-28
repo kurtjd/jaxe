@@ -452,21 +452,42 @@ void chip8_execute(CHIP8 *chip8)
             break;
 
         /* OR Vx, Vy (8xy1)
-           Set Vx = Vx OR Vy. */
+           Set Vx = Vx OR Vy.
+           Legacy: Set VF = 0.
+           S-CHIP: Leave VF alone. */
         case 0x01:
             chip8->V[x] |= chip8->V[y];
+
+            if (!chip8->quirks[9])
+            {
+                chip8->V[0x0F] = 0;
+            }
             break;
 
         /* AND Vx, Vy (8xy2)
-           Set Vx = Vx AND Vy. */
+           Set Vx = Vx AND Vy.
+           Legacy: Set VF = 0.
+           S-CHIP: Leave VF alone. */
         case 0x02:
             chip8->V[x] &= chip8->V[y];
+            
+            if (!chip8->quirks[9])
+            {
+                chip8->V[0x0F] = 0;
+            }
             break;
 
         /* XOR Vx, Vy (8xy3)
-           Set Vx = Vx XOR Vy. */
+           Set Vx = Vx XOR Vy.
+           Legacy: Set VF = 0.
+           S-CHIP: Leave VF alone. */
         case 0x03:
             chip8->V[x] ^= chip8->V[y];
+            
+            if (!chip8->quirks[9])
+            {
+                chip8->V[0x0F] = 0;
+            }
             break;
 
         /* ADD Vx, Vy (8xy4)

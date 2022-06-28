@@ -29,7 +29,7 @@
 #define NUM_KEYS 16
 #define NUM_REGISTERS 16
 #define NUM_USER_FLAGS 16
-#define NUM_QUIRKS 9
+#define NUM_QUIRKS 10
 #define NUM_BITPLANES 3
 #define NUM_FONT_BYTES 80
 #define NUM_BIG_FONT_BYTES 160

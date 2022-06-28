@@ -121,6 +121,7 @@ Also includes flags for disabling specific S-CHIP "quirks" (which are all enable
 `-6` Allow sprite wrapping  
 `-7` Disable collision enumeration  
 `-8` Disable collision check with bottom of screen
+`-9` Enable VF reset on logical OR, AND, XOR
 
 
 ## Controls

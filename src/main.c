@@ -38,7 +38,7 @@ unsigned long cpu_freq = CPU_FREQ_DEFAULT;
 unsigned long timer_freq = TIMER_FREQ_DEFAULT;
 unsigned long refresh_freq = REFRESH_FREQ_DEFAULT;
 bool play_sound = false;
-bool quirks[NUM_QUIRKS] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+bool quirks[NUM_QUIRKS] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 bool load_dmp = false;
 
 // Color/Display
@@ -285,6 +285,7 @@ bool handle_args(int argc, char **argv)
             case '6':
             case '7':
             case '8':
+            case '9':
                 quirks[opt - '0'] = false;
                 break;
 
