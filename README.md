@@ -97,7 +97,8 @@ Otherwise:
 `test.exe` (for unit tests)
 
 ## Options
-`-x` Enable compatibility mode (disables all S-CHIP quirks but keeps HI-RES and new instructions)  
+`-l` Enable legacy mode (for running original CHIP-8 ROMs)  
+`-x` Enable XO-CHIP mode  
 `-d` Enable debug mode  
 `-m` Load dump file instead of ROM  
 `-p` Set program start address (in hex)  
@@ -116,12 +117,12 @@ Also includes flags for disabling specific S-CHIP "quirks" (which are all enable
 `-1` Disable 8xy6/8xyE bug  
 `-2` Disable Fx55/Fx65 bug  
 `-3` Disable Bnnn bug  
-`-4` Allow big sprites to be drawn in LO-RES mode  
-`-5` Clear display when 00FE/00FF execute  
-`-6` Allow sprite wrapping  
+`-4` Disable ban on big sprites being drawn in LO-RES mode  
+`-5` Disable display state remaining the same when 00FE/00FF execute (display is cleared with this disabled)  
+`-6` Disable sprite clipping  
 `-7` Disable collision enumeration  
 `-8` Disable collision check with bottom of screen  
-`-9` Enable VF reset on logical OR, AND, XOR
+`-9` Disable undefined VF after logical OR, AND, XOR (VF is set to 0 with this disabled)
 
 
 ## Controls
@@ -156,8 +157,8 @@ Also includes flags for disabling specific S-CHIP "quirks" (which are all enable
 |`ESC`|Reset Emulator|
 
 ## Troubleshooting
-* This emulator defaults to S-CHIP mode, which has become more popular since the 90s. Unfortunately, S-CHIP changed the behavior of several instructions and introduced some other quirks, making some programs developed for the original COSMAC VIP not backwards-compatible. If a ROM is not working correctly (especially one written before 1990), try enabling compatibility mode with the `-x` flag.
-* If running a program developed for Octo, you should also enable compatibility mode with the `-x` flag since Octo ignores all S-CHIP quirks.
+* This emulator defaults to S-CHIP mode, which has become more popular since the 90s. Unfortunately, S-CHIP changed the behavior of several instructions and introduced some other quirks, making some programs developed for the original COSMAC VIP not backwards-compatible. If a ROM is not working correctly (especially one written before 1990), try enabling legacy mode with the `-l` flag.
+* If running an XO-CHIP ROM, enable XO-CHIP mode with the `-x` flag.
 * This emulator defaults to 0x200 as the start address, however some programs assume other defaults (namely, those written for the ETI-660 which default to 0x600). Try to find out what default address the program assumes and set that with the `-p` option.
 * If a program is running very slowly, try increasing the CPU speed or even uncapping it (by setting the `-c` option to 0). Some ROMs are developed around an uncapped execution frequency and will run much more smoothly.
 * There are many CHIP-8 variants and this emulator does not support all of them. If a ROM still does not work correctly after trying the suggestions above, it may have been written for an unsupported variant and thus will simply not work.

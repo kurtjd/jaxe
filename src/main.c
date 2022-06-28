@@ -271,7 +271,7 @@ bool handle_args(int argc, char **argv)
 
 #ifdef ALLOW_GETOPTS
         int opt;
-        while ((opt = getopt(argc, argv, "012345678xdms:p:c:t:r:f:b:n:k:")) != -1)
+        while ((opt = getopt(argc, argv, "012345678xldms:p:c:t:r:f:b:n:k:")) != -1)
         {
             switch (opt)
             {
@@ -289,13 +289,27 @@ bool handle_args(int argc, char **argv)
                 quirks[opt - '0'] = false;
                 break;
 
-            // Toggle compatibility mode
-            case 'x':
-                for (size_t i = 0; i < sizeof(quirks); i++)
+            // Toggle legacy mode
+            case 'l':
+                for (size_t i = 0; i < NUM_QUIRKS; i++)
                 {
                     quirks[i] = false;
                 }
 
+                // Both CHIP-8 and SCHIP apparently clip sprites (but not XO-CHIP)
+                quirks[6] = true;
+
+                break;
+            
+            // Toggle XO-CHIP mode
+            case 'x':
+                /* XO-CHIP is similar to legacy mode except the last quirk
+                   (VF Reset) should not be enabled and sprite wrapping should
+                   be enabled. */
+                for (size_t i = 0; i < NUM_QUIRKS - 1; i++)
+                {
+                    quirks[i] = false;
+                }
                 break;
 
             // Toggle debug mode
