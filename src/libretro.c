@@ -478,12 +478,14 @@ void retro_run(void)
     }
 
     if (chip8.timer_freq == chip8.refresh_freq) {
-	if (chip8.DT > 0)
-	    chip8.DT--;
+    	if (chip8.DT > 0)
+    	    chip8.DT--;
 
-	if (chip8.ST > 0)
-	    chip8.ST--;
-        chip8.beep =  chip8.ST > 0 ? true : false;
+    	if (chip8.ST > 0) 
+        {
+    	    chip8.ST--;
+            chip8.beep =  chip8.ST > 0 ? true : false;
+        }
     }
 
     cpu_debt = (chip8.cpu_freq + cpu_debt) % chip8.refresh_freq;
