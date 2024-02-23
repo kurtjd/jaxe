@@ -483,6 +483,7 @@ void retro_run(void)
 
 	if (chip8.ST > 0)
 	    chip8.ST--;
+        chip8.beep =  chip8.ST > 0 ? true : false;
     }
 
     cpu_debt = (chip8.cpu_freq + cpu_debt) % chip8.refresh_freq;
