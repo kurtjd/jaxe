@@ -140,7 +140,7 @@ static struct retro_variable variables[] =
     },
     {
 	"jaxe_cpu_requency",
-	"CPU frequency; 1000|1500|2000|3000|5000|10000|800|750|600|500|400|300",
+	"CPU frequency; 1000|1500|2000|3000|5000|10000|25000|50000|100000|800|750|600|500|400|300",
     },
     {
 	"jaxe_theme",
