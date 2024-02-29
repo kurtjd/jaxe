@@ -144,6 +144,7 @@ typedef struct CHIP8
         -6: Sprite Wrapping
         -7: Collision Enumeration
         -8: Collision with Bottom of Screen
+        -9: Disable undefined VF after logical OR, AND, XOR (VF is set to 0 with this disabled)
     */
     bool quirks[NUM_QUIRKS];
 
