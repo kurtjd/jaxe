@@ -139,6 +139,10 @@ static struct retro_variable variables[] =
 	"Collision with Bottom of Screen; enabled|disabled",
     },
     {
+    "jaxe_quirk_9_disable_undefined_VF_after_logical_OR_AND_XOR",
+    "Disable undefined VF after logical OR, AND, XOR; enabled|disabled",
+    },
+    {
 	"jaxe_cpu_requency",
 	"CPU frequency; 1000|1500|2000|3000|5000|10000|25000|50000|100000|800|750|600|500|400|300",
     },
@@ -253,7 +257,7 @@ static unsigned long get_cpu_freq_var(unsigned long def)
 
 static void chip8_init_with_vars(void)
 {
-    bool quirks[NUM_QUIRKS] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+    bool quirks[NUM_QUIRKS] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     unsigned long cpu_freq = CPU_FREQ_DEFAULT;
     unsigned long timer_freq = TIMER_FREQ_DEFAULT;
     unsigned long refresh_freq = REFRESH_FREQ_DEFAULT;
