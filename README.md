@@ -77,7 +77,7 @@ It should also be noted that JAXE stores its fonts in memory starting at address
 ## Build Procedures
 ### Linux/Windows (MinGW)
 `mkdir build && cd build`  
-`cmake -B. --config Release ..`  
+`cmake -B . -DCMAKE_BUILD_TYPE=Release ..`  
 `make`
 
 ### Windows (non-MinGW)
