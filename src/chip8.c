@@ -514,14 +514,17 @@ void chip8_execute(CHIP8 *chip8)
            Legacy: Set Vx = Vy SHR 1.
            S-CHIP: Set Vx = Vx SHR 1. */
         case 0x06:
+        {
             if (!chip8->quirks[1])
             {
                 chip8->V[x] = chip8->V[y];
             }
 
-            chip8->V[0x0F] = chip8->V[x] & 0x01;
+            int carry = chip8->V[x] & 0x01;
             chip8->V[x] >>= 1;
+            chip8->V[0x0F] = carry;
             break;
+        }
 
         /* SUBN Vx, Vy (8xy7)
            Set Vx = Vy - Vx, set VF = NOT borrow. */
@@ -537,14 +540,18 @@ void chip8_execute(CHIP8 *chip8)
            Legacy: Set Vx = Vy SHL 1.
            S-CHIP: Set Vx = Vx SHL 1. */
         case 0x0E:
+        {
             if (!chip8->quirks[1])
             {
                 chip8->V[x] = chip8->V[y];
             }
 
-            chip8->V[0x0F] = (chip8->V[x] & 0x80) >> 7;
+            //chip8->V[0x0F] = (chip8->V[x] & 0x80) >> 7;
+            int carry = (chip8->V[x] & 0x80) >> 7;
             chip8->V[x] <<= 1;
+            chip8->V[0x0F] = carry;
             break;
+        }
         }
 
         break;
