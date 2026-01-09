@@ -81,7 +81,13 @@ static const struct theme color_themes[] = {
     {vRGB(0,0,0), vRGB(0,0xFF,0), vRGB(0,0,0), vRGB(0,0,0), "Hacker"},
     {vRGB(0,0,0), vRGB(0,0,0xFF), vRGB(0,0,0), vRGB(0,0,0), "Space" },
     {vRGB(0xF0,0x90,0x7C), vRGB(0x96,0x29,0x12), vRGB(0xF4,0x69,0), vRGB(0xFA, 0xA4,0), "Crazy Orange"},
-    {vRGB(0x10,0,0x19), vRGB(0xFF,0xE1,0xFF), vRGB(0xE7,0,0xEA), vRGB(0xE7,0,0xEA), "Cyberpunk"}
+    {vRGB(0x10,0,0x19), vRGB(0xFF,0xE1,0xFF), vRGB(0xE7,0,0xEA), vRGB(0xE7,0,0xEA), "Cyberpunk"},
+    {vRGB(0x99,0x66,0), vRGB(0xFF,0xCC,0), vRGB(0xFF,0x66,0), vRGB(0x66,0x22,0), "Octo"},
+    {vRGB(0xF9,0xFF,0xB3), vRGB(0x3D,0x80,0x26), vRGB(0xAB,0xCC,0x47), vRGB(0,0x13,0x1A), "LCD"},
+    {vRGB(0,0,0), vRGB(0xFF,0,0), vRGB(0xFF,0xFF,0), vRGB(0xFF,0xFF,0xFF), "Hot Dog"},
+    {vRGB(0xAA,0xAA,0xAA), vRGB(0,0,0), vRGB(0xFF,0xFF,0xFF), vRGB(0x66,0x66,0x66), "Gray"},
+    {vRGB(0,0,0), vRGB(0,0xFF,0), vRGB(0xFF,0,0), vRGB(0xFF,0xFF,0), "CGA 0"},
+    {vRGB(0,0,0), vRGB(0xFF,0,0xFF), vRGB(0,0xFF,0xFF), vRGB(0xFF,0xFF,0xFF), "CGA 1"}
 };
 static pixel_t bg_color = BG_COLOR_DEFAULT;
 static pixel_t p1_color = P1_COLOR_DEFAULT;
@@ -148,7 +154,7 @@ static struct retro_variable variables[] =
     },
     {
 	"jaxe_theme",
-	"Theme; Default|Black and white|Inverted black and white|Blood|Hacker|Space|Crazy Orange|Cyberpunk"
+	"Theme; Default|Black and white|Inverted black and white|Blood|Hacker|Space|Crazy Orange|Cyberpunk|Octo|LCD|Hot Dog|Gray|CGA 0|CGA 1"
     },
     { NULL, NULL },
 };
